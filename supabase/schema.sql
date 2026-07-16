@@ -8,6 +8,17 @@ create table if not exists public.admin_users (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.customer_profiles (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  full_name text not null,
+  phone text not null,
+  email text not null,
+  marketing_opt_in boolean not null default false,
+  marketing_opt_in_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists public.products (
   id bigint generated always as identity primary key,
   legacy_id integer unique,
@@ -55,6 +66,8 @@ create index if not exists products_status_idx on public.products(status);
 create index if not exists products_category_idx on public.products(category);
 create index if not exists finance_entries_date_idx on public.finance_entries(entry_date desc);
 create index if not exists sales_created_at_idx on public.sales(created_at desc);
+create index if not exists customer_profiles_created_at_idx on public.customer_profiles(created_at desc);
+create index if not exists customer_profiles_marketing_idx on public.customer_profiles(marketing_opt_in) where marketing_opt_in = true;
 
 create or replace function public.is_admin()
 returns boolean
@@ -85,6 +98,40 @@ drop trigger if exists products_set_updated_at on public.products;
 create trigger products_set_updated_at
 before update on public.products
 for each row execute function public.set_updated_at();
+
+drop trigger if exists customer_profiles_set_updated_at on public.customer_profiles;
+create trigger customer_profiles_set_updated_at
+before update on public.customer_profiles
+for each row execute function public.set_updated_at();
+
+create or replace function public.handle_new_customer()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_marketing boolean;
+begin
+  v_marketing := lower(coalesce(new.raw_user_meta_data ->> 'marketing_opt_in', 'false')) in ('true', '1', 'yes', 'si', 'sí');
+  insert into public.customer_profiles (user_id, full_name, phone, email, marketing_opt_in, marketing_opt_in_at)
+  values (
+    new.id,
+    coalesce(nullif(trim(new.raw_user_meta_data ->> 'full_name'), ''), split_part(coalesce(new.email, ''), '@', 1)),
+    coalesce(new.raw_user_meta_data ->> 'phone', ''),
+    coalesce(new.email, ''),
+    v_marketing,
+    case when v_marketing then now() else null end
+  )
+  on conflict (user_id) do update set email = excluded.email;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created_customer on auth.users;
+create trigger on_auth_user_created_customer
+after insert on auth.users
+for each row execute function public.handle_new_customer();
 
 create or replace function public.register_sale(
   p_product_id bigint,
@@ -164,6 +211,7 @@ revoke all on function public.register_sale(bigint, integer, text) from public;
 grant execute on function public.register_sale(bigint, integer, text) to authenticated;
 
 alter table public.admin_users enable row level security;
+alter table public.customer_profiles enable row level security;
 alter table public.products enable row level security;
 alter table public.sales enable row level security;
 alter table public.finance_entries enable row level security;
@@ -173,6 +221,27 @@ create policy "Admin can read own role"
 on public.admin_users for select
 to authenticated
 using (user_id = auth.uid());
+
+drop policy if exists "Customers and admins can read profiles" on public.customer_profiles;
+create policy "Customers and admins can read profiles"
+on public.customer_profiles for select
+to authenticated
+using (user_id = auth.uid() or public.is_admin());
+
+drop policy if exists "Customers can create own profile" on public.customer_profiles;
+create policy "Customers can create own profile"
+on public.customer_profiles for insert
+to authenticated
+with check (user_id = auth.uid());
+
+drop policy if exists "Customers can update own profile" on public.customer_profiles;
+create policy "Customers can update own profile"
+on public.customer_profiles for update
+to authenticated
+using (user_id = auth.uid())
+with check (user_id = auth.uid());
+
+grant select, insert, update on public.customer_profiles to authenticated;
 
 drop policy if exists "Public can read catalog products" on public.products;
 create policy "Public can read catalog products"
@@ -256,4 +325,3 @@ create policy "Admin can delete product images"
 on storage.objects for delete
 to authenticated
 using (bucket_id = 'product-images' and public.is_admin());
-

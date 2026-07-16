@@ -92,6 +92,7 @@
                 <nav class="admin-tabs" aria-label="Secciones del panel">
                     <button class="admin-tab active" type="button" data-panel="dashboard-panel"><i data-lucide="layout-dashboard"></i><span>Resumen</span></button>
                     <button class="admin-tab" type="button" data-panel="products-panel"><i data-lucide="shirt"></i><span>Productos</span></button>
+                    <button class="admin-tab" type="button" data-panel="customers-panel"><i data-lucide="users"></i><span>Clientes</span></button>
                     <button class="admin-tab" type="button" data-panel="finance-panel"><i data-lucide="wallet-cards"></i><span>Caja</span></button>
                 </nav>
                 <a class="store-link" href="index.html" target="_blank" rel="noopener"><i data-lucide="external-link"></i> Ver tienda</a>
@@ -110,6 +111,8 @@
                         <article class="stat-card danger"><span>Agotados</span><strong id="stat-soldout">0</strong><small>productos</small></article>
                         <article class="stat-card income"><span>Ingresos del mes</span><strong id="stat-income">S/. 0</strong><small>ventas y otros</small></article>
                         <article class="stat-card expense"><span>Gastos del mes</span><strong id="stat-expense">S/. 0</strong><small>movimientos</small></article>
+                        <article class="stat-card"><span>Clientes</span><strong id="stat-customers">0</strong><small>cuentas registradas</small></article>
+                        <article class="stat-card income"><span>Suscritos</span><strong id="stat-subscribers">0</strong><small>aceptaron novedades</small></article>
                     </div>
                     <div class="balance-card">
                         <div><span>BALANCE DEL MES</span><strong id="stat-balance">S/. 0.00</strong></div>
@@ -153,6 +156,29 @@
                         </table>
                     </div>
                     <div class="mobile-product-list" id="mobile-product-list"></div>
+                </section>
+
+                <section class="admin-panel" id="customers-panel">
+                    <div class="panel-heading">
+                        <div><span class="eyebrow">COMUNIDAD LYNX</span><h2>Clientes registrados</h2></div>
+                        <div class="heading-actions">
+                            <button class="secondary-btn refresh-btn" type="button"><i data-lucide="refresh-cw"></i> Actualizar</button>
+                            <button class="primary-btn" id="export-customers-btn" type="button"><i data-lucide="download"></i> Exportar suscritos</button>
+                        </div>
+                    </div>
+                    <div class="toolbar">
+                        <label class="search-control"><i data-lucide="search"></i><input id="customer-search" type="search" placeholder="Buscar por nombre, correo o celular..."></label>
+                        <select id="customer-marketing-filter" aria-label="Filtrar clientes">
+                            <option value="all">Todos los clientes</option>
+                            <option value="subscribed">Aceptaron novedades</option>
+                            <option value="not-subscribed">Sin suscripción</option>
+                        </select>
+                    </div>
+                    <div class="table-shell customer-table-shell">
+                        <table class="data-table"><thead><tr><th>Cliente</th><th>WhatsApp</th><th>Novedades</th><th>Registro</th></tr></thead><tbody id="customers-tbody"></tbody></table>
+                    </div>
+                    <div class="mobile-customer-list" id="mobile-customer-list"></div>
+                    <p class="customer-privacy-note"><i data-lucide="shield-check"></i> La exportación incluye únicamente a quienes dieron permiso para recibir novedades y descuentos.</p>
                 </section>
 
                 <section class="admin-panel" id="finance-panel">
@@ -229,6 +255,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="supabase-config.js?v=20260716-admin-v1"></script>
-    <script src="admin.js?v=20260716-admin-v2"></script>
+    <script src="admin.js?v=20260716-customer-accounts-v1"></script>
 </body>
 </html>

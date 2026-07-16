@@ -667,6 +667,10 @@ let selectedCategory = 'all';
 let searchQuery = '';
 let currentProduct = null; // Para ver detalles
 let catalogScrollFrame = null;
+let customerUser = null;
+let customerProfile = null;
+let pendingCustomerAction = null;
+const customerSupabase = window.getLynxSupabase?.() || null;
 
 // 3. SELECCIÓN DE ELEMENTOS DEL DOM
 const productsGrid = document.getElementById('products-grid-container');
@@ -690,6 +694,11 @@ const categoryTags = document.querySelectorAll('#category-tags-container .tag-bt
 const navLinks = document.querySelectorAll('.desktop-nav .nav-link');
 const mobileMenuBtn = document.getElementById('mobile-menu-btn');
 const headerSearchBtn = document.getElementById('header-search-btn');
+const accountBtn = document.getElementById('account-btn');
+const accountBtnLabel = document.getElementById('account-btn-label');
+const mobileAccountBtn = document.getElementById('mobile-account-btn');
+const mobileAccountBtnLabel = document.getElementById('mobile-account-btn-label');
+const accountDialog = document.getElementById('account-dialog');
 const mobileNav = document.getElementById('mobile-nav');
 const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 const catalogCountText = document.getElementById('catalog-count-text');
@@ -745,6 +754,169 @@ const modalQtyInput = document.getElementById('modal-qty-input');
 const modalQtyMinus = document.getElementById('modal-qty-minus');
 const modalQtyPlus = document.getElementById('modal-qty-plus');
 const modalAddToCartBtn = document.getElementById('modal-add-to-cart-btn');
+
+function customerErrorMessage(error) {
+    const message = String(error?.message || error || 'No se pudo completar la operación.');
+    if (/Invalid login credentials/i.test(message)) return 'Correo o contraseña incorrectos.';
+    if (/Email not confirmed/i.test(message)) return 'Primero confirma tu correo desde el mensaje que te enviamos.';
+    if (/User already registered/i.test(message)) return 'Este correo ya tiene una cuenta. Inicia sesión.';
+    if (/Password should be/i.test(message)) return 'La contraseña debe tener al menos 8 caracteres.';
+    if (/rate limit/i.test(message)) return 'Se enviaron demasiados intentos. Espera unos minutos y vuelve a probar.';
+    return message;
+}
+
+function setAccountMessage(elementId, message = '', success = false) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    element.textContent = message;
+    element.classList.toggle('success', success);
+}
+
+function setCustomerButtonLoading(button, loading, label = 'Procesando...') {
+    if (!button) return;
+    if (loading) {
+        button.dataset.originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = label;
+    } else {
+        button.disabled = false;
+        button.textContent = button.dataset.originalText || button.textContent;
+    }
+}
+
+function updateAccountButton() {
+    const name = customerProfile?.full_name?.trim().split(/\s+/)[0];
+    accountBtn?.classList.toggle('is-authenticated', Boolean(customerUser));
+    accountBtn?.setAttribute('aria-label', customerUser ? 'Abrir mi cuenta' : 'Ingresar o crear cuenta');
+    if (accountBtnLabel) accountBtnLabel.textContent = name || (customerUser ? 'Mi cuenta' : 'Cuenta');
+    if (mobileAccountBtnLabel) mobileAccountBtnLabel.textContent = name ? `Cuenta de ${name}` : (customerUser ? 'Mi cuenta' : 'Ingresar / registrarme');
+}
+
+async function loadCustomerProfile() {
+    if (!customerSupabase || !customerUser) {
+        customerProfile = null;
+        updateAccountButton();
+        return null;
+    }
+    const { data, error } = await customerSupabase.from('customer_profiles').select('*').eq('user_id', customerUser.id).maybeSingle();
+    if (error) throw error;
+    customerProfile = data || null;
+    updateAccountButton();
+    prefillCheckoutFromProfile();
+    return customerProfile;
+}
+
+function prefillCheckoutFromProfile() {
+    if (!customerProfile) return;
+    const nameInput = document.getElementById('checkout-name');
+    const phoneInput = document.getElementById('checkout-phone');
+    if (nameInput && !nameInput.value) nameInput.value = customerProfile.full_name || '';
+    if (phoneInput && !phoneInput.value) phoneInput.value = customerProfile.phone || '';
+}
+
+function showAccountMode(mode = 'login') {
+    const login = mode === 'login';
+    document.getElementById('show-login-tab')?.classList.toggle('active', login);
+    document.getElementById('show-register-tab')?.classList.toggle('active', !login);
+    document.getElementById('customer-login-form').hidden = !login;
+    document.getElementById('customer-register-form').hidden = login;
+}
+
+function fillCustomerProfileForm(message = '') {
+    document.getElementById('account-auth-view').hidden = true;
+    document.getElementById('account-profile-view').hidden = false;
+    document.getElementById('customer-profile-email').textContent = customerUser?.email || '';
+    document.getElementById('customer-profile-name').value = customerProfile?.full_name || customerUser?.user_metadata?.full_name || '';
+    document.getElementById('customer-profile-phone').value = customerProfile?.phone || customerUser?.user_metadata?.phone || '';
+    document.getElementById('customer-profile-marketing').checked = Boolean(customerProfile?.marketing_opt_in);
+    setAccountMessage('customer-profile-message', message);
+}
+
+function openAccountDialog(mode = 'login', message = '') {
+    document.getElementById('account-recovery-view').hidden = true;
+    if (customerUser) {
+        fillCustomerProfileForm(message);
+    } else {
+        document.getElementById('account-auth-view').hidden = false;
+        document.getElementById('account-profile-view').hidden = true;
+        showAccountMode(mode);
+        setAccountMessage('customer-login-message', mode === 'login' ? message : '');
+        setAccountMessage('customer-register-message', mode === 'register' ? message : '');
+    }
+    if (!accountDialog.open) accountDialog.showModal();
+    lucide.createIcons();
+}
+
+function showCustomerRecovery() {
+    document.getElementById('account-auth-view').hidden = true;
+    document.getElementById('account-profile-view').hidden = true;
+    document.getElementById('account-recovery-view').hidden = false;
+    setAccountMessage('customer-recovery-message');
+    if (!accountDialog.open) accountDialog.showModal();
+}
+
+function closeAccountDialog(clearPending = true) {
+    if (clearPending) pendingCustomerAction = null;
+    if (accountDialog?.open) accountDialog.close();
+}
+
+async function requireCustomerAccount(action) {
+    if (!customerSupabase) {
+        alert('El registro de clientes no está disponible en este momento. Inténtalo nuevamente en unos minutos.');
+        return false;
+    }
+    if (!customerUser) {
+        pendingCustomerAction = action;
+        openAccountDialog('login', 'Inicia sesión o regístrate para enviar tu pedido. Tu carrito seguirá guardado.');
+        return false;
+    }
+    if (!customerProfile) await loadCustomerProfile();
+    if (!customerProfile?.full_name?.trim() || !customerProfile?.phone?.trim()) {
+        pendingCustomerAction = action;
+        openAccountDialog('login', 'Completa tu nombre y WhatsApp para continuar con el pedido.');
+        return false;
+    }
+    return true;
+}
+
+async function continuePendingCustomerAction() {
+    const action = pendingCustomerAction;
+    pendingCustomerAction = null;
+    closeAccountDialog(false);
+    if (action === 'checkout') openCheckoutDrawer();
+    if (action === 'outfit') await sendOutfitToWhatsApp();
+}
+
+function openCheckoutDrawer() {
+    cartDrawer.classList.remove('active');
+    checkoutDrawer.classList.add('active');
+    prefillCheckoutFromProfile();
+    updateCheckoutTotals();
+}
+
+async function initializeCustomerAccount() {
+    if (!customerSupabase) return;
+    const { data: { session } } = await customerSupabase.auth.getSession();
+    customerUser = session?.user || null;
+    if (customerUser) {
+        try { await loadCustomerProfile(); } catch (error) { console.warn('No se pudo cargar el perfil del cliente.', error.message); }
+    }
+    updateAccountButton();
+    const initialAuthType = new URLSearchParams(location.hash.slice(1)).get('type');
+    if (initialAuthType === 'recovery') showCustomerRecovery();
+    customerSupabase.auth.onAuthStateChange((event, nextSession) => {
+        window.setTimeout(async () => {
+            customerUser = nextSession?.user || null;
+            customerProfile = null;
+            if (customerUser) {
+                try { await loadCustomerProfile(); } catch (error) { console.warn(error.message); }
+            } else {
+                updateAccountButton();
+            }
+            if (event === 'PASSWORD_RECOVERY') showCustomerRecovery();
+        }, 0);
+    });
+}
 
 // 4. LÓGICA DE INICIALIZACIÓN
 function mapDatabaseProduct(row) {
@@ -822,6 +994,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderTrendingProducts();
     setupOutfitBuilder();
     setupEventListeners();
+    await initializeCustomerAccount();
     setupTrendingCarousel();
     lucide.createIcons(); // Cargar íconos lucide
 });
@@ -1068,7 +1241,7 @@ function renderOutfitPreview() {
     builderTotal.textContent = `S/. ${total.toFixed(2)}`;
 }
 
-function sendOutfitToWhatsApp() {
+async function sendOutfitToWhatsApp() {
     const selectedProducts = Object.values(outfitSelection)
         .filter(Boolean)
         .map(id => PRODUCTS.find(product => product.id === id))
@@ -1078,6 +1251,8 @@ function sendOutfitToWhatsApp() {
         alert('Elige al menos una prenda para armar tu outfit.');
         return;
     }
+
+    if (!await requireCustomerAccount('outfit')) return;
 
     const total = selectedProducts.reduce((sum, product) => sum + product.price, 0);
     const productsText = selectedProducts.map(product => `- ${product.title} — S/. ${product.price.toFixed(2)}`).join('\n');
@@ -1303,8 +1478,168 @@ function updateCheckoutTotals() {
     }
 }
 
+function setupCustomerAccountEvents() {
+    accountBtn?.addEventListener('click', () => openAccountDialog('login'));
+    mobileAccountBtn?.addEventListener('click', () => {
+        setMobileMenuOpen(false);
+        openAccountDialog('login');
+    });
+    document.getElementById('account-close-btn')?.addEventListener('click', () => closeAccountDialog());
+    accountDialog?.addEventListener('click', event => {
+        if (event.target === accountDialog) closeAccountDialog();
+    });
+    document.getElementById('show-login-tab')?.addEventListener('click', () => showAccountMode('login'));
+    document.getElementById('show-register-tab')?.addEventListener('click', () => showAccountMode('register'));
+
+    document.getElementById('customer-login-form')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = event.submitter;
+        setAccountMessage('customer-login-message');
+        setCustomerButtonLoading(button, true, 'INGRESANDO...');
+        try {
+            const { data, error } = await customerSupabase.auth.signInWithPassword({
+                email: document.getElementById('customer-login-email').value.trim(),
+                password: document.getElementById('customer-login-password').value
+            });
+            if (error) throw error;
+            customerUser = data.user;
+            await loadCustomerProfile();
+            if (!customerProfile?.full_name || !customerProfile?.phone) {
+                fillCustomerProfileForm('Completa tus datos para continuar.');
+                return;
+            }
+            await continuePendingCustomerAction();
+        } catch (error) {
+            setAccountMessage('customer-login-message', customerErrorMessage(error));
+        } finally {
+            setCustomerButtonLoading(button, false);
+            lucide.createIcons();
+        }
+    });
+
+    document.getElementById('customer-register-form')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = event.submitter;
+        const fullName = document.getElementById('customer-register-name').value.trim();
+        const phone = document.getElementById('customer-register-phone').value.trim();
+        const email = document.getElementById('customer-register-email').value.trim();
+        const password = document.getElementById('customer-register-password').value;
+        const confirmation = document.getElementById('customer-register-confirm').value;
+        const marketingOptIn = document.getElementById('customer-register-marketing').checked;
+        setAccountMessage('customer-register-message');
+        if (password !== confirmation) {
+            setAccountMessage('customer-register-message', 'Las contraseñas no coinciden.');
+            return;
+        }
+        setCustomerButtonLoading(button, true, 'CREANDO CUENTA...');
+        try {
+            const { data, error } = await customerSupabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    emailRedirectTo: `${location.origin}/`,
+                    data: { full_name: fullName, phone, marketing_opt_in: marketingOptIn }
+                }
+            });
+            if (error) throw error;
+            if (!data.session) {
+                event.currentTarget.reset();
+                setAccountMessage('customer-register-message', 'Cuenta creada. Revisa tu correo y confirma el registro; después podrás iniciar sesión y enviar tu pedido.', true);
+                return;
+            }
+            customerUser = data.user;
+            const { error: profileError } = await customerSupabase.from('customer_profiles').upsert({
+                user_id: data.user.id,
+                full_name: fullName,
+                phone,
+                email,
+                marketing_opt_in: marketingOptIn,
+                marketing_opt_in_at: marketingOptIn ? new Date().toISOString() : null
+            }, { onConflict: 'user_id' });
+            if (profileError) throw profileError;
+            await loadCustomerProfile();
+            await continuePendingCustomerAction();
+        } catch (error) {
+            setAccountMessage('customer-register-message', customerErrorMessage(error));
+        } finally {
+            setCustomerButtonLoading(button, false);
+            lucide.createIcons();
+        }
+    });
+
+    document.getElementById('customer-profile-form')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = event.submitter;
+        const marketingOptIn = document.getElementById('customer-profile-marketing').checked;
+        setAccountMessage('customer-profile-message');
+        setCustomerButtonLoading(button, true, 'GUARDANDO...');
+        try {
+            const payload = {
+                user_id: customerUser.id,
+                full_name: document.getElementById('customer-profile-name').value.trim(),
+                phone: document.getElementById('customer-profile-phone').value.trim(),
+                email: customerUser.email,
+                marketing_opt_in: marketingOptIn,
+                marketing_opt_in_at: marketingOptIn ? (customerProfile?.marketing_opt_in_at || new Date().toISOString()) : null
+            };
+            const { error } = await customerSupabase.from('customer_profiles').upsert(payload, { onConflict: 'user_id' });
+            if (error) throw error;
+            await loadCustomerProfile();
+            setAccountMessage('customer-profile-message', 'Tus datos se guardaron correctamente.', true);
+            if (pendingCustomerAction) window.setTimeout(continuePendingCustomerAction, 450);
+        } catch (error) {
+            setAccountMessage('customer-profile-message', customerErrorMessage(error));
+        } finally {
+            setCustomerButtonLoading(button, false);
+        }
+    });
+
+    document.getElementById('customer-reset-password')?.addEventListener('click', async () => {
+        const email = document.getElementById('customer-login-email').value.trim();
+        if (!email) {
+            setAccountMessage('customer-login-message', 'Escribe tu correo primero.');
+            return;
+        }
+        const { error } = await customerSupabase.auth.resetPasswordForEmail(email, { redirectTo: `${location.origin}/` });
+        setAccountMessage('customer-login-message', error ? customerErrorMessage(error) : 'Te enviamos un enlace para recuperar tu contraseña.', !error);
+    });
+
+    document.getElementById('customer-recovery-form')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = event.submitter;
+        const password = document.getElementById('customer-recovery-password').value;
+        const confirmation = document.getElementById('customer-recovery-confirm').value;
+        setAccountMessage('customer-recovery-message');
+        if (password !== confirmation) {
+            setAccountMessage('customer-recovery-message', 'Las contraseñas no coinciden.');
+            return;
+        }
+        setCustomerButtonLoading(button, true, 'GUARDANDO...');
+        try {
+            const { error } = await customerSupabase.auth.updateUser({ password });
+            if (error) throw error;
+            history.replaceState({}, document.title, location.pathname + location.search);
+            event.currentTarget.reset();
+            fillCustomerProfileForm('Contraseña actualizada correctamente.');
+        } catch (error) {
+            setAccountMessage('customer-recovery-message', customerErrorMessage(error));
+        } finally {
+            setCustomerButtonLoading(button, false);
+        }
+    });
+
+    document.getElementById('customer-logout-btn')?.addEventListener('click', async () => {
+        await customerSupabase.auth.signOut();
+        customerUser = null;
+        customerProfile = null;
+        updateAccountButton();
+        closeAccountDialog();
+    });
+}
+
 // 6. CONTROLADORES DE EVENTO
 function setupEventListeners() {
+    setupCustomerAccountEvents();
     mobileMenuBtn.addEventListener('click', (event) => {
         event.stopPropagation();
         const isOpen = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
@@ -1441,10 +1776,9 @@ function setupEventListeners() {
     });
 
     // Flujo de Checkout
-    goToCheckoutBtn.addEventListener('click', () => {
-        cartDrawer.classList.remove('active');
-        checkoutDrawer.classList.add('active');
-        updateCheckoutTotals();
+    goToCheckoutBtn.addEventListener('click', async () => {
+        if (!await requireCustomerAccount('checkout')) return;
+        openCheckoutDrawer();
     });
 
     backToCartBtn.addEventListener('click', () => {
@@ -1471,8 +1805,8 @@ function setupEventListeners() {
     });
 
     // Enviar pedido por WhatsApp
-    submitOrderBtn.addEventListener('click', () => {
-        submitOrder();
+    submitOrderBtn.addEventListener('click', async () => {
+        await submitOrder();
     });
 }
 
@@ -1692,7 +2026,9 @@ function closeAllDrawers() {
 }
 
 // 8. FINALIZACIÓN Y ENVÍO A WHATSAPP
-function submitOrder() {
+async function submitOrder() {
+    if (!await requireCustomerAccount('checkout')) return;
+
     // Validar formulario manualmente
     const name = document.getElementById('checkout-name').value.trim();
     const phone = document.getElementById('checkout-phone').value.trim();
@@ -1735,6 +2071,7 @@ function submitOrder() {
     const message = `🔥 *NUEVO PEDIDO - LYNX STREETWEAR* 🔥\n\n` +
                     `👤 *DATOS DEL CLIENTE:*\n` +
                     `- *Nombre:* ${name}\n` +
+                    `- *Cuenta:* ${customerUser.email}\n` +
                     `- *Celular:* ${phone}\n` +
                     `- *Ciudad:* ${city}\n` +
                     `- *Dirección:* ${address}\n\n` +

@@ -1,6 +1,6 @@
 # Documentación LYNX Boutique
 
-**Última actualización:** 15 de julio de 2026  
+**Última actualización:** 16 de julio de 2026
 **Proyecto:** LYNX | Premium Streetwear Co.  
 **Carpeta local:** `C:\Users\Lynx\Documents\LYNX BOUTIQUE WEB\whatsapp-clothing-store`
 
@@ -76,6 +76,8 @@ No eliminar todavía el código del Fit Lab hasta decidir si se reconstruye con 
 - La portada utiliza el estilo streetwear cinematográfico de LYNX.
 - El sitio está pensado para funcionar en ordenador y móvil.
 - La compra y las consultas se gestionan por WhatsApp.
+- El catálogo es público, pero finalizar un pedido requiere una cuenta de cliente.
+- Los clientes pueden aceptar opcionalmente novedades y descuentos; los contactos autorizados aparecen en el panel administrativo.
 
 ## Próximos pasos
 

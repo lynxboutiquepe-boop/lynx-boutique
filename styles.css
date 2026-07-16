@@ -223,6 +223,24 @@ button, input, select, textarea {
     gap: 20px;
 }
 
+.account-btn {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-family: var(--font-title);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+}
+.account-btn:hover { background: var(--bg-tertiary); }
+.account-btn svg { width: 19px; height: 19px; }
+.account-btn.is-authenticated { background: #efefff; color: #5f59f7; }
+
 .cart-btn {
     position: relative;
     cursor: pointer;
@@ -2425,8 +2443,19 @@ html.is-android .stock-marquee {
     color: var(--text-muted);
     font-size: 0.85rem;
     letter-spacing: 0.05em;
-    text-transform: uppercase;
-}
+        text-transform: uppercase;
+    }
+
+    .mobile-account-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 6px;
+        border-top: 1px solid var(--border-color);
+        color: #5f59f7;
+    }
+
+    .mobile-account-link svg { width: 17px; height: 17px; }
 
 .filter-controls {
     display: flex;
@@ -2913,6 +2942,51 @@ html.is-android .stock-marquee {
 
 .drawer-overlay.active .drawer-content {
     transform: translateX(0);
+}
+
+/* Customer account */
+.account-dialog {
+    width: min(94vw, 560px);
+    max-height: 92dvh;
+    margin: auto;
+    border: 0;
+    border-radius: 24px;
+    background: transparent;
+    color: #17181d;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, .32);
+}
+.account-dialog::backdrop { background: rgba(8, 9, 14, .72); backdrop-filter: blur(6px); }
+.account-card { position: relative; padding: clamp(26px, 6vw, 42px); background: #fff; overflow-y: auto; max-height: 92dvh; }
+.account-close { position: absolute; top: 17px; right: 17px; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; cursor: pointer; background: #f3f3f7; color: #555864; }
+.account-close svg { width: 19px; }
+.account-heading { padding-right: 42px; }
+.account-eyebrow { color: #5f59f7; font-family: var(--font-title); font-size: .66rem; font-weight: 800; letter-spacing: .17em; }
+.account-heading h2 { margin-top: 9px; font-family: var(--font-title); font-size: clamp(1.8rem, 6vw, 2.6rem); line-height: 1; letter-spacing: -.035em; }
+.account-heading p { margin-top: 12px; color: #6f727d; font-size: .84rem; line-height: 1.55; }
+.account-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin: 26px 0 20px; padding: 5px; border-radius: 13px; background: #f3f3f7; }
+.account-tab { min-height: 42px; border-radius: 9px; cursor: pointer; color: #6f727d; font-family: var(--font-title); font-size: .75rem; font-weight: 800; }
+.account-tab.active { background: #fff; color: #17181d; box-shadow: 0 5px 16px rgba(31, 32, 42, .08); }
+.account-form { display: grid; gap: 15px; margin-top: 24px; }
+.account-tabs + .account-form { margin-top: 0; }
+.account-form label:not(.account-consent) { display: grid; gap: 7px; color: #30323b; font-size: .72rem; font-weight: 700; }
+.account-form input:not([type="checkbox"]) { width: 100%; min-height: 48px; padding: 11px 13px; border: 1px solid #e1e2e8; border-radius: 11px; outline: 0; background: #fff; color: #17181d; }
+.account-form input:focus { border-color: #5f59f7; box-shadow: 0 0 0 3px rgba(95, 89, 247, .12); }
+.account-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+.account-consent { display: flex; align-items: flex-start; gap: 11px; padding: 13px; border-radius: 11px; background: #f7f7fa; color: #666975; font-size: .72rem; line-height: 1.45; cursor: pointer; }
+.account-consent input { width: 17px; height: 17px; margin-top: 2px; flex: 0 0 auto; accent-color: #5f59f7; }
+.account-consent strong { color: #2d2f37; }
+.account-message { min-height: 18px; color: #c43c4b; font-size: .74rem; line-height: 1.45; }
+.account-message.success { color: #168c55; }
+.account-text-btn { justify-self: center; cursor: pointer; color: #6f727d; font-size: .73rem; text-decoration: underline; text-underline-offset: 3px; }
+.account-secondary-btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #e1e2e8; border-radius: 11px; cursor: pointer; color: #4f515b; font-family: var(--font-title); font-size: .74rem; font-weight: 800; }
+.account-secondary-btn svg { width: 17px; }
+
+@media (max-width: 768px) {
+    .account-btn { width: 40px; min-height: 40px; justify-content: center; padding: 0; }
+    .account-btn span { display: none; }
+    .account-dialog { width: 100%; max-height: calc(100dvh - 8px); margin: auto 0 0; border-radius: 22px 22px 0 0; }
+    .account-card { max-height: calc(100dvh - 8px); padding: 30px 20px calc(28px + env(safe-area-inset-bottom)); }
+    .account-form-grid { grid-template-columns: 1fr; }
 }
 
 .drawer-header {
@@ -4324,6 +4398,8 @@ h6 {
         width: 42px;
         height: 42px;
     }
+
+    .account-btn { display: none; }
 
     .cart-btn {
         grid-column: 4;

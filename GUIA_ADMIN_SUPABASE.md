@@ -1,7 +1,7 @@
 # Guía del panel administrativo LYNX
 
 **Última actualización:** 16 de julio de 2026  
-**Objetivo:** administrar catálogo, inventario, preventas, ventas, ingresos y gastos con acceso privado.
+**Objetivo:** administrar catálogo, inventario, preventas, clientes, ventas, ingresos y gastos con acceso privado.
 
 ## Estado actual de LYNX
 
@@ -58,6 +58,7 @@ El archivo crea:
 - `sales`: ventas confirmadas.
 - `finance_entries`: ingresos y gastos.
 - `admin_users`: lista privada de administradores autorizados.
+- `customer_profiles`: nombre, correo, WhatsApp y permiso opcional para recibir promociones.
 - Bucket `product-images`: imágenes que se suben desde el panel.
 - Función `register_sale`: descuenta stock y crea el ingreso automáticamente.
 - Políticas RLS: impiden que un visitante modifique datos o consulte la caja.
@@ -149,7 +150,19 @@ El sistema registra la venta, descuenta el stock y añade el total como ingreso 
 
 Usa **Movimiento manual** para publicidad, empaques, transporte, compra de mercadería u otros movimientos. Indica tipo, monto, categoría, fecha y descripción. El resumen calcula ingresos, gastos y balance del mes actual.
 
-## 9. Cambiar o recuperar la contraseña
+## 9. Registro de clientes y novedades
+
+- Cualquier visitante puede ver el catálogo y añadir prendas al carrito.
+- Para pasar al pedido o solicitar un outfit por WhatsApp debe crear una cuenta o iniciar sesión.
+- El registro guarda nombre, correo y número de WhatsApp.
+- La casilla para recibir novedades y descuentos es opcional; no se exige para comprar.
+- Cada cliente puede cambiar ese permiso desde **Mi cuenta**.
+
+En el panel abre **Clientes** para buscar registros, revisar cuántos aceptaron novedades y pulsar **Exportar suscritos**. El CSV incluye únicamente a quienes dieron permiso y puede utilizarse en una plataforma de correo autorizada.
+
+Supabase administra las cuentas y los correos de confirmación o recuperación. Los envíos masivos de campañas todavía requieren conectar un proveedor especializado como Brevo o Resend. Nunca se debe colocar la llave secreta de ese proveedor dentro de `app.js` o de otro archivo público de la web.
+
+## 10. Cambiar o recuperar la contraseña
 
 - En la pantalla de acceso pulsa **Olvidé mi contraseña**.
 - Escribe primero tu correo.
@@ -158,7 +171,7 @@ Usa **Movimiento manual** para publicidad, empaques, transporte, compra de merca
 
 También puedes cambiarla desde **Supabase → Authentication → Users**. Nunca compartas la contraseña por WhatsApp ni la escribas en archivos del proyecto.
 
-## 10. Copias de seguridad
+## 11. Copias de seguridad
 
 Como práctica mensual:
 
@@ -169,7 +182,7 @@ Como práctica mensual:
 
 El plan gratuito no incluye copias automáticas restaurables. Para una operación más grande, el plan Pro ofrece copias diarias.
 
-## 11. Publicar cambios en Vercel
+## 12. Publicar cambios en Vercel
 
 1. Prueba primero `index.html` y `admin.html` localmente.
 2. Sube nuevamente la carpeta completa a Vercel.
@@ -177,7 +190,7 @@ El plan gratuito no incluye copias automáticas restaurables. Para una operació
 4. Abre `/admin.html` e inicia sesión.
 5. Verifica que un producto editado desde el panel se refleje en la tienda.
 
-## 12. Solución rápida de problemas
+## 13. Solución rápida de problemas
 
 ### “Falta conectar Supabase”
 

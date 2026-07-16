@@ -193,7 +193,14 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
 .row-action.delete:hover { color: var(--danger); border-color: var(--danger); }
 .row-action svg { width: 16px; }
 .empty-state { padding: 34px !important; color: var(--muted); text-align: center; }
-.mobile-product-list, .mobile-finance-list { display: none; }
+.mobile-product-list, .mobile-finance-list, .mobile-customer-list { display: none; }
+.customer-identity { display: grid; gap: 4px; min-width: 220px; }
+.customer-identity strong { font-size: .78rem; }
+.customer-identity span { color: var(--muted); font-size: .67rem; }
+.consent-pill { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 999px; background: var(--surface-soft); color: var(--muted); font-size: .62rem; font-weight: 800; }
+.consent-pill.yes { background: var(--success-soft); color: var(--success); }
+.customer-privacy-note { display: flex; align-items: center; gap: 8px; margin-top: 14px; color: var(--muted); font-size: .7rem; line-height: 1.5; }
+.customer-privacy-note svg { width: 17px; flex: 0 0 auto; color: var(--success); }
 
 .admin-form { display: grid; gap: 15px; }
 .form-grid { display: grid; gap: 13px; }
@@ -250,9 +257,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
     .finance-grid { grid-template-columns: 1fr; }
     .toolbar { flex-direction: column; }
     .toolbar select { width: 100%; }
-    .products-table, .finance-history-card .table-shell { display: none; }
-    .mobile-product-list, .mobile-finance-list { display: grid; gap: 10px; }
-    .mobile-product-card, .mobile-finance-card { padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+    .products-table, .finance-history-card .table-shell, .customer-table-shell { display: none; }
+    .mobile-product-list, .mobile-finance-list, .mobile-customer-list { display: grid; gap: 10px; }
+    .mobile-product-card, .mobile-finance-card, .mobile-customer-card { padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
     .mobile-product-head { display: flex; gap: 12px; }
     .mobile-product-head img { width: 58px; height: 74px; flex: 0 0 auto; border-radius: 9px; object-fit: cover; }
     .mobile-product-copy { min-width: 0; display: grid; align-content: center; gap: 4px; }
@@ -262,6 +269,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
     .mobile-finance-card { display: flex; align-items: center; justify-content: space-between; gap: 15px; }
     .mobile-finance-card div { min-width: 0; display: grid; gap: 4px; }
     .mobile-finance-card strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mobile-customer-card { display: grid; gap: 11px; }
+    .mobile-customer-card header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .mobile-customer-card p { color: var(--muted); font-size: .69rem; }
     .form-grid.two, .form-grid.four { grid-template-columns: 1fr; }
     .product-dialog { width: 100%; max-height: calc(100dvh - 8px); margin: auto 0 0; border-radius: 22px 22px 0 0; }
     .product-form { max-height: calc(100dvh - 8px); padding: 23px 18px calc(26px + env(safe-area-inset-bottom)); }

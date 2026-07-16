@@ -39,6 +39,10 @@
                 <button class="header-search-btn" id="header-search-btn" aria-label="Buscar productos">
                     <i data-lucide="search"></i>
                 </button>
+                <button class="account-btn" id="account-btn" aria-label="Ingresar o crear cuenta">
+                    <i data-lucide="user-round"></i>
+                    <span id="account-btn-label">Cuenta</span>
+                </button>
                 <button class="cart-btn" id="open-cart-btn" aria-label="Abrir carrito">
                     <i data-lucide="shopping-bag"></i>
                     <span class="cart-count" id="cart-badge">0</span>
@@ -51,6 +55,7 @@
                 <button class="mobile-nav-link" data-category="t-shirts">T-Shirts</button>
                 <button class="mobile-nav-link" data-category="jeans-pants">Jeans & Pants</button>
                 <button class="mobile-nav-link" data-category="conjuntos">Conjuntos</button>
+                <button class="mobile-nav-link mobile-account-link" id="mobile-account-btn" type="button"><i data-lucide="user-round"></i><span id="mobile-account-btn-label">Ingresar / registrarme</span></button>
             </nav>
         </div>
     </header>
@@ -504,9 +509,74 @@
         </div>
     </div>
 
+    <!-- Customer Account -->
+    <dialog class="account-dialog" id="account-dialog">
+        <div class="account-card">
+            <button class="account-close" id="account-close-btn" type="button" aria-label="Cerrar"><i data-lucide="x"></i></button>
+            <div id="account-auth-view">
+                <div class="account-heading">
+                    <span class="account-eyebrow">MI CUENTA LYNX</span>
+                    <h2>Compra con tu cuenta</h2>
+                    <p>Puedes mirar todo el catálogo sin registrarte. Para enviar un pedido, inicia sesión o crea tu cuenta.</p>
+                </div>
+                <div class="account-tabs" role="tablist" aria-label="Acceso de clientes">
+                    <button class="account-tab active" id="show-login-tab" type="button">Iniciar sesión</button>
+                    <button class="account-tab" id="show-register-tab" type="button">Registrarme</button>
+                </div>
+                <form class="account-form" id="customer-login-form">
+                    <label><span>Correo</span><input id="customer-login-email" type="email" autocomplete="email" required placeholder="tu@correo.com"></label>
+                    <label><span>Contraseña</span><input id="customer-login-password" type="password" autocomplete="current-password" required placeholder="Tu contraseña"></label>
+                    <p class="account-message" id="customer-login-message" aria-live="polite"></p>
+                    <button class="btn btn-primary btn-block" type="submit">INGRESAR</button>
+                    <button class="account-text-btn" id="customer-reset-password" type="button">Olvidé mi contraseña</button>
+                </form>
+                <form class="account-form" id="customer-register-form" hidden>
+                    <label><span>Nombre y apellido</span><input id="customer-register-name" type="text" autocomplete="name" required placeholder="Tu nombre completo"></label>
+                    <label><span>WhatsApp</span><input id="customer-register-phone" type="tel" autocomplete="tel" required placeholder="987654321"></label>
+                    <label><span>Correo</span><input id="customer-register-email" type="email" autocomplete="email" required placeholder="tu@correo.com"></label>
+                    <div class="account-form-grid">
+                        <label><span>Contraseña</span><input id="customer-register-password" type="password" autocomplete="new-password" minlength="8" required placeholder="Mínimo 8 caracteres"></label>
+                        <label><span>Confirmar</span><input id="customer-register-confirm" type="password" autocomplete="new-password" minlength="8" required placeholder="Repite la contraseña"></label>
+                    </div>
+                    <label class="account-consent"><input id="customer-register-marketing" type="checkbox"><span><strong>Quiero recibir novedades y descuentos.</strong> Es opcional y puedes cambiarlo luego.</span></label>
+                    <p class="account-message" id="customer-register-message" aria-live="polite"></p>
+                    <button class="btn btn-primary btn-block" type="submit">CREAR MI CUENTA</button>
+                </form>
+            </div>
+            <div id="account-profile-view" hidden>
+                <div class="account-heading">
+                    <span class="account-eyebrow">MI CUENTA LYNX</span>
+                    <h2>Mis datos</h2>
+                    <p id="customer-profile-email"></p>
+                </div>
+                <form class="account-form" id="customer-profile-form">
+                    <label><span>Nombre y apellido</span><input id="customer-profile-name" type="text" autocomplete="name" required></label>
+                    <label><span>WhatsApp</span><input id="customer-profile-phone" type="tel" autocomplete="tel" required></label>
+                    <label class="account-consent"><input id="customer-profile-marketing" type="checkbox"><span><strong>Recibir novedades y descuentos.</strong> Puedes retirar este permiso cuando quieras.</span></label>
+                    <p class="account-message" id="customer-profile-message" aria-live="polite"></p>
+                    <button class="btn btn-primary btn-block" type="submit">GUARDAR MIS DATOS</button>
+                    <button class="account-secondary-btn" id="customer-logout-btn" type="button"><i data-lucide="log-out"></i> Cerrar sesión</button>
+                </form>
+            </div>
+            <div id="account-recovery-view" hidden>
+                <div class="account-heading">
+                    <span class="account-eyebrow">SEGURIDAD LYNX</span>
+                    <h2>Crea una nueva contraseña</h2>
+                    <p>Escribe una contraseña de al menos 8 caracteres para recuperar tu cuenta.</p>
+                </div>
+                <form class="account-form" id="customer-recovery-form">
+                    <label><span>Nueva contraseña</span><input id="customer-recovery-password" type="password" autocomplete="new-password" minlength="8" required></label>
+                    <label><span>Confirmar contraseña</span><input id="customer-recovery-confirm" type="password" autocomplete="new-password" minlength="8" required></label>
+                    <p class="account-message" id="customer-recovery-message" aria-live="polite"></p>
+                    <button class="btn btn-primary btn-block" type="submit">GUARDAR CONTRASEÑA</button>
+                </form>
+            </div>
+        </div>
+    </dialog>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js?v=20260716-admin-v1"></script>
-    <script src="app.js?v=20260716-supabase-admin-v1"></script>
+    <script src="app.js?v=20260716-customer-accounts-v1"></script>
 </body>
 </html>

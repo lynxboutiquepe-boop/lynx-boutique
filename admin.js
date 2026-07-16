@@ -13,7 +13,8 @@ const STATUS_META = {
 const state = {
     user: null,
     products: [],
-    finances: []
+    finances: [],
+    customers: []
 };
 
 const $ = selector => document.querySelector(selector);
@@ -39,6 +40,11 @@ function localDate(value) {
     if (!value) return '—';
     return new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
         .format(new Date(`${value}T12:00:00`));
+}
+
+function localDateTime(value) {
+    if (!value) return '—';
+    return new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(value));
 }
 
 function showToast(message, type = 'success') {
@@ -134,16 +140,19 @@ async function initialize() {
 }
 
 async function loadAll() {
-    const [{ data: products, error: productError }, { data: finances, error: financeError }] = await Promise.all([
+    const [{ data: products, error: productError }, { data: finances, error: financeError }, { data: customers, error: customerError }] = await Promise.all([
         supabaseClient.from('products').select('*').order('sort_order', { ascending: true }).order('id'),
-        supabaseClient.from('finance_entries').select('*').order('entry_date', { ascending: false }).order('created_at', { ascending: false }).limit(500)
+        supabaseClient.from('finance_entries').select('*').order('entry_date', { ascending: false }).order('created_at', { ascending: false }).limit(500),
+        supabaseClient.from('customer_profiles').select('*').order('created_at', { ascending: false }).limit(2000)
     ]);
 
     if (productError) throw productError;
     if (financeError) throw financeError;
+    if (customerError) throw customerError;
 
     state.products = products || [];
     state.finances = finances || [];
+    state.customers = customers || [];
     renderEverything();
 }
 
@@ -151,6 +160,7 @@ function renderEverything() {
     renderStats();
     renderProducts();
     renderFinance();
+    renderCustomers();
     renderSaleProducts();
     renderAttention();
     lucide.createIcons();
@@ -175,6 +185,8 @@ function renderStats() {
     $('#stat-income').textContent = money(income);
     $('#stat-expense').textContent = money(expense);
     $('#stat-balance').textContent = money(income - expense);
+    $('#stat-customers').textContent = state.customers.length;
+    $('#stat-subscribers').textContent = state.customers.filter(customer => customer.marketing_opt_in).length;
 
     const recent = state.finances.slice(0, 5);
     $('#recent-finance-list').innerHTML = recent.length ? recent.map(entry => `
@@ -261,6 +273,59 @@ function renderFinance() {
     $('#mobile-finance-list').innerHTML = state.finances.length ? state.finances.map(entry => `
         <article class="mobile-finance-card"><div><strong>${escapeHtml(entry.description)}</strong><span>${localDate(entry.entry_date)} · ${escapeHtml(entry.category)}</span></div><b class="amount-${entry.entry_type}">${entry.entry_type === 'income' ? '+' : '-'}${money(entry.amount)}</b></article>
     `).join('') : '<p class="empty-state">Todavía no hay movimientos.</p>';
+}
+
+function filteredCustomers() {
+    const query = $('#customer-search').value.trim().toLowerCase();
+    const filter = $('#customer-marketing-filter').value;
+    return state.customers.filter(customer => {
+        const haystack = `${customer.full_name || ''} ${customer.email || ''} ${customer.phone || ''}`.toLowerCase();
+        const matchesQuery = !query || haystack.includes(query);
+        const matchesConsent = filter === 'all'
+            || (filter === 'subscribed' && customer.marketing_opt_in)
+            || (filter === 'not-subscribed' && !customer.marketing_opt_in);
+        return matchesQuery && matchesConsent;
+    });
+}
+
+function renderCustomers() {
+    const customers = filteredCustomers();
+    $('#customers-tbody').innerHTML = customers.length ? customers.map(customer => `
+        <tr>
+            <td><div class="customer-identity"><strong>${escapeHtml(customer.full_name)}</strong><span>${escapeHtml(customer.email)}</span></div></td>
+            <td>${escapeHtml(customer.phone)}</td>
+            <td><span class="consent-pill ${customer.marketing_opt_in ? 'yes' : ''}">${customer.marketing_opt_in ? 'SÍ, ACEPTÓ' : 'NO'}</span></td>
+            <td>${localDateTime(customer.created_at)}</td>
+        </tr>
+    `).join('') : '<tr><td class="empty-state" colspan="4">No se encontraron clientes.</td></tr>';
+
+    $('#mobile-customer-list').innerHTML = customers.length ? customers.map(customer => `
+        <article class="mobile-customer-card">
+            <header><div class="customer-identity"><strong>${escapeHtml(customer.full_name)}</strong><span>${escapeHtml(customer.email)}</span></div><span class="consent-pill ${customer.marketing_opt_in ? 'yes' : ''}">${customer.marketing_opt_in ? 'SÍ' : 'NO'}</span></header>
+            <p>${escapeHtml(customer.phone)} · Registrado ${localDateTime(customer.created_at)}</p>
+        </article>
+    `).join('') : '<p class="empty-state">No se encontraron clientes.</p>';
+}
+
+function exportSubscribedCustomers() {
+    const customers = state.customers.filter(customer => customer.marketing_opt_in);
+    if (!customers.length) {
+        showToast('Todavía no hay clientes suscritos para exportar.', 'error');
+        return;
+    }
+    const quote = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
+    const rows = [
+        ['Nombre', 'Correo', 'WhatsApp', 'Fecha de registro'],
+        ...customers.map(customer => [customer.full_name, customer.email, customer.phone, customer.created_at])
+    ];
+    const csv = `\uFEFF${rows.map(row => row.map(quote).join(',')).join('\r\n')}`;
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `clientes-lynx-suscritos-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast(`${customers.length} contactos suscritos exportados.`);
 }
 
 function openProductForm(product = null) {
@@ -568,6 +633,9 @@ function bindEvents() {
     $('#import-catalog-btn').addEventListener('click', event => importCatalog(event.currentTarget));
     $('#product-search').addEventListener('input', renderProducts);
     $('#product-status-filter').addEventListener('change', renderProducts);
+    $('#customer-search').addEventListener('input', renderCustomers);
+    $('#customer-marketing-filter').addEventListener('change', renderCustomers);
+    $('#export-customers-btn').addEventListener('click', exportSubscribedCustomers);
     $('#sale-form').addEventListener('submit', registerSale);
     $('#finance-form').addEventListener('submit', saveFinance);
 
