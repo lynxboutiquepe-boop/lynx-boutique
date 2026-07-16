@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#111218">
+    <title>LYNX | Administración</title>
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="admin.css?v=20260716-admin-v2">
+</head>
+<body>
+    <main class="login-shell" id="login-shell">
+        <section class="login-card" aria-labelledby="login-title">
+            <a class="login-brand" href="index.html" aria-label="Volver a la tienda LYNX">
+                <img src="assets/logo-transparent.png" alt="LYNX">
+            </a>
+            <span class="eyebrow">ACCESO PRIVADO</span>
+            <h1 id="login-title">Panel administrativo</h1>
+            <p class="login-intro">Gestiona inventario, preventas, ventas y caja desde un solo lugar.</p>
+
+            <div class="setup-warning" id="setup-warning" hidden>
+                <i data-lucide="settings"></i>
+                <div>
+                    <strong>Falta conectar Supabase</strong>
+                    <span>Sigue la guía <code>GUIA_ADMIN_SUPABASE.md</code> para completar la configuración.</span>
+                </div>
+            </div>
+
+            <form id="login-form" class="login-form">
+                <label>
+                    <span>Correo administrador</span>
+                    <input id="login-email" type="email" autocomplete="username" required placeholder="tu-correo@ejemplo.com">
+                </label>
+                <label>
+                    <span>Contraseña</span>
+                    <div class="password-field">
+                        <input id="login-password" type="password" autocomplete="current-password" required minlength="8" placeholder="••••••••">
+                        <button id="toggle-password" type="button" aria-label="Mostrar contraseña"><i data-lucide="eye"></i></button>
+                    </div>
+                </label>
+                <p class="form-message" id="login-message" role="status"></p>
+                <button class="primary-btn" type="submit"><i data-lucide="log-in"></i> Ingresar</button>
+                <button class="text-btn" id="reset-password-btn" type="button">Olvidé mi contraseña</button>
+            </form>
+
+            <form id="set-password-form" class="login-form" hidden>
+                <div class="password-setup-heading">
+                    <span class="eyebrow">ÚLTIMO PASO</span>
+                    <h2>Crea tu contraseña</h2>
+                    <p>Elige una contraseña privada de al menos 12 caracteres. No necesitas compartirla con nadie.</p>
+                </div>
+                <label>
+                    <span>Nueva contraseña</span>
+                    <div class="password-field">
+                        <input id="new-password" type="password" autocomplete="new-password" required minlength="12" placeholder="••••••••••••">
+                        <button class="toggle-new-password" type="button" aria-label="Mostrar contraseña"><i data-lucide="eye"></i></button>
+                    </div>
+                </label>
+                <label>
+                    <span>Repetir contraseña</span>
+                    <input id="confirm-new-password" type="password" autocomplete="new-password" required minlength="12" placeholder="••••••••••••">
+                </label>
+                <p class="form-message" id="set-password-message" role="status"></p>
+                <button class="primary-btn" type="submit"><i data-lucide="shield-check"></i> Guardar contraseña</button>
+            </form>
+        </section>
+    </main>
+
+    <div class="admin-app" id="admin-app" hidden>
+        <header class="admin-topbar">
+            <a class="admin-brand" href="index.html">
+                <img src="assets/logo-transparent.png" alt="LYNX">
+                <span>ADMIN</span>
+            </a>
+            <div class="admin-user">
+                <span id="admin-email"></span>
+                <button class="icon-text-btn" id="logout-btn" type="button"><i data-lucide="log-out"></i> Salir</button>
+            </div>
+        </header>
+
+        <div class="admin-layout">
+            <aside class="admin-sidebar">
+                <div class="sidebar-heading">
+                    <span class="eyebrow">LYNX CONTROL</span>
+                    <h1>Administración</h1>
+                </div>
+                <nav class="admin-tabs" aria-label="Secciones del panel">
+                    <button class="admin-tab active" type="button" data-panel="dashboard-panel"><i data-lucide="layout-dashboard"></i><span>Resumen</span></button>
+                    <button class="admin-tab" type="button" data-panel="products-panel"><i data-lucide="shirt"></i><span>Productos</span></button>
+                    <button class="admin-tab" type="button" data-panel="finance-panel"><i data-lucide="wallet-cards"></i><span>Caja</span></button>
+                </nav>
+                <a class="store-link" href="index.html" target="_blank" rel="noopener"><i data-lucide="external-link"></i> Ver tienda</a>
+            </aside>
+
+            <main class="admin-content">
+                <section class="admin-panel active" id="dashboard-panel">
+                    <div class="panel-heading">
+                        <div><span class="eyebrow">ESTADO GENERAL</span><h2>Resumen del negocio</h2></div>
+                        <button class="secondary-btn refresh-btn" type="button"><i data-lucide="refresh-cw"></i> Actualizar</button>
+                    </div>
+                    <div class="stats-grid">
+                        <article class="stat-card"><span>Productos</span><strong id="stat-products">0</strong><small>registrados</small></article>
+                        <article class="stat-card"><span>Stock disponible</span><strong id="stat-stock">0</strong><small>unidades</small></article>
+                        <article class="stat-card warning"><span>Preventas</span><strong id="stat-preorder">0</strong><small>productos</small></article>
+                        <article class="stat-card danger"><span>Agotados</span><strong id="stat-soldout">0</strong><small>productos</small></article>
+                        <article class="stat-card income"><span>Ingresos del mes</span><strong id="stat-income">S/. 0</strong><small>ventas y otros</small></article>
+                        <article class="stat-card expense"><span>Gastos del mes</span><strong id="stat-expense">S/. 0</strong><small>movimientos</small></article>
+                    </div>
+                    <div class="balance-card">
+                        <div><span>BALANCE DEL MES</span><strong id="stat-balance">S/. 0.00</strong></div>
+                        <p>Ingresos menos gastos registrados durante el mes actual.</p>
+                    </div>
+                    <div class="dashboard-grid">
+                        <article class="content-card">
+                            <div class="card-heading"><h3>Atención requerida</h3><span>Inventario</span></div>
+                            <div id="attention-list" class="attention-list"></div>
+                        </article>
+                        <article class="content-card">
+                            <div class="card-heading"><h3>Últimos movimientos</h3><span>Caja</span></div>
+                            <div id="recent-finance-list" class="mini-list"></div>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="admin-panel" id="products-panel">
+                    <div class="panel-heading">
+                        <div><span class="eyebrow">INVENTARIO</span><h2>Catálogo completo</h2></div>
+                        <div class="heading-actions">
+                            <button class="secondary-btn" id="import-catalog-btn" type="button"><i data-lucide="database-zap"></i> Importar catálogo actual</button>
+                            <button class="primary-btn" id="new-product-btn" type="button"><i data-lucide="plus"></i> Añadir producto</button>
+                        </div>
+                    </div>
+                    <div class="toolbar">
+                        <label class="search-control"><i data-lucide="search"></i><input id="product-search" type="search" placeholder="Buscar producto..."></label>
+                        <select id="product-status-filter" aria-label="Filtrar por estado">
+                            <option value="all">Todos los estados</option>
+                            <option value="available">Disponible</option>
+                            <option value="low_stock">Últimas unidades</option>
+                            <option value="preorder">Preventa</option>
+                            <option value="sold_out">Agotado</option>
+                            <option value="archived">Archivado</option>
+                        </select>
+                    </div>
+                    <div class="table-shell">
+                        <table class="data-table products-table">
+                            <thead><tr><th>Producto</th><th>Estado</th><th>Precio</th><th>Stock</th><th>Tallas</th><th>Acciones</th></tr></thead>
+                            <tbody id="products-tbody"></tbody>
+                        </table>
+                    </div>
+                    <div class="mobile-product-list" id="mobile-product-list"></div>
+                </section>
+
+                <section class="admin-panel" id="finance-panel">
+                    <div class="panel-heading">
+                        <div><span class="eyebrow">CONTROL FINANCIERO</span><h2>Caja, ventas y gastos</h2></div>
+                        <button class="secondary-btn refresh-btn" type="button"><i data-lucide="refresh-cw"></i> Actualizar</button>
+                    </div>
+                    <div class="finance-grid">
+                        <form class="content-card admin-form" id="sale-form">
+                            <div class="card-heading"><h3>Registrar venta</h3><span>Ingreso automático</span></div>
+                            <label><span>Producto</span><select id="sale-product" required></select></label>
+                            <div class="form-grid two">
+                                <label><span>Cantidad</span><input id="sale-quantity" type="number" min="1" value="1" required></label>
+                                <label><span>Nota</span><input id="sale-note" type="text" placeholder="Cliente o referencia"></label>
+                            </div>
+                            <p class="form-help">Al guardar, se descontará el stock y se creará el ingreso automáticamente.</p>
+                            <button class="primary-btn" type="submit"><i data-lucide="badge-check"></i> Confirmar venta</button>
+                        </form>
+                        <form class="content-card admin-form" id="finance-form">
+                            <div class="card-heading"><h3>Movimiento manual</h3><span>Ingreso o gasto</span></div>
+                            <div class="form-grid two">
+                                <label><span>Tipo</span><select id="finance-type" required><option value="expense">Gasto</option><option value="income">Ingreso</option></select></label>
+                                <label><span>Monto S/.</span><input id="finance-amount" type="number" min="0.01" step="0.01" required></label>
+                            </div>
+                            <div class="form-grid two">
+                                <label><span>Categoría</span><input id="finance-category" type="text" required placeholder="Publicidad, envío, compra..."></label>
+                                <label><span>Fecha</span><input id="finance-date" type="date" required></label>
+                            </div>
+                            <label><span>Descripción</span><input id="finance-description" type="text" required placeholder="Detalle del movimiento"></label>
+                            <button class="secondary-btn" type="submit"><i data-lucide="plus-circle"></i> Guardar movimiento</button>
+                        </form>
+                    </div>
+                    <article class="content-card finance-history-card">
+                        <div class="card-heading"><h3>Historial de caja</h3><span id="finance-count">0 movimientos</span></div>
+                        <div class="table-shell">
+                            <table class="data-table"><thead><tr><th>Fecha</th><th>Tipo</th><th>Detalle</th><th>Categoría</th><th>Monto</th><th></th></tr></thead><tbody id="finance-tbody"></tbody></table>
+                        </div>
+                        <div class="mobile-finance-list" id="mobile-finance-list"></div>
+                    </article>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <dialog class="product-dialog" id="product-dialog">
+        <form class="product-form" id="product-form">
+            <div class="dialog-heading">
+                <div><span class="eyebrow">CATÁLOGO</span><h2 id="product-form-title">Añadir producto</h2></div>
+                <button class="dialog-close" id="close-product-dialog" type="button" aria-label="Cerrar"><i data-lucide="x"></i></button>
+            </div>
+            <input id="product-id" type="hidden">
+            <div class="form-grid two">
+                <label><span>Nombre *</span><input id="product-title" type="text" required></label>
+                <label><span>Categoría *</span><select id="product-category" required><option value="hoodies-jackets">Hoodies & Jackets</option><option value="t-shirts">T-Shirts</option><option value="jeans-pants">Jeans & Pants</option><option value="conjuntos">Conjuntos</option></select></label>
+            </div>
+            <div class="form-grid four">
+                <label><span>Precio S/. *</span><input id="product-price" type="number" min="0" step="0.01" required></label>
+                <label><span>Costo S/.</span><input id="product-cost" type="number" min="0" step="0.01" value="0"></label>
+                <label><span>Stock *</span><input id="product-stock" type="number" min="0" step="1" required></label>
+                <label><span>Estado *</span><select id="product-status" required><option value="available">Disponible</option><option value="low_stock">Últimas unidades</option><option value="preorder">Preventa</option><option value="sold_out">Agotado</option><option value="archived">Archivado</option></select></label>
+            </div>
+            <div class="form-grid two">
+                <label><span>Tallas</span><input id="product-sizes" type="text" placeholder="S, M, L, XL"></label>
+                <label><span>Etiqueta visible</span><input id="product-badge" type="text" placeholder="NUEVO DROP"></label>
+            </div>
+            <label><span>Descripción</span><textarea id="product-description" rows="4"></textarea></label>
+            <label><span>URLs de imágenes</span><textarea id="product-images" rows="4" placeholder="Una dirección por línea"></textarea></label>
+            <label class="upload-field"><span>Subir imágenes nuevas</span><input id="product-image-files" type="file" accept="image/png,image/jpeg,image/webp" multiple><small>PNG, JPG o WEBP. Máximo 10 MB por archivo.</small></label>
+            <label class="check-control"><input id="product-fit" type="checkbox" checked><span>Mostrar recomendación de fit para este producto</span></label>
+            <p class="form-message" id="product-form-message" role="status"></p>
+            <div class="dialog-actions"><button class="secondary-btn" id="cancel-product-btn" type="button">Cancelar</button><button class="primary-btn" type="submit"><i data-lucide="save"></i> Guardar producto</button></div>
+        </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="supabase-config.js?v=20260716-admin-v1"></script>
+    <script src="admin.js?v=20260716-admin-v2"></script>
+</body>
+</html>

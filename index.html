@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#f7f8fc">
+    <title>LYNX | Premium Streetwear Co.</title>
+    <meta name="description" content="Colección exclusiva de streetwear premium en Perú. Compra hoodies oversized, camisetas gráficas y joggers de alta gama y paga contra entrega.">
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons (CDN) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css?v=20260716-mobile-home">
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header class="app-header" id="main-header">
+        <div class="header-container">
+            <a href="#" class="brand-logo" id="logo-link">
+                <img src="assets/logo-transparent.png" alt="LYNX" class="logo-img">
+            </a>
+            
+            <nav class="desktop-nav">
+                <button class="nav-link active" id="nav-all">Catálogo</button>
+                <button class="nav-link" id="nav-hoodies">Hoodies & Jackets</button>
+                <button class="nav-link" id="nav-tshirts">T-Shirts</button>
+                <button class="nav-link" id="nav-jeans">Jeans & Pants</button>
+                <button class="nav-link" id="nav-conjuntos">Conjuntos</button>
+            </nav>
+
+            <div class="header-actions">
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-nav">
+                    <i data-lucide="menu"></i>
+                </button>
+                <button class="header-search-btn" id="header-search-btn" aria-label="Buscar productos">
+                    <i data-lucide="search"></i>
+                </button>
+                <button class="cart-btn" id="open-cart-btn" aria-label="Abrir carrito">
+                    <i data-lucide="shopping-bag"></i>
+                    <span class="cart-count" id="cart-badge">0</span>
+                </button>
+            </div>
+
+            <nav class="mobile-nav" id="mobile-nav" aria-hidden="true" aria-label="Categorías de la tienda">
+                <button class="mobile-nav-link active" data-category="all">Catálogo</button>
+                <button class="mobile-nav-link" data-category="hoodies-jackets">Hoodies & Jackets</button>
+                <button class="mobile-nav-link" data-category="t-shirts">T-Shirts</button>
+                <button class="mobile-nav-link" data-category="jeans-pants">Jeans & Pants</button>
+                <button class="mobile-nav-link" data-category="conjuntos">Conjuntos</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Limited Stock Marquee -->
+    <section class="stock-marquee" aria-label="Avisos importantes de la tienda">
+        <div class="stock-marquee-track">
+            <div class="stock-marquee-group">
+                <span>🛍️ STOCK MUY LIMITADO</span>
+                <span>🔥 ÚLTIMAS UNIDADES DISPONIBLES</span>
+                <span>🚚 ENVÍOS 100% SEGUROS A TODO EL PERÚ</span>
+                <span>💳 SEPARA CON S/ 50 EN LIMA</span>
+            </div>
+            <div class="stock-marquee-group" aria-hidden="true">
+                <span>🛍️ STOCK MUY LIMITADO</span>
+                <span>🔥 ÚLTIMAS UNIDADES DISPONIBLES</span>
+                <span>🚚 ENVÍOS 100% SEGUROS A TODO EL PERÚ</span>
+                <span>💳 SEPARA CON S/ 50 EN LIMA</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Hero -->
+    <section class="hero-section" id="home-hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <span class="hero-tag">LYNX / COLECCIÓN 2026</span>
+            <h1 class="hero-title">STREETWEAR<br><span class="gradient-text">PREMIUM</span></h1>
+            <p class="hero-description">Una selección curada de streetwear Fashion Nova para destacar sin esfuerzo. Stock limitado y envíos seguros a todo el Perú.</p>
+            <a href="#catalog" class="btn btn-primary" id="hero-cta-btn">
+                <span class="hero-cta-desktop">EXPLORAR COLECCIÓN</span>
+                <span class="hero-cta-mobile">COMPRAR AHORA</span>
+                <i data-lucide="arrow-right"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- Shipping Info Strip -->
+    <section class="info-strip" id="shipping-info-strip">
+        <div class="info-item">
+            <i data-lucide="truck"></i>
+            <span><strong>Envío Shalom:</strong> Todo el Perú (2-3 días hábiles)</span>
+        </div>
+        <div class="info-item">
+            <i data-lucide="zap"></i>
+            <span><strong>Envío Motorizado:</strong> Lima Express</span>
+        </div>
+        <div class="info-item">
+            <i data-lucide="shield-check"></i>
+            <span><strong>Reserva en Lima:</strong> Separa con S/ 50 y paga el saldo al recibir</span>
+        </div>
+    </section>
+
+    <!-- Trending Carousel -->
+    <section class="trending-section" aria-labelledby="trending-title">
+        <div class="trending-header">
+            <div>
+                <span class="trending-eyebrow">SELECCIÓN LYNX</span>
+                <h2 id="trending-title">TRENDING NOW</h2>
+            </div>
+            <div class="trending-controls" aria-label="Controles del carrusel">
+                <button type="button" id="trending-prev" aria-label="Productos anteriores">
+                    <i data-lucide="arrow-left"></i>
+                </button>
+                <button type="button" id="trending-next" aria-label="Siguientes productos">
+                    <i data-lucide="arrow-right"></i>
+                </button>
+            </div>
+        </div>
+        <div class="trending-viewport" id="trending-viewport" tabindex="0" aria-label="Productos destacados">
+            <div class="trending-track" id="trending-track"></div>
+        </div>
+    </section>
+
+    <!-- LYNX Outfit Builder -->
+    <section class="outfit-builder-section" id="outfit-builder" aria-labelledby="outfit-builder-title">
+        <div class="outfit-builder-heading">
+            <div class="builder-heading-kicker">
+                <span class="trending-eyebrow">LYNX FIT LAB</span>
+                <span class="builder-beta-badge"><span aria-hidden="true"></span>MODO BETA · EN PRUEBA</span>
+            </div>
+            <h2 id="outfit-builder-title">ARMA TU LOOK</h2>
+            <p>Combina tus prendas favoritas y visualiza el outfit completo sobre nuestro maniquí LYNX.</p>
+        </div>
+
+        <div class="outfit-builder-grid">
+            <div class="builder-preview-panel">
+                <div class="builder-stage" id="outfit-preview" aria-label="Vista previa del outfit">
+                    <span class="builder-stage-label">LYNX / FIT LAB</span>
+                    <div class="builder-stage-glow"></div>
+                    <img class="builder-composite" id="builder-composite" src="assets/outfit-composites/malcom-phantom-static-default.png" alt="Outfit LYNX completo" hidden>
+                    <img class="builder-layer builder-layer-underwear" id="builder-layer-underwear" src="assets/outfit-layers/outfit-builder-boxers.png" alt="Short base del maniquí LYNX" hidden>
+                    <img class="builder-mannequin" src="assets/outfit-builder-mannequin.png" alt="Maniquí blanco LYNX">
+                    <img class="builder-layer builder-layer-bottom" id="builder-layer-bottom" src="" alt="" hidden>
+                    <img class="builder-layer builder-layer-top" id="builder-layer-top" src="" alt="" hidden>
+                    <img class="builder-layer builder-layer-outer" id="builder-layer-outer" src="" alt="" hidden>
+                </div>
+                <div class="builder-total-row">
+                    <div>
+                        <span class="builder-total-label">TOTAL DEL LOOK</span>
+                        <strong id="builder-total">S/. 0.00</strong>
+                    </div>
+                    <span class="builder-size-note">Tallas según disponibilidad</span>
+                </div>
+            </div>
+
+            <div class="builder-controls">
+                <div class="builder-choice-group">
+                    <div class="builder-choice-heading"><span>01</span><h3>HOODIE / TOP</h3></div>
+                    <div class="builder-choice-list" id="builder-top-options"></div>
+                </div>
+                <div class="builder-choice-group">
+                    <div class="builder-choice-heading"><span>02</span><h3>JACKET / CAPA</h3></div>
+                    <div class="builder-choice-list" id="builder-outer-options"></div>
+                </div>
+                <div class="builder-choice-group">
+                    <div class="builder-choice-heading"><span>03</span><h3>JEAN / PANT</h3></div>
+                    <div class="builder-choice-list" id="builder-bottom-options"></div>
+                </div>
+                <button class="btn btn-primary btn-block builder-buy-btn" id="builder-buy-btn">
+                    COMPRAR ESTE OUTFIT <i data-lucide="arrow-up-right"></i>
+                </button>
+                <p class="builder-disclaimer"><strong class="builder-beta-note">MODO BETA:</strong> vista generada con fit de referencia sobre el maniquí LYNX. Las tallas y disponibilidad se confirman por WhatsApp.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Catalog Section -->
+    <main class="catalog-section" id="catalog">
+        <div class="catalog-container">
+            <div class="catalog-header">
+                <div class="title-group">
+                    <h2 class="section-title">NUESTRAS PRENDAS</h2>
+                    <p class="section-subtitle" id="catalog-count-text">Mostrando todos los productos</p>
+                </div>
+                
+                <!-- Search & Filters -->
+                <div class="filter-controls">
+                    <div class="search-box">
+                        <i data-lucide="search"></i>
+                        <input type="text" id="search-input" placeholder="Buscar prenda...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Tags -->
+            <div class="category-tags" id="category-tags-container">
+                <button class="tag-btn active" data-category="all" id="tag-all">Todo</button>
+                <button class="tag-btn" data-category="hoodies-jackets" id="tag-hoodies">Hoodies & Jackets</button>
+                <button class="tag-btn" data-category="t-shirts" id="tag-tshirts">T-Shirts</button>
+                <button class="tag-btn" data-category="jeans-pants" id="tag-jeans">Jeans & Pants</button>
+                <button class="tag-btn" data-category="conjuntos" id="tag-conjuntos">Conjuntos</button>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="products-grid" id="products-grid-container">
+                <!-- Products will be dynamically generated by JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Preguntas frecuentes -->
+    <section class="faq-section" id="preguntas-frecuentes" aria-labelledby="faq-title">
+        <div class="faq-container">
+            <div class="faq-heading">
+                <span class="faq-kicker">COMPRA CON CONFIANZA</span>
+                <h2 id="faq-title">PREGUNTAS FRECUENTES</h2>
+                <p>Todo lo que necesitas saber antes de elegir tu próximo fit.</p>
+            </div>
+
+            <div class="faq-list">
+                <details class="faq-item">
+                    <summary>¿Cómo realizo una compra?</summary>
+                    <p>Agrega tus prendas al carrito, completa tus datos y envía el pedido por WhatsApp. Confirmaremos contigo las tallas, el stock y la entrega antes de solicitar cualquier pago.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>¿Realizan entregas en Lima?</summary>
+                    <p>Sí. En Lima trabajamos con motorizado. Puedes separar tu pedido con S/. 50 y pagar el saldo al momento de recibirlo.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>¿Hacen envíos a provincias?</summary>
+                    <p>Sí. Enviamos mediante Shalom a todo el Perú. El tiempo estimado es de 2 a 3 días hábiles y el flete se paga al recoger el pedido en la agencia.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>¿Cómo funciona la reserva de una prenda?</summary>
+                    <p>Para entregas en Lima puedes reservar el stock con S/. 50. El saldo restante se paga en efectivo o Yape cuando llegue el motorizado.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>¿Cómo confirmo mi talla?</summary>
+                    <p>Las tallas disponibles aparecen en cada producto. Si tienes dudas sobre el fit, escríbenos por WhatsApp antes de confirmar y te ayudaremos a elegir.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>¿Qué medios de pago aceptan?</summary>
+                    <p>Aceptamos Yape y transferencias mediante BCP o BBVA. Las cuentas oficiales se comparten únicamente durante la confirmación del pedido por WhatsApp.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <h3>LYNX</h3>
+                <p>Streetwear de alta gama fabricado con algodón premium.</p>
+            </div>
+            <div class="footer-info">
+                <h4>ENVÍOS Y ENTREGAS</h4>
+                <ul>
+                    <li><i data-lucide="check"></i> Shalom (Provincia): Recoge en agencia local (2-3 días)</li>
+                    <li><i data-lucide="check"></i> Motorizado (Lima): Separa con S/. 50 y liquida al recibir</li>
+                    <li><i data-lucide="phone"></i> Soporte WhatsApp: +51 962 210 278</li>
+                </ul>
+            </div>
+            <div class="footer-social">
+                <h4>CONECTA CON LYNX</h4>
+                <p>Stock, tallas y pedidos con atención directa.</p>
+                <div class="social-links">
+                    <a href="https://www.instagram.com/boutique_lynx/" target="_blank" rel="noopener noreferrer" aria-label="Seguir a LYNX en Instagram">
+                        <i data-lucide="instagram"></i>
+                        <span>Instagram</span>
+                    </a>
+                    <a href="https://www.tiktok.com/@boutique_lynx" target="_blank" rel="noopener noreferrer" aria-label="Seguir a LYNX en TikTok">
+                        <i data-lucide="music-2"></i>
+                        <span>TikTok</span>
+                    </a>
+                    <a href="https://wa.me/51962210278" target="_blank" rel="noopener noreferrer" aria-label="Contactar a LYNX por WhatsApp">
+                        <i data-lucide="message-circle"></i>
+                        <span>WhatsApp</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 LYNX. Todos los derechos reservados. Desarrollado con seguridad.</p>
+        </div>
+    </footer>
+
+    <nav class="social-fab-group" aria-label="Redes sociales de LYNX">
+        <a class="social-fab social-fab-instagram" href="https://www.instagram.com/boutique_lynx/" target="_blank" rel="noopener noreferrer" aria-label="Seguir a LYNX en Instagram">
+            <i data-lucide="instagram"></i>
+            <span>Instagram</span>
+        </a>
+        <a class="social-fab social-fab-tiktok" href="https://www.tiktok.com/@boutique_lynx" target="_blank" rel="noopener noreferrer" aria-label="Seguir a LYNX en TikTok">
+            <i data-lucide="music-2"></i>
+            <span>TikTok</span>
+        </a>
+        <a class="social-fab social-fab-whatsapp" href="https://wa.me/51962210278" target="_blank" rel="noopener noreferrer" aria-label="Escribir a LYNX por WhatsApp">
+            <i data-lucide="message-circle"></i>
+            <span>WhatsApp</span>
+        </a>
+    </nav>
+
+    <!-- Product Details Modal (Overlay) -->
+    <div class="modal-overlay" id="product-modal" role="dialog" aria-hidden="true">
+        <div class="modal-content product-detail-card">
+            <button class="close-modal-btn" id="close-product-modal" aria-label="Cerrar detalles">
+                <i data-lucide="x"></i>
+            </button>
+            <div class="product-detail-layout">
+                <div class="product-detail-gallery">
+                    <img id="modal-product-img" src="" alt="Prenda de ropa">
+                </div>
+                <div class="product-detail-info">
+                    <span class="detail-badge" id="modal-product-badge">NUEVO</span>
+                    <h3 class="detail-title" id="modal-product-title">Nombre del Producto</h3>
+                    <div class="detail-price-row">
+                        <span class="detail-price" id="modal-product-price">S/. 0.00</span>
+                    </div>
+                    <p class="detail-description" id="modal-product-desc">Descripción del producto aquí.</p>
+
+                    <aside class="fit-recommendation" id="modal-fit-recommendation" hidden>
+                        <i data-lucide="ruler" aria-hidden="true"></i>
+                        <div>
+                            <strong>Recomendación de calce</strong>
+                            <p>Los jeans Fashion Nova suelen tener un fit ajustado. Para lograr un calce más cómodo, considera elegir 1 o 2 tallas por encima de tu talla habitual.</p>
+                            <p class="fit-example"><strong>Ejemplo:</strong> si normalmente usas talla 32, recomendamos elegir talla 36.</p>
+                        </div>
+                    </aside>
+                    
+                    <!-- Size Selector -->
+                    <div class="detail-options">
+                        <span class="option-label">Selecciona tu Talla:</span>
+                        <div class="size-options-container" id="modal-size-container">
+                            <button class="size-btn" data-size="S">S</button>
+                            <button class="size-btn active" data-size="M">M</button>
+                            <button class="size-btn" data-size="L">L</button>
+                            <button class="size-btn" data-size="XL">XL</button>
+                        </div>
+                    </div>
+
+                    <!-- Quantity Selector -->
+                    <div class="detail-quantity">
+                        <span class="option-label">Cantidad:</span>
+                        <div class="qty-selector">
+                            <button type="button" class="qty-btn" id="modal-qty-minus"><i data-lucide="minus"></i></button>
+                            <input type="number" id="modal-qty-input" value="1" min="1" readonly>
+                            <button type="button" class="qty-btn" id="modal-qty-plus"><i data-lucide="plus"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Add to Cart CTA -->
+                    <button class="btn btn-primary btn-block" id="modal-add-to-cart-btn">
+                        <i data-lucide="shopping-bag"></i> AGREGAR AL CARRITO
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Slide Drawer -->
+    <div class="drawer-overlay" id="cart-drawer" role="dialog" aria-hidden="true">
+        <div class="drawer-content">
+            <div class="drawer-header">
+                <h3 class="drawer-title"><i data-lucide="shopping-bag"></i> TU CARRITO</h3>
+                <button class="close-drawer-btn" id="close-cart-btn" aria-label="Cerrar carrito">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            
+            <!-- Cart Items Container -->
+            <div class="drawer-body" id="cart-items-container">
+                <!-- Cart items will be loaded dynamically -->
+                <div class="empty-cart-state">
+                    <i data-lucide="shopping-cart"></i>
+                    <p>Tu carrito está vacío</p>
+                    <button class="btn btn-secondary" id="empty-cart-explore-btn">Explorar Drop</button>
+                </div>
+            </div>
+
+            <!-- Cart Footer -->
+            <div class="drawer-footer" id="cart-summary-footer">
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span class="summary-price" id="cart-subtotal">S/. 0.00</span>
+                </div>
+                <p class="summary-disclaimer">Los costos de envío y reservas se calculan al finalizar pedido.</p>
+                <button class="btn btn-primary btn-block" id="go-to-checkout-btn">
+                    PROCEDER AL PEDIDO <i data-lucide="arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Slide Drawer -->
+    <div class="drawer-overlay" id="checkout-drawer" role="dialog" aria-hidden="true">
+        <div class="drawer-content">
+            <div class="drawer-header">
+                <button class="back-drawer-btn" id="back-to-cart-btn" aria-label="Regresar al carrito">
+                    <i data-lucide="arrow-left"></i>
+                </button>
+                <h3 class="drawer-title">DATOS DE ENTREGA</h3>
+                <button class="close-drawer-btn" id="close-checkout-btn" aria-label="Cerrar">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            
+            <div class="drawer-body">
+                <form id="checkout-form" class="checkout-form-container">
+                    <div class="form-group">
+                        <label for="checkout-name">Nombre y Apellido *</label>
+                        <input type="text" id="checkout-name" required placeholder="Ejemplo: Sebastian Torres">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="checkout-phone">Número de WhatsApp *</label>
+                        <input type="tel" id="checkout-phone" required placeholder="Ejemplo: 987654321">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="checkout-city">Ciudad / Departamento *</label>
+                        <input type="text" id="checkout-city" required placeholder="Ejemplo: Lima Metropolitana, Cusco, Arequipa">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="checkout-address">Dirección de Entrega *</label>
+                        <input type="text" id="checkout-address" required placeholder="Ejemplo: Av. Larco 123 Dpto 402 / Referencia">
+                    </div>
+
+                    <!-- Shipping Method Selection -->
+                    <div class="form-group">
+                        <label>Método de Envío *</label>
+                        <div class="shipping-options-grid">
+                            <label class="shipping-option-card active" id="shipping-shalom-label">
+                                <input type="radio" name="shipping-method" value="shalom" checked>
+                                <div class="option-details">
+                                    <span class="option-title">Shalom (Provincias)</span>
+                                    <span class="option-price">S/. 0.00 (Flete Contra Entrega)</span>
+                                    <span class="option-time">Llega de 2 a 3 días hábiles a la agencia de tu ciudad.</span>
+                                </div>
+                            </label>
+
+                            <label class="shipping-option-card" id="shipping-lima-label">
+                                <input type="radio" name="shipping-method" value="lima">
+                                <div class="option-details">
+                                    <span class="option-title">Motorizado Express (Lima)</span>
+                                    <span class="option-price">+ S/. 15.00</span>
+                                    <span class="option-time">Entrega directa a tu puerta en 24-48 horas.</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Payment Condition Reservation for Lima -->
+                    <div class="form-group hidden" id="lima-payment-condition-box">
+                        <div class="reservation-checkbox-wrapper">
+                            <input type="checkbox" id="lima-reserve-checkbox" checked>
+                            <label for="lima-reserve-checkbox">
+                                <strong>Separar mi pedido con S/. 50.00</strong>
+                                <span class="checkbox-desc">Pagas 50 soles por transferencia bancaria (BCP/BBVA/Yape) para reservar tu stock y el saldo restante en efectivo o Yape cuando el motorizado llegue.</span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Order Totals Box -->
+                <div class="totals-breakdown-box">
+                    <h4 class="box-title">Resumen de Cuenta</h4>
+                    <div class="total-row">
+                        <span>Prendas:</span>
+                        <span id="checkout-subtotal">S/. 0.00</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Costo de Envío:</span>
+                        <span id="checkout-shipping">S/. 0.00</span>
+                    </div>
+                    <hr class="totals-divider">
+                    
+                    <div class="total-row main-total">
+                        <span>Total de Compra:</span>
+                        <span id="checkout-total">S/. 0.00</span>
+                    </div>
+
+                    <!-- Dynamic payment status box -->
+                    <div class="dynamic-payment-status" id="dynamic-payment-info">
+                        <div class="status-alert">
+                            <i data-lucide="info"></i>
+                            <span id="payment-explanation-text">Envío a provincia vía Shalom. Pagas el costo del flete directamente en la agencia al recoger tu paquete.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checkout Footer CTA -->
+            <div class="drawer-footer">
+                <button type="button" class="btn btn-whatsapp btn-block" id="submit-order-btn">
+                    <i data-lucide="message-square"></i> ENVIAR PEDIDO POR WHATSAPP
+                </button>
+                <p class="whatsapp-security-notice">Al dar clic, te redirigiremos a WhatsApp para confirmar los datos y brindarte las cuentas de depósito.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js?v=20260716-admin-v1"></script>
+    <script src="app.js?v=20260716-supabase-admin-v1"></script>
+</body>
+</html>
