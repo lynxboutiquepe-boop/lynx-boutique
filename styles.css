@@ -173,7 +173,7 @@ button, input, select, textarea {
 }
 
 .logo-img {
-    height: 24px;
+    height: 28px;
     display: block;
     filter: invert(1); /* El PNG es negro sobre transparencia. */
 }
@@ -1994,7 +1994,7 @@ html.is-android .stock-marquee {
     }
 
     .logo-img {
-        height: 18px;
+        height: 22px;
         max-width: 118px;
     }
 
@@ -4373,7 +4373,7 @@ h6 {
     }
 
     .logo-img {
-        height: 18px;
+        height: 22px;
         max-width: 118px;
     }
 
@@ -4550,5 +4550,85 @@ h6 {
 
     .trending-card-price {
         font-size: 0.88rem;
+    }
+}
+
+/* Infinite carousel, brand icons and direct contact refinements */
+.trending-viewport {
+    cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.trending-viewport.is-dragging {
+    cursor: grabbing;
+}
+
+.trending-viewport.is-dragging .trending-track {
+    pointer-events: none;
+}
+
+.trending-viewport img {
+    -webkit-user-drag: none;
+    user-select: none;
+}
+
+.trending-viewport:focus-visible {
+    outline: 3px solid rgba(var(--accent-rgb), 0.3);
+    outline-offset: 5px;
+}
+
+.social-brand-icon {
+    display: block;
+    flex: 0 0 auto;
+    object-fit: contain;
+}
+
+.social-links .social-brand-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.social-fab .social-brand-icon {
+    width: 25px;
+    height: 25px;
+    padding: 3px;
+    border-radius: 7px;
+    background: #ffffff;
+}
+
+.footer-whatsapp-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: inherit;
+    transition: color 0.2s ease;
+}
+
+.footer-whatsapp-link:hover,
+.footer-whatsapp-link:focus-visible {
+    color: #25d366;
+}
+
+@media (max-width: 768px) {
+    .trending-header {
+        justify-content: space-between;
+        gap: 16px;
+        text-align: left;
+    }
+
+    .trending-controls {
+        display: flex;
+        flex: 0 0 auto;
+    }
+
+    .trending-header h2 {
+        font-size: clamp(1.65rem, 8vw, 2.15rem);
+    }
+
+    .logo-img {
+        height: 22px;
+        max-width: 132px;
     }
 }

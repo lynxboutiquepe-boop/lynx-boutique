@@ -1108,11 +1108,11 @@ function renderTrendingProducts() {
         </article>
     `).join('');
 
-    // Tres copias permiten mantener siempre una pista completa a cada lado.
-    // La copia central es la accesible; las laterales son solo continuidad visual.
-    trendingTrack.innerHTML = [0, 1, 2].map(groupIndex => `
+    // Cinco copias dejan margen suficiente para arrastres y gestos rápidos.
+    // La copia central es la accesible; las demás son continuidad visual.
+    trendingTrack.innerHTML = [0, 1, 2, 3, 4].map(groupIndex => `
         <div class="trending-loop-group" data-loop-group="${groupIndex}">
-            ${renderGroup(groupIndex !== 1)}
+            ${renderGroup(groupIndex !== 2)}
         </div>
     `).join('');
 
@@ -1269,18 +1269,32 @@ function setupTrendingCarousel() {
     if (!trendingViewport || !trendingTrack || !trendingPrevBtn || !trendingNextBtn) return;
 
     let groupWidth = 0;
-    let virtualScrollLeft = 0;
     let animationFrame = 0;
     let lastFrameTime = 0;
-    let isDragging = false;
-    let pauseUntil = 0;
+    let resumeAt = 0;
+    let pointerId = null;
+    let dragStartX = 0;
+    let dragStartScroll = 0;
+    let dragDistance = 0;
+    let suppressClick = false;
     const speed = 0.085; // 85 px por segundo.
 
     const normalizePosition = value => {
         if (!groupWidth) return value;
-        while (value >= groupWidth * 2) value -= groupWidth;
-        while (value < groupWidth) value += groupWidth;
+        while (value >= groupWidth * 2.5) value -= groupWidth;
+        while (value < groupWidth * 1.5) value += groupWidth;
         return value;
+    };
+
+    const normalizeScroll = () => {
+        const normalized = normalizePosition(trendingViewport.scrollLeft);
+        if (Math.abs(normalized - trendingViewport.scrollLeft) > 0.5) {
+            trendingViewport.scrollLeft = normalized;
+        }
+    };
+
+    const pauseAutoScroll = (milliseconds = 1400) => {
+        resumeAt = Math.max(resumeAt, performance.now() + milliseconds);
     };
 
     const measureAndCenter = () => {
@@ -1288,25 +1302,25 @@ function setupTrendingCarousel() {
         if (!group) return;
 
         const previousWidth = groupWidth;
-        const previousProgress = previousWidth
-            ? (normalizePosition(virtualScrollLeft) - previousWidth) / previousWidth
-            : 0;
+        const previousProgress = previousWidth ? (trendingViewport.scrollLeft % previousWidth) / previousWidth : 0;
 
         groupWidth = group.getBoundingClientRect().width;
         if (!groupWidth) return;
 
-        virtualScrollLeft = groupWidth * (1 + Math.max(0, Math.min(0.999, previousProgress)));
-        trendingViewport.scrollLeft = virtualScrollLeft;
+        trendingViewport.scrollLeft = groupWidth * (2 + Math.max(0, Math.min(0.999, previousProgress)));
     };
 
     const getScrollStep = () => {
         const card = trendingTrack.querySelector('.trending-card');
-        return card ? card.getBoundingClientRect().width + 24 : trendingViewport.clientWidth * 0.8;
+        const group = trendingTrack.querySelector('.trending-loop-group');
+        const gap = group ? parseFloat(getComputedStyle(group).columnGap) || 0 : 0;
+        return card ? card.getBoundingClientRect().width + gap : trendingViewport.clientWidth * 0.8;
     };
 
     const moveCarousel = direction => {
-        pauseUntil = performance.now() + 500;
+        pauseAutoScroll(1600);
         trendingViewport.scrollBy({ left: getScrollStep() * direction, behavior: 'smooth' });
+        window.setTimeout(normalizeScroll, 700);
     };
 
     const autoScroll = timestamp => {
@@ -1314,15 +1328,9 @@ function setupTrendingCarousel() {
         const elapsed = Math.min(timestamp - lastFrameTime, 50);
         lastFrameTime = timestamp;
 
-        if (groupWidth) {
-            // Velocidad estable en cualquier pantalla; el bucle se normaliza
-            // silenciosamente sobre una copia idéntica.
-            if (isDragging || timestamp < pauseUntil) {
-                virtualScrollLeft = trendingViewport.scrollLeft;
-            } else {
-                virtualScrollLeft = normalizePosition(virtualScrollLeft + elapsed * speed);
-                trendingViewport.scrollLeft = virtualScrollLeft;
-            }
+        if (groupWidth && pointerId === null && timestamp >= resumeAt) {
+            trendingViewport.scrollLeft += elapsed * speed;
+            normalizeScroll();
         }
         animationFrame = requestAnimationFrame(autoScroll);
     };
@@ -1335,19 +1343,52 @@ function setupTrendingCarousel() {
         if (event.key === 'ArrowRight') moveCarousel(1);
     });
 
-    const endDragging = () => {
-        if (!isDragging) return;
-        isDragging = false;
-        virtualScrollLeft = normalizePosition(trendingViewport.scrollLeft);
-        trendingViewport.scrollLeft = virtualScrollLeft;
+    const endDragging = event => {
+        if (pointerId === null || (event?.pointerId != null && event.pointerId !== pointerId)) return;
+        suppressClick = dragDistance > 6;
+        if (event?.pointerId != null && trendingViewport.hasPointerCapture?.(event.pointerId)) {
+            trendingViewport.releasePointerCapture(event.pointerId);
+        }
+        pointerId = null;
+        trendingViewport.classList.remove('is-dragging');
+        normalizeScroll();
+        pauseAutoScroll(1200);
         lastFrameTime = performance.now();
+        window.setTimeout(() => { suppressClick = false; }, 250);
     };
 
-    trendingViewport.addEventListener('pointerdown', () => { isDragging = true; }, { passive: true });
+    trendingViewport.addEventListener('pointerdown', event => {
+        if (event.pointerType === 'mouse' && event.button !== 0) return;
+        if (pointerId !== null) return;
+        pointerId = event.pointerId;
+        dragStartX = event.clientX;
+        dragStartScroll = trendingViewport.scrollLeft;
+        dragDistance = 0;
+        pauseAutoScroll(2000);
+        trendingViewport.classList.add('is-dragging');
+        trendingViewport.setPointerCapture?.(event.pointerId);
+    });
+    trendingViewport.addEventListener('pointermove', event => {
+        if (event.pointerId !== pointerId) return;
+        const delta = event.clientX - dragStartX;
+        dragDistance = Math.max(dragDistance, Math.abs(delta));
+        if (dragDistance > 3 && event.cancelable) event.preventDefault();
+        trendingViewport.scrollLeft = dragStartScroll - delta;
+    }, { passive: false });
     trendingViewport.addEventListener('pointerup', endDragging, { passive: true });
     trendingViewport.addEventListener('pointercancel', endDragging, { passive: true });
-    // Si el dedo o mouse termina el gesto fuera del carrusel, reanudar igual.
     window.addEventListener('pointerup', endDragging, { passive: true });
+    trendingViewport.addEventListener('click', event => {
+        if (!suppressClick) return;
+        event.preventDefault();
+        event.stopPropagation();
+    }, true);
+    trendingViewport.addEventListener('wheel', () => {
+        pauseAutoScroll(1200);
+        window.setTimeout(normalizeScroll, 180);
+    }, { passive: true });
+    trendingViewport.addEventListener('focusin', () => pauseAutoScroll(4000));
+    trendingViewport.addEventListener('focusout', () => pauseAutoScroll(700));
 
     let resizeObserver = null;
     if ('ResizeObserver' in window) {
