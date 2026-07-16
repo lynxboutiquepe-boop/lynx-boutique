@@ -280,7 +280,8 @@ button, input, select, textarea {
 .stock-marquee {
     position: relative;
     z-index: 90;
-    margin-top: 65px;
+    /* El header de escritorio mide 82 px (42 px de contenido + 40 px de padding). */
+    margin-top: 82px;
     overflow: hidden;
     background: #050505;
     color: #ffffff;
