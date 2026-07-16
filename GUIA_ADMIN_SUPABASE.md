@@ -154,13 +154,17 @@ Usa **Movimiento manual** para publicidad, empaques, transporte, compra de merca
 
 - Cualquier visitante puede ver el catálogo y añadir prendas al carrito.
 - Para pasar al pedido o solicitar un outfit por WhatsApp debe crear una cuenta o iniciar sesión.
+- El registro comienza con el correo y exige confirmarlo desde el enlace que recibe el cliente.
+- Si el mensaje no aparece, el cliente puede pulsar **Reenviar correo de verificación** y revisar Spam o Promociones.
 - El registro guarda nombre, correo y número de WhatsApp.
 - La casilla para recibir novedades y descuentos es opcional; no se exige para comprar.
 - Cada cliente puede cambiar ese permiso desde **Mi cuenta**.
 
-En el panel abre **Clientes** para buscar registros, revisar cuántos aceptaron novedades y pulsar **Exportar suscritos**. El CSV incluye únicamente a quienes dieron permiso y puede utilizarse en una plataforma de correo autorizada.
+En el panel abre **Clientes** para buscar registros y distinguir entre correo **Verificado** o **Pendiente**. El contador y el archivo de **Exportar suscritos** incluyen únicamente a quienes verificaron el correo y aceptaron recibir promociones. Una persona pendiente o sin permiso nunca entra en esa lista.
 
-Supabase administra las cuentas y los correos de confirmación o recuperación. Los envíos masivos de campañas todavía requieren conectar un proveedor especializado como Brevo o Resend. Nunca se debe colocar la llave secreta de ese proveedor dentro de `app.js` o de otro archivo público de la web.
+Supabase administra las cuentas y los correos de confirmación o recuperación. Con el proveedor gratuito predeterminado, este proyecto tiene actualmente un límite de **2 correos de autenticación por hora**; después de varias pruebas el siguiente correo puede demorarse hasta que se renueve ese límite. Para una tienda en producción se debe conectar un SMTP propio, por ejemplo Brevo o Resend, desde **Supabase → Authentication → Email → SMTP Settings**.
+
+Los correos de autenticación sirven para confirmar cuentas o recuperar contraseñas, no para campañas comerciales. Los envíos masivos de promociones todavía requieren configurar un proveedor especializado y realizar el envío únicamente a la lista verificada y autorizada. Nunca se debe colocar la llave secreta de ese proveedor dentro de `app.js` o de otro archivo público de la web.
 
 ## 10. Cambiar o recuperar la contraseña
 

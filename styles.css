@@ -2972,6 +2972,9 @@ html.is-android .stock-marquee {
 .account-form input:not([type="checkbox"]) { width: 100%; min-height: 48px; padding: 11px 13px; border: 1px solid #e1e2e8; border-radius: 11px; outline: 0; background: #fff; color: #17181d; }
 .account-form input:focus { border-color: #5f59f7; box-shadow: 0 0 0 3px rgba(95, 89, 247, .12); }
 .account-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+.account-verification-note { display: flex; align-items: flex-start; gap: 11px; padding: 13px; border: 1px solid #dcdcff; border-radius: 11px; background: #f3f2ff; color: #555864; font-size: .73rem; line-height: 1.45; }
+.account-verification-note svg { width: 20px; height: 20px; flex: 0 0 auto; color: #5f59f7; }
+.account-verification-note strong { color: #34307e; }
 .account-consent { display: flex; align-items: flex-start; gap: 11px; padding: 13px; border-radius: 11px; background: #f7f7fa; color: #666975; font-size: .72rem; line-height: 1.45; cursor: pointer; }
 .account-consent input { width: 17px; height: 17px; margin-top: 2px; flex: 0 0 auto; accent-color: #5f59f7; }
 .account-consent strong { color: #2d2f37; }
@@ -2979,6 +2982,7 @@ html.is-android .stock-marquee {
 .account-message.success { color: #168c55; }
 .account-text-btn { justify-self: center; cursor: pointer; color: #6f727d; font-size: .73rem; text-decoration: underline; text-underline-offset: 3px; }
 .account-secondary-btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #e1e2e8; border-radius: 11px; cursor: pointer; color: #4f515b; font-family: var(--font-title); font-size: .74rem; font-weight: 800; }
+.account-secondary-btn[hidden] { display: none !important; }
 .account-secondary-btn svg { width: 17px; }
 
 @media (max-width: 768px) {

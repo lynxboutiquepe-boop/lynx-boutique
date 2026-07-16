@@ -197,6 +197,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
 .customer-identity { display: grid; gap: 4px; min-width: 220px; }
 .customer-identity strong { font-size: .78rem; }
 .customer-identity span { color: var(--muted); font-size: .67rem; }
+.customer-identity .verification-status { color: var(--warning); font-weight: 800; }
+.customer-identity .verification-status.verified { color: var(--success); }
 .consent-pill { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 999px; background: var(--surface-soft); color: var(--muted); font-size: .62rem; font-weight: 800; }
 .consent-pill.yes { background: var(--success-soft); color: var(--success); }
 .customer-privacy-note { display: flex; align-items: center; gap: 8px; margin-top: 14px; color: var(--muted); font-size: .7rem; line-height: 1.5; }

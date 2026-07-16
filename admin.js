@@ -186,7 +186,7 @@ function renderStats() {
     $('#stat-expense').textContent = money(expense);
     $('#stat-balance').textContent = money(income - expense);
     $('#stat-customers').textContent = state.customers.length;
-    $('#stat-subscribers').textContent = state.customers.filter(customer => customer.marketing_opt_in).length;
+    $('#stat-subscribers').textContent = state.customers.filter(customer => customer.email_verified && customer.marketing_opt_in).length;
 
     const recent = state.finances.slice(0, 5);
     $('#recent-finance-list').innerHTML = recent.length ? recent.map(entry => `
@@ -282,8 +282,8 @@ function filteredCustomers() {
         const haystack = `${customer.full_name || ''} ${customer.email || ''} ${customer.phone || ''}`.toLowerCase();
         const matchesQuery = !query || haystack.includes(query);
         const matchesConsent = filter === 'all'
-            || (filter === 'subscribed' && customer.marketing_opt_in)
-            || (filter === 'not-subscribed' && !customer.marketing_opt_in);
+            || (filter === 'subscribed' && customer.email_verified && customer.marketing_opt_in)
+            || (filter === 'not-subscribed' && (!customer.email_verified || !customer.marketing_opt_in));
         return matchesQuery && matchesConsent;
     });
 }
@@ -292,23 +292,24 @@ function renderCustomers() {
     const customers = filteredCustomers();
     $('#customers-tbody').innerHTML = customers.length ? customers.map(customer => `
         <tr>
-            <td><div class="customer-identity"><strong>${escapeHtml(customer.full_name)}</strong><span>${escapeHtml(customer.email)}</span></div></td>
+            <td><div class="customer-identity"><strong>${escapeHtml(customer.full_name)}</strong><span>Cliente LYNX</span></div></td>
+            <td><div class="customer-identity"><strong>${escapeHtml(customer.email)}</strong><span class="verification-status ${customer.email_verified ? 'verified' : ''}">${customer.email_verified ? '✓ Verificado' : 'Pendiente de verificar'}</span></div></td>
             <td>${escapeHtml(customer.phone)}</td>
             <td><span class="consent-pill ${customer.marketing_opt_in ? 'yes' : ''}">${customer.marketing_opt_in ? 'SÍ, ACEPTÓ' : 'NO'}</span></td>
             <td>${localDateTime(customer.created_at)}</td>
         </tr>
-    `).join('') : '<tr><td class="empty-state" colspan="4">No se encontraron clientes.</td></tr>';
+    `).join('') : '<tr><td class="empty-state" colspan="5">No se encontraron clientes.</td></tr>';
 
     $('#mobile-customer-list').innerHTML = customers.length ? customers.map(customer => `
         <article class="mobile-customer-card">
-            <header><div class="customer-identity"><strong>${escapeHtml(customer.full_name)}</strong><span>${escapeHtml(customer.email)}</span></div><span class="consent-pill ${customer.marketing_opt_in ? 'yes' : ''}">${customer.marketing_opt_in ? 'SÍ' : 'NO'}</span></header>
+            <header><div class="customer-identity"><strong>${escapeHtml(customer.full_name)}</strong><span>${escapeHtml(customer.email)}</span><span class="verification-status ${customer.email_verified ? 'verified' : ''}">${customer.email_verified ? '✓ Correo verificado' : 'Correo pendiente'}</span></div><span class="consent-pill ${customer.marketing_opt_in ? 'yes' : ''}">${customer.marketing_opt_in ? 'SÍ' : 'NO'}</span></header>
             <p>${escapeHtml(customer.phone)} · Registrado ${localDateTime(customer.created_at)}</p>
         </article>
     `).join('') : '<p class="empty-state">No se encontraron clientes.</p>';
 }
 
 function exportSubscribedCustomers() {
-    const customers = state.customers.filter(customer => customer.marketing_opt_in);
+    const customers = state.customers.filter(customer => customer.email_verified && customer.marketing_opt_in);
     if (!customers.length) {
         showToast('Todavía no hay clientes suscritos para exportar.', 'error');
         return;

@@ -13,7 +13,7 @@
     <!-- Lucide Icons (CDN) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260716-mobile-home">
+    <link rel="stylesheet" href="styles.css?v=20260716-email-register-v1">
 </head>
 <body>
 
@@ -516,8 +516,8 @@
             <div id="account-auth-view">
                 <div class="account-heading">
                     <span class="account-eyebrow">MI CUENTA LYNX</span>
-                    <h2>Compra con tu cuenta</h2>
-                    <p>Puedes mirar todo el catálogo sin registrarte. Para enviar un pedido, inicia sesión o crea tu cuenta.</p>
+                    <h2 id="account-auth-title">Inicia sesión</h2>
+                    <p id="account-auth-intro">Usa tu correo verificado para continuar con tu pedido.</p>
                 </div>
                 <div class="account-tabs" role="tablist" aria-label="Acceso de clientes">
                     <button class="account-tab active" id="show-login-tab" type="button">Iniciar sesión</button>
@@ -531,9 +531,10 @@
                     <button class="account-text-btn" id="customer-reset-password" type="button">Olvidé mi contraseña</button>
                 </form>
                 <form class="account-form" id="customer-register-form" hidden>
+                    <div class="account-verification-note"><i data-lucide="mail-check"></i><span><strong>Registro con correo verificado.</strong> Te enviaremos un enlace para activar tu cuenta antes de hacer pedidos.</span></div>
+                    <label><span>Correo electrónico</span><input id="customer-register-email" type="email" autocomplete="email" required placeholder="tu@correo.com"></label>
                     <label><span>Nombre y apellido</span><input id="customer-register-name" type="text" autocomplete="name" required placeholder="Tu nombre completo"></label>
                     <label><span>WhatsApp</span><input id="customer-register-phone" type="tel" autocomplete="tel" required placeholder="987654321"></label>
-                    <label><span>Correo</span><input id="customer-register-email" type="email" autocomplete="email" required placeholder="tu@correo.com"></label>
                     <div class="account-form-grid">
                         <label><span>Contraseña</span><input id="customer-register-password" type="password" autocomplete="new-password" minlength="8" required placeholder="Mínimo 8 caracteres"></label>
                         <label><span>Confirmar</span><input id="customer-register-confirm" type="password" autocomplete="new-password" minlength="8" required placeholder="Repite la contraseña"></label>
@@ -541,6 +542,7 @@
                     <label class="account-consent"><input id="customer-register-marketing" type="checkbox"><span><strong>Quiero recibir novedades y descuentos.</strong> Es opcional y puedes cambiarlo luego.</span></label>
                     <p class="account-message" id="customer-register-message" aria-live="polite"></p>
                     <button class="btn btn-primary btn-block" type="submit">CREAR MI CUENTA</button>
+                    <button class="account-secondary-btn" id="customer-resend-verification" type="button" hidden><i data-lucide="send"></i> Reenviar correo de verificación</button>
                 </form>
             </div>
             <div id="account-profile-view" hidden>
@@ -577,6 +579,6 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js?v=20260716-admin-v1"></script>
-    <script src="app.js?v=20260716-customer-accounts-v1"></script>
+    <script src="app.js?v=20260716-email-register-v1"></script>
 </body>
 </html>

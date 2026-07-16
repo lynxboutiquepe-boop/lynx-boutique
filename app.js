@@ -670,6 +670,7 @@ let catalogScrollFrame = null;
 let customerUser = null;
 let customerProfile = null;
 let pendingCustomerAction = null;
+let pendingVerificationEmail = '';
 const customerSupabase = window.getLynxSupabase?.() || null;
 
 // 3. SELECCIÓN DE ELEMENTOS DEL DOM
@@ -816,6 +817,10 @@ function prefillCheckoutFromProfile() {
 
 function showAccountMode(mode = 'login') {
     const login = mode === 'login';
+    document.getElementById('account-auth-title').textContent = login ? 'Inicia sesión' : 'Regístrate con tu correo';
+    document.getElementById('account-auth-intro').textContent = login
+        ? 'Usa tu correo verificado para continuar con tu pedido.'
+        : 'Crea tu cuenta gratis. Te enviaremos un enlace para verificar el correo antes de comprar.';
     document.getElementById('show-login-tab')?.classList.toggle('active', login);
     document.getElementById('show-register-tab')?.classList.toggle('active', !login);
     document.getElementById('customer-login-form').hidden = !login;
@@ -867,7 +872,7 @@ async function requireCustomerAccount(action) {
     }
     if (!customerUser) {
         pendingCustomerAction = action;
-        openAccountDialog('login', 'Inicia sesión o regístrate para enviar tu pedido. Tu carrito seguirá guardado.');
+        openAccountDialog('register', 'Crea tu cuenta con un correo real y verifícalo para enviar el pedido. Tu carrito seguirá guardado.');
         return false;
     }
     if (!customerProfile) await loadCustomerProfile();
@@ -1543,8 +1548,9 @@ function setupCustomerAccountEvents() {
             });
             if (error) throw error;
             if (!data.session) {
-                event.currentTarget.reset();
-                setAccountMessage('customer-register-message', 'Cuenta creada. Revisa tu correo y confirma el registro; después podrás iniciar sesión y enviar tu pedido.', true);
+                pendingVerificationEmail = email;
+                document.getElementById('customer-resend-verification').hidden = false;
+                setAccountMessage('customer-register-message', `Te enviamos un enlace de verificación a ${email}. Abre ese correo para activar tu cuenta; después inicia sesión y envía tu pedido.`, true);
                 return;
             }
             customerUser = data.user;
@@ -1602,6 +1608,29 @@ function setupCustomerAccountEvents() {
         }
         const { error } = await customerSupabase.auth.resetPasswordForEmail(email, { redirectTo: `${location.origin}/` });
         setAccountMessage('customer-login-message', error ? customerErrorMessage(error) : 'Te enviamos un enlace para recuperar tu contraseña.', !error);
+    });
+
+    document.getElementById('customer-resend-verification')?.addEventListener('click', async event => {
+        const email = pendingVerificationEmail || document.getElementById('customer-register-email').value.trim();
+        if (!email) {
+            setAccountMessage('customer-register-message', 'Escribe el correo que deseas verificar.');
+            return;
+        }
+        setCustomerButtonLoading(event.currentTarget, true, 'REENVIANDO...');
+        try {
+            const { error } = await customerSupabase.auth.resend({
+                type: 'signup',
+                email,
+                options: { emailRedirectTo: `${location.origin}/` }
+            });
+            if (error) throw error;
+            setAccountMessage('customer-register-message', `Correo reenviado a ${email}. Revisa también la carpeta de spam o promociones.`, true);
+        } catch (error) {
+            setAccountMessage('customer-register-message', customerErrorMessage(error));
+        } finally {
+            setCustomerButtonLoading(event.currentTarget, false);
+            lucide.createIcons();
+        }
     });
 
     document.getElementById('customer-recovery-form')?.addEventListener('submit', async event => {

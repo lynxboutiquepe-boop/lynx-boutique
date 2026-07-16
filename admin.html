@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="admin.css?v=20260716-admin-v2">
+    <link rel="stylesheet" href="admin.css?v=20260716-email-register-v1">
 </head>
 <body>
     <main class="login-shell" id="login-shell">
@@ -170,15 +170,15 @@
                         <label class="search-control"><i data-lucide="search"></i><input id="customer-search" type="search" placeholder="Buscar por nombre, correo o celular..."></label>
                         <select id="customer-marketing-filter" aria-label="Filtrar clientes">
                             <option value="all">Todos los clientes</option>
-                            <option value="subscribed">Aceptaron novedades</option>
-                            <option value="not-subscribed">Sin suscripción</option>
+                            <option value="subscribed">Verificados y suscritos</option>
+                            <option value="not-subscribed">Pendientes o sin suscripción</option>
                         </select>
                     </div>
                     <div class="table-shell customer-table-shell">
-                        <table class="data-table"><thead><tr><th>Cliente</th><th>WhatsApp</th><th>Novedades</th><th>Registro</th></tr></thead><tbody id="customers-tbody"></tbody></table>
+                        <table class="data-table"><thead><tr><th>Cliente</th><th>Correo verificado</th><th>WhatsApp</th><th>Promociones</th><th>Registro</th></tr></thead><tbody id="customers-tbody"></tbody></table>
                     </div>
                     <div class="mobile-customer-list" id="mobile-customer-list"></div>
-                    <p class="customer-privacy-note"><i data-lucide="shield-check"></i> La exportación incluye únicamente a quienes dieron permiso para recibir novedades y descuentos.</p>
+                    <p class="customer-privacy-note"><i data-lucide="shield-check"></i> La exportación incluye únicamente correos verificados que dieron permiso para recibir novedades y descuentos.</p>
                 </section>
 
                 <section class="admin-panel" id="finance-panel">
@@ -255,6 +255,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="supabase-config.js?v=20260716-admin-v1"></script>
-    <script src="admin.js?v=20260716-customer-accounts-v1"></script>
+    <script src="admin.js?v=20260716-email-register-v1"></script>
 </body>
 </html>
