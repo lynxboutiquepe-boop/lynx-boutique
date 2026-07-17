@@ -5,8 +5,8 @@
       "destination": "/admin.html"
     },
     {
-      "source": "/producto/:id",
-      "destination": "/producto.html?id=:id"
+      "source": "/producto/:slug",
+      "destination": "/producto.html?slug=:slug"
     }
   ]
 }

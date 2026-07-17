@@ -11,17 +11,27 @@ const quantityMinus = document.getElementById('quantity-minus');
 const quantityPlus = document.getElementById('quantity-plus');
 const buyButton = document.getElementById('buy-button');
 
-// Vercel conserva la URL bonita (/producto/14) en el navegador aunque sirva
-// producto.html por dentro; por eso leemos el id tanto de la query como de la ruta.
-const queryProductId = new URLSearchParams(location.search).get('id');
-const pathProductId = location.pathname.match(/^\/producto\/(\d+)\/?$/i)?.[1];
-const productId = Number(queryProductId || pathProductId);
+// Vercel conserva la URL bonita en el navegador aunque sirva producto.html
+// por dentro; por eso leemos el slug tanto de la query como de la propia ruta.
+const queryProductSlug = new URLSearchParams(location.search).get('slug');
+const pathProductSlug = location.pathname.match(/^\/producto\/([^/]+)\/?$/i)?.[1];
+const productReference = decodeURIComponent(queryProductSlug || pathProductSlug || '').trim().toLowerCase();
+const productId = /^\d+$/.test(productReference) ? Number(productReference) : null;
+const productSlug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(productReference) ? productReference : '';
 let selectedSize = '';
 let selectedQuantity = 1;
 let currentProduct = null;
 
 function text(value = '') {
     return String(value ?? '');
+}
+
+function productImageUrl(source) {
+    const value = text(source).trim();
+    if (!value) return '/assets/logo-transparent.png';
+    // Las fotos locales deben resolverse desde la raíz, no desde la URL de la ficha.
+    if (/^(?:https?:|data:|\/)/i.test(value)) return value;
+    return `/${value.replace(/^\.?(?:\/|\\)/, '')}`;
 }
 
 function statusCopy(product) {
@@ -33,7 +43,7 @@ function statusCopy(product) {
 
 function setImage(images, index) {
     const image = images[index];
-    productMainImage.src = image;
+    productMainImage.src = productImageUrl(image);
     productMainImage.alt = currentProduct.title;
     thumbnailList.querySelectorAll('button').forEach((button, buttonIndex) => button.classList.toggle('active', buttonIndex === index));
 }
@@ -86,7 +96,7 @@ function renderProduct(product) {
         button.className = index === 0 ? 'active' : '';
         button.setAttribute('aria-label', `Ver foto ${index + 1} de ${product.title}`);
         const image = document.createElement('img');
-        image.src = source;
+        image.src = productImageUrl(source);
         image.alt = '';
         image.loading = index < 3 ? 'eager' : 'lazy';
         button.append(image);
@@ -125,16 +135,13 @@ function renderProduct(product) {
 }
 
 async function loadProduct() {
-    if (!Number.isInteger(productId) || productId < 1) throw new Error('ID inválido');
+    if ((!Number.isInteger(productId) || productId < 1) && !productSlug) throw new Error('Producto inválido');
     const client = window.getLynxSupabase?.();
     if (!client) throw new Error('No se pudo conectar al catálogo');
-    const { data, error } = await client
-        .from('products')
-        .select('*')
-        .or(`id.eq.${productId},legacy_id.eq.${productId}`)
-        .neq('status', 'archived')
-        .limit(1)
-        .maybeSingle();
+    const request = client.from('products').select('*').neq('status', 'archived').limit(1);
+    const { data, error } = productSlug
+        ? await request.eq('slug', productSlug).maybeSingle()
+        : await request.or(`id.eq.${productId},legacy_id.eq.${productId}`).maybeSingle();
     if (error) throw error;
     if (!data) throw new Error('Producto no encontrado');
     return data;

@@ -1145,6 +1145,7 @@ function mapDatabaseProduct(row) {
     return {
         id: row.legacy_id ?? (1000000 + Number(row.id)),
         databaseId: row.id,
+        slug: row.slug || '',
         title: row.title,
         category: row.category,
         price: Number(row.price),
@@ -1220,9 +1221,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // 5. FUNCIONES DE RENDERIZACIÓN
 function productUrl(product) {
-    // La ficha vive en una página ligera propia. Si viene de Supabase usamos su
-    // id real para que también funcione con prendas creadas desde el panel.
-    const identifier = product.databaseId || product.id;
+    // Las fichas tienen una URL legible y estable; el nombre se genera solo
+    // como respaldo para productos antiguos que aún no tienen slug guardado.
+    const identifier = product.slug || product.title
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '') || product.databaseId || product.id;
     return `/producto/${encodeURIComponent(String(identifier))}`;
 }
 
