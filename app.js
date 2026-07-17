@@ -759,6 +759,11 @@ const reviewsList = document.getElementById('reviews-list');
 const reviewForm = document.getElementById('review-form');
 const reviewGuestView = document.getElementById('review-guest-view');
 const reviewMessage = document.getElementById('review-message');
+const reviewImagesInput = document.getElementById('review-images');
+const reviewImagesNote = document.getElementById('review-images-note');
+const reviewImageModal = document.getElementById('review-image-modal');
+const reviewImageGallery = document.getElementById('review-image-gallery');
+const publishedReviewImages = new Map();
 
 function escapeHtml(value = '') {
     return String(value).replace(/[&<>'"]/g, character => ({
@@ -946,6 +951,70 @@ function reviewStars(rating) {
     return `${'★'.repeat(normalized)}${'☆'.repeat(5 - normalized)}`;
 }
 
+function setReviewImagesNote(message = 'JPG, PNG o WebP · hasta 5 MB por foto.', isError = false) {
+    if (!reviewImagesNote) return;
+    reviewImagesNote.textContent = message;
+    reviewImagesNote.classList.toggle('is-error', isError);
+}
+
+function selectedReviewImages() {
+    return Array.from(reviewImagesInput?.files || []);
+}
+
+function validateReviewImages(files) {
+    if (files.length > 3) return 'Puedes adjuntar un máximo de 3 fotos.';
+    const invalid = files.find(file => !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024);
+    return invalid ? 'Cada foto debe ser JPG, PNG o WebP y pesar hasta 5 MB.' : '';
+}
+
+async function uploadReviewImages(files) {
+    if (!files.length) return [];
+    const uploadedPaths = [];
+    const extensions = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
+    try {
+        for (const [index, file] of files.entries()) {
+            const token = window.crypto?.randomUUID?.() || `${Date.now()}-${index}`;
+            const path = `${customerUser.id}/${token}.${extensions[file.type]}`;
+            const { error } = await customerSupabase.storage.from('review-images').upload(path, file, {
+                cacheControl: '31536000',
+                contentType: file.type,
+                upsert: false
+            });
+            if (error) throw error;
+            uploadedPaths.push(path);
+        }
+        return uploadedPaths;
+    } catch (error) {
+        if (uploadedPaths.length) await customerSupabase.storage.from('review-images').remove(uploadedPaths);
+        throw error;
+    }
+}
+
+async function signedReviewImageUrls(paths) {
+    const validPaths = Array.isArray(paths) ? paths.filter(Boolean).slice(0, 3) : [];
+    if (!validPaths.length || !customerSupabase) return [];
+    const { data, error } = await customerSupabase.storage.from('review-images').createSignedUrls(validPaths, 60 * 60);
+    if (error) {
+        console.warn('No se pudieron cargar las fotos de una reseña.', error.message);
+        return [];
+    }
+    return (data || []).map(file => file.signedUrl).filter(Boolean);
+}
+
+function openReviewImages(reviewId) {
+    const imageUrls = publishedReviewImages.get(String(reviewId)) || [];
+    if (!reviewImageModal || !reviewImageGallery || !imageUrls.length) return;
+    reviewImageGallery.innerHTML = imageUrls.map((url, index) => `<img src="${escapeHtml(url)}" alt="Foto ${index + 1} de la reseña" loading="eager">`).join('');
+    reviewImageModal.hidden = false;
+    document.body.classList.add('review-image-open');
+}
+
+function closeReviewImages() {
+    if (!reviewImageModal) return;
+    reviewImageModal.hidden = true;
+    document.body.classList.remove('review-image-open');
+}
+
 function syncReviewAccess() {
     if (!reviewForm || !reviewGuestView) return;
     const canReview = Boolean(customerUser && customerProfile?.email_verified);
@@ -962,7 +1031,7 @@ async function loadPublishedReviews() {
     }
     const { data, error } = await customerSupabase
         .from('customer_reviews')
-        .select('id, author_name, rating, comment, created_at')
+        .select('id, author_name, rating, comment, images, created_at')
         .eq('status', 'published')
         .order('created_at', { ascending: false })
         .limit(6);
@@ -973,20 +1042,49 @@ async function loadPublishedReviews() {
         return;
     }
 
-    reviewsList.innerHTML = data?.length ? data.map(review => `
+    const reviewsWithImages = await Promise.all((data || []).map(async review => ({
+        ...review,
+        imageUrls: await signedReviewImageUrls(review.images)
+    })));
+    publishedReviewImages.clear();
+    reviewsWithImages.forEach(review => publishedReviewImages.set(String(review.id), review.imageUrls));
+
+    reviewsList.innerHTML = reviewsWithImages.length ? reviewsWithImages.map(review => `
         <article class="review-card">
             <div class="review-card-header">
                 <div><strong class="review-author">${escapeHtml(review.author_name)}</strong><span class="review-date"> · ${new Intl.DateTimeFormat('es-PE', { month: 'short', year: 'numeric' }).format(new Date(review.created_at))}</span></div>
                 <span class="review-stars-display" aria-label="${review.rating} de 5 estrellas">${reviewStars(review.rating)}</span>
             </div>
             <p>${escapeHtml(review.comment)}</p>
+            ${review.imageUrls.length ? `<button class="review-photo-btn" type="button" data-review-id="${review.id}"><i data-lucide="images"></i> VER ${review.imageUrls.length === 1 ? 'FOTO' : `${review.imageUrls.length} FOTOS`}</button>` : ''}
         </article>
     `).join('') : '<p class="reviews-empty">Aún no hay reseñas públicas. Sé el primero en compartir tu experiencia.</p>';
+    lucide.createIcons();
 }
 
 function setupReviewEvents() {
     document.getElementById('review-login-btn')?.addEventListener('click', () => {
         openAccountDialog('login', 'Inicia sesión con tu correo verificado para dejar una reseña.');
+    });
+
+    reviewImagesInput?.addEventListener('change', () => {
+        const files = selectedReviewImages();
+        const error = validateReviewImages(files);
+        setReviewImagesNote(error || (files.length ? `${files.length} ${files.length === 1 ? 'foto seleccionada' : 'fotos seleccionadas'}.` : undefined), Boolean(error));
+        if (error) reviewImagesInput.value = '';
+    });
+
+    reviewsList?.addEventListener('click', event => {
+        const button = event.target.closest('.review-photo-btn');
+        if (button) openReviewImages(button.dataset.reviewId);
+    });
+
+    reviewImageModal?.addEventListener('click', event => {
+        if (event.target.closest('[data-review-image-close]')) closeReviewImages();
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && !reviewImageModal?.hidden) closeReviewImages();
     });
 
     reviewForm?.addEventListener('submit', async event => {
@@ -1000,22 +1098,33 @@ function setupReviewEvents() {
         const button = event.submitter;
         const rating = Number(reviewForm.querySelector('input[name="review-rating"]:checked')?.value);
         const comment = document.getElementById('review-comment').value.trim();
+        const images = selectedReviewImages();
         if (!rating || comment.length < 10) {
             setReviewMessage('Escribe una reseña de al menos 10 caracteres.');
+            return;
+        }
+        const imageError = validateReviewImages(images);
+        if (imageError) {
+            setReviewImagesNote(imageError, true);
             return;
         }
 
         setCustomerButtonLoading(button, true, 'ENVIANDO...');
         setReviewMessage('');
+        let uploadedPaths = [];
         try {
+            uploadedPaths = await uploadReviewImages(images);
             const { error } = await customerSupabase.rpc('submit_customer_review', {
                 p_rating: rating,
-                p_comment: comment
+                p_comment: comment,
+                p_images: uploadedPaths
             });
             if (error) throw error;
             reviewForm.reset();
+            setReviewImagesNote();
             setReviewMessage('Gracias. Tu reseña fue enviada y aparecerá cuando sea aprobada.', true);
         } catch (error) {
+            if (uploadedPaths.length) await customerSupabase.storage.from('review-images').remove(uploadedPaths);
             setReviewMessage(customerErrorMessage(error));
         } finally {
             setCustomerButtonLoading(button, false);
@@ -2209,6 +2318,7 @@ function closeAllDrawers() {
     cartDrawer.classList.remove('active');
     checkoutDrawer.classList.remove('active');
     closeProductDetails();
+    closeReviewImages();
 }
 
 // 8. FINALIZACIÓN Y ENVÍO A WHATSAPP

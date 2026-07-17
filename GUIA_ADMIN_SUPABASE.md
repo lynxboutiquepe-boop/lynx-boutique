@@ -173,6 +173,8 @@ Los correos de autenticación sirven para confirmar cuentas o recuperar contrase
 - En el panel abre **Reseñas** para verlas. El botón de check la publica y el de ojo tachado la oculta.
 - Si un cliente modifica y vuelve a enviar su reseña, esta vuelve a quedar pendiente de tu aprobación.
 - La tienda pública muestra solamente las reseñas con estado **Publicada**.
+- Una reseña puede llevar hasta 3 fotos JPG, PNG o WebP de 5 MB cada una. No se muestran de frente: el visitante debe pulsar **Ver foto(s)** para abrirlas.
+- Antes de usar fotos, ejecuta una sola vez el archivo `supabase/review_images.sql` en **Supabase → SQL Editor**. Este crea el almacenamiento privado y permite ver una foto únicamente cuando su reseña fue publicada.
 
 ## 11. Cambiar o recuperar la contraseña
 

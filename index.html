@@ -15,7 +15,7 @@
     <!-- Lucide Icons (CDN) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260716-product-reviews-v2">
+    <link rel="stylesheet" href="styles.css?v=20260716-review-images-v1">
 </head>
 <body>
 
@@ -250,6 +250,11 @@
                             </div>
                         </fieldset>
                         <label><span>Tu reseña</span><textarea id="review-comment" minlength="10" maxlength="600" required placeholder="¿Cómo fue tu experiencia con LYNX?"></textarea></label>
+                        <label class="review-photo-picker">
+                            <span>Fotos (opcional, máximo 3)</span>
+                            <input id="review-images" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+                            <small id="review-images-note">JPG, PNG o WebP · hasta 5 MB por foto.</small>
+                        </label>
                         <p class="review-message" id="review-message" aria-live="polite"></p>
                         <button class="btn btn-primary" type="submit">ENVIAR RESEÑA <i data-lucide="send"></i></button>
                     </form>
@@ -257,6 +262,14 @@
             </div>
         </div>
     </section>
+
+    <div class="review-image-modal" id="review-image-modal" role="dialog" aria-modal="true" aria-labelledby="review-image-modal-title" hidden>
+        <div class="review-image-modal-backdrop" data-review-image-close></div>
+        <section class="review-image-modal-panel">
+            <div class="review-image-modal-heading"><h3 id="review-image-modal-title">Fotos de la reseña</h3><button class="review-image-modal-close" type="button" data-review-image-close aria-label="Cerrar fotos"><i data-lucide="x"></i></button></div>
+            <div class="review-image-gallery" id="review-image-gallery"></div>
+        </section>
+    </div>
 
     <!-- Preguntas frecuentes -->
     <section class="faq-section" id="preguntas-frecuentes" aria-labelledby="faq-title">
@@ -620,6 +633,6 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js?v=20260716-admin-v1"></script>
-    <script src="app.js?v=20260716-product-reviews-v1"></script>
+    <script src="app.js?v=20260716-review-images-v1"></script>
 </body>
 </html>
