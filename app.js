@@ -1220,10 +1220,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // 5. FUNCIONES DE RENDERIZACIÓN
 function productUrl(product) {
-    const url = new URL(location.href);
-    url.searchParams.set('producto', String(product.id));
-    url.hash = '';
-    return `${url.pathname}${url.search}`;
+    // La ficha vive en una página ligera propia. Si viene de Supabase usamos su
+    // id real para que también funcione con prendas creadas desde el panel.
+    const identifier = product.databaseId || product.id;
+    return `/producto/${encodeURIComponent(String(identifier))}`;
 }
 
 function renderProducts() {
@@ -2262,8 +2262,27 @@ function closeProductDetails() {
 }
 
 function openProductFromUrl() {
-    const productId = Number(new URLSearchParams(location.search).get('producto'));
-    if (productId) openProductDetails(productId, { syncUrl: false });
+    const params = new URLSearchParams(location.search);
+    const productId = Number(params.get('producto'));
+    if (!productId) return;
+
+    const product = PRODUCTS.find(item => item.id === productId);
+    if (!product) return;
+
+    openProductDetails(productId, { syncUrl: false });
+
+    // Llegadas desde una ficha individual: se conserva la prenda, talla y
+    // cantidad seleccionadas, y se abre la bolsa para continuar el pedido.
+    if (params.get('comprar') === '1') {
+        const availableSizes = product.sizes?.length ? product.sizes : ['ÚNICA'];
+        const requestedSize = params.get('talla');
+        const size = availableSizes.includes(requestedSize) ? requestedSize : availableSizes[0];
+        const requestedQty = Math.max(1, Number(params.get('cantidad')) || 1);
+        if (addToCart(product, size, requestedQty)) {
+            productModal.classList.remove('active');
+            cartDrawer.classList.add('active');
+        }
+    }
 }
 
 function addToCart(product, size, qty) {

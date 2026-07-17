@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="icon" type="image/png" href="/assets/favicon-lynx.png?v=20260716-v1">
+    <link rel="apple-touch-icon" href="/assets/favicon-lynx.png?v=20260716-v1">
+    <title>Prenda | LYNX</title>
+    <meta name="description" content="Ficha de producto LYNX Boutique.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/producto.css?v=20260716-v1">
+</head>
+<body>
+    <header class="product-header">
+        <a class="product-logo" href="/" aria-label="Volver a LYNX">
+            <img src="/assets/logo-transparent.png" alt="LYNX">
+        </a>
+        <a class="back-link" href="/#catalog">← VOLVER AL CATÁLOGO</a>
+    </header>
+
+    <main class="product-page" id="product-page" aria-live="polite">
+        <section class="product-loading" id="product-loading">
+            <span class="loading-mark"></span>
+            <p>Cargando prenda...</p>
+        </section>
+
+        <section class="product-not-found" id="product-not-found" hidden>
+            <p class="eyebrow">LYNX BOUTIQUE</p>
+            <h1>Esta prenda ya no está disponible.</h1>
+            <p>Puede haberse agotado o retirado del catálogo.</p>
+            <a class="primary-button" href="/#catalog">VER CATÁLOGO</a>
+        </section>
+
+        <article class="product-view" id="product-view" hidden>
+            <div class="product-gallery">
+                <div class="image-frame">
+                    <span class="product-badge" id="product-badge"></span>
+                    <img id="product-main-image" src="" alt="" fetchpriority="high">
+                </div>
+                <div class="thumbnail-list" id="thumbnail-list" aria-label="Fotos del producto"></div>
+            </div>
+
+            <div class="product-copy">
+                <p class="eyebrow" id="product-category"></p>
+                <h1 id="product-title"></h1>
+                <p class="product-price" id="product-price"></p>
+                <p class="stock-note" id="stock-note"></p>
+                <p class="product-description" id="product-description"></p>
+
+                <aside class="fit-note" id="fit-note" hidden>
+                    <strong>Recomendación de calce</strong>
+                    <span>Para un calce más cómodo en jeans Fashion Nova, considera elegir 1 o 2 tallas por encima de tu talla habitual.</span>
+                </aside>
+
+                <div class="product-options" id="product-options">
+                    <div>
+                        <span class="option-label">SELECCIONA TU TALLA</span>
+                        <div class="size-list" id="size-list"></div>
+                    </div>
+                    <div class="quantity-option">
+                        <span class="option-label">CANTIDAD</span>
+                        <div class="quantity-control">
+                            <button type="button" id="quantity-minus" aria-label="Reducir cantidad">−</button>
+                            <output id="quantity-value">1</output>
+                            <button type="button" id="quantity-plus" aria-label="Aumentar cantidad">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <a class="primary-button" id="buy-button" href="/">INICIAR PEDIDO</a>
+                <p class="purchase-note">Te llevaremos a LYNX para iniciar sesión y finalizar tu pedido de forma segura.</p>
+            </div>
+        </article>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/supabase-config.js?v=20260716-admin-v1"></script>
+    <script src="/producto.js?v=20260716-v1"></script>
+</body>
+</html>
