@@ -1232,6 +1232,15 @@ function productUrl(product) {
     return `/producto/${encodeURIComponent(String(identifier))}`;
 }
 
+function imageFallback(image) {
+    if (image.dataset.imageFallbackBound) return;
+    image.dataset.imageFallbackBound = 'true';
+    image.addEventListener('error', () => {
+        if (new URL(image.currentSrc || image.src, location.href).pathname === '/assets/logo-transparent.png') return;
+        image.src = '/assets/logo-transparent.png';
+    });
+}
+
 function renderProducts() {
     // Filtrar productos
     let filtered = PRODUCTS.filter(product => {
@@ -1303,6 +1312,10 @@ function renderProducts() {
     `;
     }).join('');
 
+    // Si una foto se elimina o se renombra desde administración, la tarjeta
+    // conserva una presentación limpia en vez de mostrar un espacio roto.
+    productsGrid.querySelectorAll('img').forEach(imageFallback);
+
     requestAnimationFrame(updateCatalogNavOnScroll);
 }
 
@@ -1332,6 +1345,8 @@ function renderTrendingProducts() {
             ${renderGroup(groupIndex !== 2)}
         </div>
     `).join('');
+
+    trendingTrack.querySelectorAll('img').forEach(imageFallback);
 
 }
 
@@ -2205,6 +2220,7 @@ function openProductDetails(id, { syncUrl = true } = {}) {
     const images = product.images || [product.image];
     
     // Imagen principal
+    imageFallback(modalProductImg);
     modalProductImg.src = images[0];
     modalProductImg.alt = product.title;
     modalProductTitle.textContent = product.title;
@@ -2231,6 +2247,7 @@ function openProductDetails(id, { syncUrl = true } = {}) {
     thumbsContainer.innerHTML = images.map((src, i) => `
         <img src="${src}" data-idx="${i}" style="width:64px;height:80px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid ${i===0?'var(--accent)':'transparent'};opacity:${i===0?'1':'0.6'};transition:all 0.2s;" class="modal-thumb">
     `).join('');
+    thumbsContainer.querySelectorAll('img').forEach(imageFallback);
     thumbsContainer.querySelectorAll('.modal-thumb').forEach(thumb => {
         thumb.addEventListener('click', () => {
             modalProductImg.src = thumb.src;

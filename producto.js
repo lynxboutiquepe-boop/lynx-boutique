@@ -43,6 +43,10 @@ function statusCopy(product) {
 
 function setImage(images, index) {
     const image = images[index];
+    productMainImage.onerror = () => {
+        productMainImage.onerror = null;
+        productMainImage.src = '/assets/logo-transparent.png';
+    };
     productMainImage.src = productImageUrl(image);
     productMainImage.alt = currentProduct.title;
     thumbnailList.querySelectorAll('button').forEach((button, buttonIndex) => button.classList.toggle('active', buttonIndex === index));
@@ -96,6 +100,10 @@ function renderProduct(product) {
         button.className = index === 0 ? 'active' : '';
         button.setAttribute('aria-label', `Ver foto ${index + 1} de ${product.title}`);
         const image = document.createElement('img');
+        image.onerror = () => {
+            image.onerror = null;
+            image.src = '/assets/logo-transparent.png';
+        };
         image.src = productImageUrl(source);
         image.alt = '';
         image.loading = index < 3 ? 'eager' : 'lazy';
