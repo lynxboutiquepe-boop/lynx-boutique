@@ -82,9 +82,17 @@ body {
     .product-header { min-height: 64px; padding: 0 20px; }
     .product-logo img { width: 52px; }
     .back-link { font-size: .62rem; }
-    .product-page { padding: 20px 20px 52px; }
-    .product-view { grid-template-columns: 1fr; gap: 28px; }
-    .image-frame { border-radius: 16px; }
+    .product-page { padding: 16px 18px 48px; }
+    .product-view { grid-template-columns: 1fr; gap: 20px; }
+    .image-frame {
+        max-height: min(44svh, 390px);
+        aspect-ratio: 1 / 1.03;
+        border-radius: 16px;
+    }
+    .image-frame > img { object-fit: contain; }
     .product-copy { padding: 0 2px; }
+    .product-copy h1 { font-size: clamp(2rem, 8.5vw, 2.45rem); line-height: 1.01; }
+    .product-price { margin: 15px 0 6px; font-size: 1.55rem; }
+    .product-description { margin-top: 18px; font-size: .98rem; line-height: 1.65; }
     .product-options { gap: 16px; }
 }

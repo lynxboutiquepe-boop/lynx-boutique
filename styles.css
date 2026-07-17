@@ -4558,7 +4558,9 @@ h6 {
 /* Infinite carousel, brand icons and direct contact refinements */
 .trending-viewport {
     cursor: grab;
-    touch-action: pan-y;
+    /* Deja que Safari gestione el swipe horizontal de forma nativa. */
+    touch-action: pan-x pan-y;
+    -webkit-overflow-scrolling: touch;
     user-select: none;
     -webkit-user-select: none;
 }
@@ -4731,4 +4733,49 @@ body.review-image-open { overflow: hidden; }
     .review-compose { order: -1; }
     .review-image-modal { padding: 12px; }
     .review-image-modal-panel { padding: 15px; }
+}
+
+/* Mobile product modal: una imagen protagonista, sin desplazar la información
+   importante fuera de la primera vista en teléfonos altos. */
+@media (max-width: 768px) {
+    .product-detail-card {
+        padding: 16px 18px calc(22px + env(safe-area-inset-bottom));
+    }
+
+    .product-detail-layout {
+        gap: 14px;
+    }
+
+    .product-detail-gallery img {
+        max-height: min(42svh, 380px);
+        aspect-ratio: 1 / 1;
+        object-fit: contain;
+    }
+
+    .detail-badge {
+        margin-bottom: 9px;
+        font-size: 0.68rem;
+    }
+
+    .detail-title {
+        padding-right: 46px;
+        margin-bottom: 9px;
+        font-size: clamp(1.45rem, 6vw, 1.8rem);
+        line-height: 1.08;
+        letter-spacing: 0.015em;
+    }
+
+    .detail-price-row {
+        margin-bottom: 14px;
+    }
+
+    .detail-price {
+        font-size: 1.4rem;
+    }
+
+    .detail-description {
+        margin-bottom: 18px;
+        font-size: 0.95rem;
+        line-height: 1.58;
+    }
 }

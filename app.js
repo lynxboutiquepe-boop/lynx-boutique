@@ -1588,6 +1588,14 @@ function setupTrendingCarousel() {
 
     trendingViewport.addEventListener('pointerdown', event => {
         if (event.pointerType === 'mouse' && event.button !== 0) return;
+        // En iPhone/iPad el desplazamiento horizontal nativo es mucho más
+        // fiable que capturar el dedo con Pointer Events. Solo arrastramos
+        // manualmente con mouse; en pantallas táctiles el viewport conserva
+        // su scroll horizontal natural.
+        if (event.pointerType !== 'mouse') {
+            pauseAutoScroll(2200);
+            return;
+        }
         if (pointerId !== null) return;
         pointerId = event.pointerId;
         dragStartX = event.clientX;
@@ -1604,7 +1612,14 @@ function setupTrendingCarousel() {
         if (dragDistance > 3 && event.cancelable) event.preventDefault();
         trendingViewport.scrollLeft = dragStartScroll - delta;
     }, { passive: false });
-    trendingViewport.addEventListener('pointerup', endDragging, { passive: true });
+    trendingViewport.addEventListener('pointerup', event => {
+        if (event.pointerType !== 'mouse') {
+            pauseAutoScroll(1600);
+            window.setTimeout(normalizeScroll, 0);
+            return;
+        }
+        endDragging(event);
+    }, { passive: true });
     trendingViewport.addEventListener('pointercancel', endDragging, { passive: true });
     window.addEventListener('pointerup', endDragging, { passive: true });
     trendingViewport.addEventListener('click', event => {
