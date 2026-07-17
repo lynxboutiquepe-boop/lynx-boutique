@@ -85,8 +85,8 @@ body {
     .product-page { padding: 16px 18px 48px; }
     .product-view { grid-template-columns: 1fr; gap: 20px; }
     .image-frame {
-        width: min(100%, 330px);
-        height: min(36svh, 330px);
+        width: min(100%, 290px);
+        height: 290px;
         margin: 0 auto;
         aspect-ratio: 1 / 1;
         border-radius: 16px;
@@ -96,11 +96,15 @@ body {
     .product-copy h1 {
         max-width: 100%;
         overflow-wrap: anywhere;
-        font-size: clamp(1.85rem, 8vw, 2.2rem);
-        line-height: 1.04;
+        font-size: clamp(1.45rem, 6.4vw, 1.75rem);
+        line-height: 1.12;
+        letter-spacing: -0.035em;
     }
-    .product-price { margin: 15px 0 6px; font-size: 1.55rem; }
-    .product-description { margin-top: 18px; font-size: .98rem; line-height: 1.65; }
-    .product-options { grid-template-columns: 1fr; gap: 18px; }
+    .product-price { margin: 12px 0 6px; font-size: 1.42rem; }
+    .stock-note { font-size: .68rem; }
+    .product-description { margin-top: 16px; font-size: .96rem; line-height: 1.58; }
+    .product-options { grid-template-columns: 1fr; gap: 16px; margin: 22px 0 18px; padding-top: 20px; }
     .quantity-option { width: fit-content; }
+    .primary-button { min-height: 50px; }
+    .purchase-note { margin-top: 10px; font-size: .68rem; }
 }
