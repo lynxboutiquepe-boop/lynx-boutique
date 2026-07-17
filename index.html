@@ -15,7 +15,7 @@
     <!-- Lucide Icons (CDN) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260716-carousel-social-v1">
+    <link rel="stylesheet" href="styles.css?v=20260716-product-reviews-v1">
 </head>
 <body>
 
@@ -218,6 +218,45 @@
             </div>
         </div>
     </main>
+
+    <!-- Reseñas de clientes -->
+    <section class="reviews-section" id="resenas" aria-labelledby="reviews-title">
+        <div class="reviews-container">
+            <div class="reviews-heading">
+                <span class="faq-kicker">COMUNIDAD LYNX</span>
+                <h2 id="reviews-title">RESEÑAS REALES</h2>
+                <p>Opiniones de clientes LYNX verificadas y publicadas por nuestro equipo.</p>
+            </div>
+            <div class="reviews-content">
+                <div class="reviews-list" id="reviews-list" aria-live="polite">
+                    <p class="reviews-empty">Cargando reseñas...</p>
+                </div>
+                <aside class="review-compose">
+                    <span class="review-compose-kicker">¿YA COMPRASTE?</span>
+                    <h3>Cuéntanos tu experiencia</h3>
+                    <p>Tu reseña se revisa antes de aparecer públicamente.</p>
+                    <div id="review-guest-view">
+                        <button class="btn btn-primary" id="review-login-btn" type="button">INICIAR SESIÓN PARA OPINAR <i data-lucide="arrow-up-right"></i></button>
+                    </div>
+                    <form id="review-form" class="review-form" hidden>
+                        <fieldset class="review-rating-fieldset">
+                            <legend>Tu calificación</legend>
+                            <div class="review-stars" role="radiogroup" aria-label="Calificación de 1 a 5 estrellas">
+                                <label><input type="radio" name="review-rating" value="1"><span>★</span><span class="sr-only">1 estrella</span></label>
+                                <label><input type="radio" name="review-rating" value="2"><span>★</span><span class="sr-only">2 estrellas</span></label>
+                                <label><input type="radio" name="review-rating" value="3"><span>★</span><span class="sr-only">3 estrellas</span></label>
+                                <label><input type="radio" name="review-rating" value="4"><span>★</span><span class="sr-only">4 estrellas</span></label>
+                                <label><input type="radio" name="review-rating" value="5" checked><span>★</span><span class="sr-only">5 estrellas</span></label>
+                            </div>
+                        </fieldset>
+                        <label><span>Tu reseña</span><textarea id="review-comment" minlength="10" maxlength="600" required placeholder="¿Cómo fue tu experiencia con LYNX?"></textarea></label>
+                        <p class="review-message" id="review-message" aria-live="polite"></p>
+                        <button class="btn btn-primary" type="submit">ENVIAR RESEÑA <i data-lucide="send"></i></button>
+                    </form>
+                </aside>
+            </div>
+        </div>
+    </section>
 
     <!-- Preguntas frecuentes -->
     <section class="faq-section" id="preguntas-frecuentes" aria-labelledby="faq-title">
@@ -581,6 +620,6 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js?v=20260716-admin-v1"></script>
-    <script src="app.js?v=20260716-carousel-social-v1"></script>
+    <script src="app.js?v=20260716-product-reviews-v1"></script>
 </body>
 </html>

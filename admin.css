@@ -203,6 +203,14 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
 .consent-pill.yes { background: var(--success-soft); color: var(--success); }
 .customer-privacy-note { display: flex; align-items: center; gap: 8px; margin-top: 14px; color: var(--muted); font-size: .7rem; line-height: 1.5; }
 .customer-privacy-note svg { width: 17px; flex: 0 0 auto; color: var(--success); }
+.review-table-shell { overflow-x: auto; }
+.review-comment-cell { min-width: 260px; max-width: 440px; color: var(--muted); line-height: 1.5; white-space: pre-line; }
+.review-rating-admin { color: #e49d17; font-size: .9rem; letter-spacing: .05em; white-space: nowrap; }
+.review-rating-empty { color: #c8cad2; }
+.review-status { display: inline-flex; padding: 5px 8px; border-radius: 999px; background: var(--warning-soft); color: var(--warning); font-size: .61rem; font-weight: 800; }
+.review-status.published { background: var(--success-soft); color: var(--success); }
+.review-status.hidden { background: var(--danger-soft); color: var(--danger); }
+.row-action:disabled { opacity: .42; cursor: not-allowed; }
 
 .admin-form { display: grid; gap: 15px; }
 .form-grid { display: grid; gap: 13px; }

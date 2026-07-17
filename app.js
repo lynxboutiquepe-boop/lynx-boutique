@@ -755,6 +755,16 @@ const modalQtyInput = document.getElementById('modal-qty-input');
 const modalQtyMinus = document.getElementById('modal-qty-minus');
 const modalQtyPlus = document.getElementById('modal-qty-plus');
 const modalAddToCartBtn = document.getElementById('modal-add-to-cart-btn');
+const reviewsList = document.getElementById('reviews-list');
+const reviewForm = document.getElementById('review-form');
+const reviewGuestView = document.getElementById('review-guest-view');
+const reviewMessage = document.getElementById('review-message');
+
+function escapeHtml(value = '') {
+    return String(value).replace(/[&<>'"]/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    })[character]);
+}
 
 function customerErrorMessage(error) {
     const message = String(error?.message || error || 'No se pudo completar la operación.');
@@ -907,6 +917,7 @@ async function initializeCustomerAccount() {
         try { await loadCustomerProfile(); } catch (error) { console.warn('No se pudo cargar el perfil del cliente.', error.message); }
     }
     updateAccountButton();
+    syncReviewAccess();
     const initialAuthType = new URLSearchParams(location.hash.slice(1)).get('type');
     if (initialAuthType === 'recovery') showCustomerRecovery();
     customerSupabase.auth.onAuthStateChange((event, nextSession) => {
@@ -918,8 +929,98 @@ async function initializeCustomerAccount() {
             } else {
                 updateAccountButton();
             }
+            syncReviewAccess();
             if (event === 'PASSWORD_RECOVERY') showCustomerRecovery();
         }, 0);
+    });
+}
+
+function setReviewMessage(message = '', success = false) {
+    if (!reviewMessage) return;
+    reviewMessage.textContent = message;
+    reviewMessage.classList.toggle('success', success);
+}
+
+function reviewStars(rating) {
+    const normalized = Math.max(1, Math.min(5, Number(rating) || 0));
+    return `${'★'.repeat(normalized)}${'☆'.repeat(5 - normalized)}`;
+}
+
+function syncReviewAccess() {
+    if (!reviewForm || !reviewGuestView) return;
+    const canReview = Boolean(customerUser && customerProfile?.email_verified);
+    reviewForm.hidden = !canReview;
+    reviewGuestView.hidden = canReview;
+    if (canReview) setReviewMessage('');
+}
+
+async function loadPublishedReviews() {
+    if (!reviewsList) return;
+    if (!customerSupabase) {
+        reviewsList.innerHTML = '<p class="reviews-empty">Las reseñas estarán disponibles pronto.</p>';
+        return;
+    }
+    const { data, error } = await customerSupabase
+        .from('customer_reviews')
+        .select('id, author_name, rating, comment, created_at')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+        .limit(6);
+
+    if (error) {
+        console.warn('No se pudieron cargar las reseñas.', error.message);
+        reviewsList.innerHTML = '<p class="reviews-empty">Aún no hay reseñas públicas. Sé el primero en compartir tu experiencia.</p>';
+        return;
+    }
+
+    reviewsList.innerHTML = data?.length ? data.map(review => `
+        <article class="review-card">
+            <div class="review-card-header">
+                <div><strong class="review-author">${escapeHtml(review.author_name)}</strong><span class="review-date"> · ${new Intl.DateTimeFormat('es-PE', { month: 'short', year: 'numeric' }).format(new Date(review.created_at))}</span></div>
+                <span class="review-stars-display" aria-label="${review.rating} de 5 estrellas">${reviewStars(review.rating)}</span>
+            </div>
+            <p>${escapeHtml(review.comment)}</p>
+        </article>
+    `).join('') : '<p class="reviews-empty">Aún no hay reseñas públicas. Sé el primero en compartir tu experiencia.</p>';
+}
+
+function setupReviewEvents() {
+    document.getElementById('review-login-btn')?.addEventListener('click', () => {
+        openAccountDialog('login', 'Inicia sesión con tu correo verificado para dejar una reseña.');
+    });
+
+    reviewForm?.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!customerUser || !customerProfile?.email_verified) {
+            syncReviewAccess();
+            openAccountDialog('login', 'Inicia sesión con tu correo verificado para dejar una reseña.');
+            return;
+        }
+
+        const button = event.submitter;
+        const rating = Number(reviewForm.querySelector('input[name="review-rating"]:checked')?.value);
+        const comment = document.getElementById('review-comment').value.trim();
+        if (!rating || comment.length < 10) {
+            setReviewMessage('Escribe una reseña de al menos 10 caracteres.');
+            return;
+        }
+
+        setCustomerButtonLoading(button, true, 'ENVIANDO...');
+        setReviewMessage('');
+        try {
+            const { error } = await customerSupabase.rpc('submit_customer_review', {
+                p_rating: rating,
+                p_comment: comment
+            });
+            if (error) throw error;
+            reviewForm.reset();
+            setReviewMessage('Gracias. Tu reseña fue enviada y aparecerá cuando sea aprobada.', true);
+        } catch (error) {
+            setReviewMessage(customerErrorMessage(error));
+        } finally {
+            setCustomerButtonLoading(button, false);
+            lucide.createIcons();
+        }
     });
 }
 
@@ -1000,11 +1101,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupOutfitBuilder();
     setupEventListeners();
     await initializeCustomerAccount();
+    setupReviewEvents();
+    await loadPublishedReviews();
+    syncReviewAccess();
+    openProductFromUrl();
     setupTrendingCarousel();
     lucide.createIcons(); // Cargar íconos lucide
 });
 
 // 5. FUNCIONES DE RENDERIZACIÓN
+function productUrl(product) {
+    const url = new URL(location.href);
+    url.searchParams.set('producto', String(product.id));
+    url.hash = '';
+    return `${url.pathname}${url.search}`;
+}
+
 function renderProducts() {
     // Filtrar productos
     let filtered = PRODUCTS.filter(product => {
@@ -1059,32 +1171,22 @@ function renderProducts() {
 
         return `${categoryHeading}
         <article class="product-card" id="product-${product.id}">
-            <div class="product-card-img-wrapper view-details-btn" data-id="${product.id}" style="cursor:pointer;">
+            <a class="product-card-img-wrapper" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ficha de ${escapeHtml(product.title)} en una pestaña nueva">
                 <span class="product-card-badge ${product.badge.toLowerCase().includes('stock') || product.badge.toLowerCase().includes('limit') || product.badge.toLowerCase().includes('última') ? 'limited' : ''}">${product.badge}</span>
                 <img class="product-card-primary-img" src="${product.image}" alt="${product.title}" loading="${productIndex < 4 ? 'eager' : 'lazy'}" decoding="async" ${productIndex < 4 ? 'fetchpriority="high"' : ''} style="pointer-events:none;">
                 ${product.images?.[1] ? `<img class="product-card-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="lazy" style="pointer-events:none;">` : ''}
-            </div>
+            </a>
             <div class="product-card-content">
                 <span class="product-card-category">${product.category}</span>
-                <h3 class="product-card-title view-details-btn" data-id="${product.id}" style="cursor:pointer;">${product.title}</h3>
+                <a class="product-card-title" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer">${product.title}</a>
                 <span class="product-card-price">S/. ${product.price.toFixed(2)}</span>
                 <div class="product-card-footer">
-                    <button class="btn btn-secondary btn-block view-details-btn" data-id="${product.id}">
-                        VER DETALLES
-                    </button>
+                    <a class="btn btn-secondary btn-block" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer">VER DETALLES</a>
                 </div>
             </div>
         </article>
     `;
     }).join('');
-
-    // Reasignar eventos a los botones de ver detalles
-    document.querySelectorAll('.view-details-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const id = parseInt(e.target.getAttribute('data-id'));
-            openProductDetails(id);
-        });
-    });
 
     requestAnimationFrame(updateCatalogNavOnScroll);
 }
@@ -1098,12 +1200,12 @@ function renderTrendingProducts() {
 
     const renderGroup = isDuplicate => featuredProducts.map((product, productIndex) => `
         <article class="trending-card" ${isDuplicate ? 'aria-hidden="true"' : ''}>
-            <button type="button" class="trending-card-image trending-view-details" data-id="${product.id}" aria-label="Ver ${product.title}" ${isDuplicate ? 'tabindex="-1"' : ''}>
+            <a class="trending-card-image" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ficha de ${escapeHtml(product.title)} en una pestaña nueva" ${isDuplicate ? 'tabindex="-1"' : ''}>
                 <span class="trending-card-badge">${product.badge}</span>
                 <img class="trending-primary-img" src="${product.image}" alt="${isDuplicate ? '' : product.title}" loading="${!isDuplicate && productIndex < 3 ? 'eager' : 'lazy'}" decoding="async" ${!isDuplicate && productIndex < 3 ? 'fetchpriority="high"' : ''}>
                 ${product.images?.[1] ? `<img class="trending-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="lazy">` : ''}
-            </button>
-            <button type="button" class="trending-card-title trending-view-details" data-id="${product.id}" ${isDuplicate ? 'tabindex="-1"' : ''}>${product.title}</button>
+            </a>
+            <a class="trending-card-title" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer" ${isDuplicate ? 'tabindex="-1"' : ''}>${product.title}</a>
             <span class="trending-card-price">S/. ${product.price.toFixed(2)}</span>
         </article>
     `).join('');
@@ -1116,9 +1218,6 @@ function renderTrendingProducts() {
         </div>
     `).join('');
 
-    trendingTrack.querySelectorAll('.trending-view-details').forEach(button => {
-        button.addEventListener('click', () => openProductDetails(parseInt(button.dataset.id)));
-    });
 }
 
 const OUTFIT_BUILDER_CONFIG = {
@@ -1804,11 +1903,11 @@ function setupEventListeners() {
 
     // Modal de Detalles
     closeProductModal.addEventListener('click', () => {
-        productModal.classList.remove('active');
+        closeProductDetails();
     });
 
     productModal.addEventListener('click', (e) => {
-        if (e.target === productModal) productModal.classList.remove('active');
+        if (e.target === productModal) closeProductDetails();
     });
 
     // Tallas en el Modal
@@ -1838,7 +1937,7 @@ function setupEventListeners() {
         
         const wasAdded = addToCart(currentProduct, size, qty);
         if (!wasAdded) return;
-        productModal.classList.remove('active');
+        closeProductDetails();
         
         // Abrir automáticamente el carrito para dar feedback
         cartDrawer.classList.add('active');
@@ -1983,7 +2082,7 @@ function syncNavLinks(category) {
 }
 
 // 7. FUNCIONES DEL CARRITO DE COMPRAS
-function openProductDetails(id) {
+function openProductDetails(id, { syncUrl = true } = {}) {
     const product = PRODUCTS.find(p => p.id === id);
     if (!product) return;
     
@@ -2038,7 +2137,24 @@ function openProductDetails(id) {
     `).join('');
 
     productModal.classList.add('active');
+    if (syncUrl) history.replaceState({ productId: product.id }, '', productUrl(product));
+    document.title = `${product.title} | LYNX`;
     lucide.createIcons();
+}
+
+function closeProductDetails() {
+    productModal.classList.remove('active');
+    const url = new URL(location.href);
+    if (url.searchParams.has('producto')) {
+        url.searchParams.delete('producto');
+        history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+    }
+    document.title = 'LYNX | Premium Streetwear Co.';
+}
+
+function openProductFromUrl() {
+    const productId = Number(new URLSearchParams(location.search).get('producto'));
+    if (productId) openProductDetails(productId, { syncUrl: false });
 }
 
 function addToCart(product, size, qty) {
@@ -2092,7 +2208,7 @@ function removeFromCart(index) {
 function closeAllDrawers() {
     cartDrawer.classList.remove('active');
     checkoutDrawer.classList.remove('active');
-    productModal.classList.remove('active');
+    closeProductDetails();
 }
 
 // 8. FINALIZACIÓN Y ENVÍO A WHATSAPP

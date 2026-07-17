@@ -14,7 +14,8 @@ const state = {
     user: null,
     products: [],
     finances: [],
-    customers: []
+    customers: [],
+    reviews: []
 };
 
 const $ = selector => document.querySelector(selector);
@@ -140,19 +141,22 @@ async function initialize() {
 }
 
 async function loadAll() {
-    const [{ data: products, error: productError }, { data: finances, error: financeError }, { data: customers, error: customerError }] = await Promise.all([
+    const [{ data: products, error: productError }, { data: finances, error: financeError }, { data: customers, error: customerError }, { data: reviews, error: reviewError }] = await Promise.all([
         supabaseClient.from('products').select('*').order('sort_order', { ascending: true }).order('id'),
         supabaseClient.from('finance_entries').select('*').order('entry_date', { ascending: false }).order('created_at', { ascending: false }).limit(500),
-        supabaseClient.from('customer_profiles').select('*').order('created_at', { ascending: false }).limit(2000)
+        supabaseClient.from('customer_profiles').select('*').order('created_at', { ascending: false }).limit(2000),
+        supabaseClient.from('customer_reviews').select('*').order('created_at', { ascending: false }).limit(500)
     ]);
 
     if (productError) throw productError;
     if (financeError) throw financeError;
     if (customerError) throw customerError;
+    if (reviewError) throw reviewError;
 
     state.products = products || [];
     state.finances = finances || [];
     state.customers = customers || [];
+    state.reviews = reviews || [];
     renderEverything();
 }
 
@@ -161,6 +165,7 @@ function renderEverything() {
     renderProducts();
     renderFinance();
     renderCustomers();
+    renderReviews();
     renderSaleProducts();
     renderAttention();
     lucide.createIcons();
@@ -306,6 +311,34 @@ function renderCustomers() {
             <p>${escapeHtml(customer.phone)} · Registrado ${localDateTime(customer.created_at)}</p>
         </article>
     `).join('') : '<p class="empty-state">No se encontraron clientes.</p>';
+}
+
+function renderReviews() {
+    const filter = $('#review-status-filter')?.value || 'all';
+    const reviews = state.reviews.filter(review => filter === 'all' || review.status === filter);
+    $('#reviews-tbody').innerHTML = reviews.length ? reviews.map(review => `
+        <tr>
+            <td><div class="customer-identity"><strong>${escapeHtml(review.author_name)}</strong><span>Cliente verificado</span></div></td>
+            <td><span class="review-rating-admin">${'★'.repeat(Number(review.rating) || 0)}<span class="review-rating-empty">${'☆'.repeat(5 - (Number(review.rating) || 0))}</span></span></td>
+            <td class="review-comment-cell">${escapeHtml(review.comment)}</td>
+            <td><span class="review-status ${escapeHtml(review.status)}">${review.status === 'published' ? 'PUBLICADA' : review.status === 'hidden' ? 'OCULTA' : 'PENDIENTE'}</span></td>
+            <td>${localDateTime(review.created_at)}</td>
+            <td><div class="row-actions">
+                <button class="row-action approve-review" data-id="${review.id}" title="Publicar" ${review.status === 'published' ? 'disabled' : ''}><i data-lucide="check"></i></button>
+                <button class="row-action hide-review" data-id="${review.id}" title="Ocultar" ${review.status === 'hidden' ? 'disabled' : ''}><i data-lucide="eye-off"></i></button>
+            </div></td>
+        </tr>
+    `).join('') : '<tr><td class="empty-state" colspan="6">No se encontraron reseñas.</td></tr>';
+}
+
+async function updateReviewStatus(id, status) {
+    const { error } = await supabaseClient.from('customer_reviews').update({ status }).eq('id', id);
+    if (error) throw error;
+    const review = state.reviews.find(item => String(item.id) === String(id));
+    if (review) review.status = status;
+    renderReviews();
+    lucide.createIcons();
+    showToast(status === 'published' ? 'Reseña publicada en la tienda.' : 'Reseña ocultada.');
 }
 
 function exportSubscribedCustomers() {
@@ -636,6 +669,7 @@ function bindEvents() {
     $('#product-status-filter').addEventListener('change', renderProducts);
     $('#customer-search').addEventListener('input', renderCustomers);
     $('#customer-marketing-filter').addEventListener('change', renderCustomers);
+    $('#review-status-filter').addEventListener('change', renderReviews);
     $('#export-customers-btn').addEventListener('click', exportSubscribedCustomers);
     $('#sale-form').addEventListener('submit', registerSale);
     $('#finance-form').addEventListener('submit', saveFinance);
@@ -661,6 +695,15 @@ function bindEvents() {
         if (!button) return;
         try { await deleteFinance(button.dataset.id); }
         catch (error) { showToast(error.message, 'error'); }
+    });
+
+    $('#reviews-tbody').addEventListener('click', async event => {
+        const approveButton = event.target.closest('.approve-review');
+        const hideButton = event.target.closest('.hide-review');
+        try {
+            if (approveButton) await updateReviewStatus(approveButton.dataset.id, 'published');
+            if (hideButton) await updateReviewStatus(hideButton.dataset.id, 'hidden');
+        } catch (error) { showToast(error.message, 'error'); }
     });
 
     $('#product-dialog').addEventListener('click', event => {

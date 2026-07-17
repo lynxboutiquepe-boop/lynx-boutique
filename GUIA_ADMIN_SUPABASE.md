@@ -166,7 +166,15 @@ Supabase administra las cuentas y los correos de confirmación o recuperación. 
 
 Los correos de autenticación sirven para confirmar cuentas o recuperar contraseñas, no para campañas comerciales. Los envíos masivos de promociones todavía requieren configurar un proveedor especializado y realizar el envío únicamente a la lista verificada y autorizada. Nunca se debe colocar la llave secreta de ese proveedor dentro de `app.js` o de otro archivo público de la web.
 
-## 10. Cambiar o recuperar la contraseña
+## 10. Reseñas de clientes
+
+- Las reseñas son reales: solo un cliente con cuenta y correo verificado puede enviar una.
+- Cada nueva reseña queda en estado **Pendiente**; no aparece en la tienda hasta que la apruebes.
+- En el panel abre **Reseñas** para verlas. El botón de check la publica y el de ojo tachado la oculta.
+- Si un cliente modifica y vuelve a enviar su reseña, esta vuelve a quedar pendiente de tu aprobación.
+- La tienda pública muestra solamente las reseñas con estado **Publicada**.
+
+## 11. Cambiar o recuperar la contraseña
 
 - En la pantalla de acceso pulsa **Olvidé mi contraseña**.
 - Escribe primero tu correo.
@@ -175,7 +183,7 @@ Los correos de autenticación sirven para confirmar cuentas o recuperar contrase
 
 También puedes cambiarla desde **Supabase → Authentication → Users**. Nunca compartas la contraseña por WhatsApp ni la escribas en archivos del proyecto.
 
-## 11. Copias de seguridad
+## 12. Copias de seguridad
 
 Como práctica mensual:
 
@@ -186,7 +194,7 @@ Como práctica mensual:
 
 El plan gratuito no incluye copias automáticas restaurables. Para una operación más grande, el plan Pro ofrece copias diarias.
 
-## 12. Publicar cambios en Vercel
+## 13. Publicar cambios en Vercel
 
 1. Prueba primero `index.html` y `admin.html` localmente.
 2. Sube nuevamente la carpeta completa a Vercel.
@@ -194,7 +202,7 @@ El plan gratuito no incluye copias automáticas restaurables. Para una operació
 4. Abre `/admin.html` e inicia sesión.
 5. Verifica que un producto editado desde el panel se refleje en la tienda.
 
-## 13. Solución rápida de problemas
+## 14. Solución rápida de problemas
 
 ### “Falta conectar Supabase”
 

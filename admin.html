@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="admin.css?v=20260716-email-register-v1">
+    <link rel="stylesheet" href="admin.css?v=20260716-product-reviews-v1">
 </head>
 <body>
     <main class="login-shell" id="login-shell">
@@ -95,6 +95,7 @@
                     <button class="admin-tab active" type="button" data-panel="dashboard-panel"><i data-lucide="layout-dashboard"></i><span>Resumen</span></button>
                     <button class="admin-tab" type="button" data-panel="products-panel"><i data-lucide="shirt"></i><span>Productos</span></button>
                     <button class="admin-tab" type="button" data-panel="customers-panel"><i data-lucide="users"></i><span>Clientes</span></button>
+                    <button class="admin-tab" type="button" data-panel="reviews-panel"><i data-lucide="star"></i><span>Reseñas</span></button>
                     <button class="admin-tab" type="button" data-panel="finance-panel"><i data-lucide="wallet-cards"></i><span>Caja</span></button>
                 </nav>
                 <a class="store-link" href="index.html" target="_blank" rel="noopener"><i data-lucide="external-link"></i> Ver tienda</a>
@@ -183,6 +184,25 @@
                     <p class="customer-privacy-note"><i data-lucide="shield-check"></i> La exportación incluye únicamente correos verificados que dieron permiso para recibir novedades y descuentos.</p>
                 </section>
 
+                <section class="admin-panel" id="reviews-panel">
+                    <div class="panel-heading">
+                        <div><span class="eyebrow">PRUEBA SOCIAL</span><h2>Reseñas de clientes</h2></div>
+                        <button class="secondary-btn refresh-btn" type="button"><i data-lucide="refresh-cw"></i> Actualizar</button>
+                    </div>
+                    <div class="toolbar">
+                        <select id="review-status-filter" aria-label="Filtrar reseñas">
+                            <option value="all">Todas las reseñas</option>
+                            <option value="pending">Pendientes de aprobar</option>
+                            <option value="published">Publicadas</option>
+                            <option value="hidden">Ocultas</option>
+                        </select>
+                    </div>
+                    <div class="table-shell review-table-shell">
+                        <table class="data-table"><thead><tr><th>Cliente</th><th>Calificación</th><th>Reseña</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="reviews-tbody"></tbody></table>
+                    </div>
+                    <p class="customer-privacy-note"><i data-lucide="shield-check"></i> Solo las reseñas aprobadas son visibles en la tienda. Puedes publicar u ocultar cada una.</p>
+                </section>
+
                 <section class="admin-panel" id="finance-panel">
                     <div class="panel-heading">
                         <div><span class="eyebrow">CONTROL FINANCIERO</span><h2>Caja, ventas y gastos</h2></div>
@@ -257,6 +277,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="supabase-config.js?v=20260716-admin-v1"></script>
-    <script src="admin.js?v=20260716-email-register-v1"></script>
+    <script src="admin.js?v=20260716-product-reviews-v1"></script>
 </body>
 </html>
