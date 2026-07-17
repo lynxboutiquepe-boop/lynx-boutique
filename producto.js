@@ -11,7 +11,11 @@ const quantityMinus = document.getElementById('quantity-minus');
 const quantityPlus = document.getElementById('quantity-plus');
 const buyButton = document.getElementById('buy-button');
 
-const productId = Number(new URLSearchParams(location.search).get('id'));
+// Vercel conserva la URL bonita (/producto/14) en el navegador aunque sirva
+// producto.html por dentro; por eso leemos el id tanto de la query como de la ruta.
+const queryProductId = new URLSearchParams(location.search).get('id');
+const pathProductId = location.pathname.match(/^\/producto\/(\d+)\/?$/i)?.[1];
+const productId = Number(queryProductId || pathProductId);
 let selectedSize = '';
 let selectedQuantity = 1;
 let currentProduct = null;
