@@ -1414,7 +1414,7 @@ body {
         background:
             linear-gradient(90deg, rgba(9, 10, 15, 0.78) 0%, rgba(11, 12, 18, 0.48) 68%, rgba(11, 12, 18, 0.18) 100%),
             linear-gradient(180deg, rgba(11, 12, 18, 0.02) 18%, rgba(11, 12, 18, 0.2) 50%, rgba(11, 12, 18, 0.9) 100%),
-            url('assets/hero-lynx-model-cinematic-v2.png') 61% center / cover no-repeat;
+            url('assets/hero-lynx-model-cinematic-v2.webp') 61% center / cover no-repeat;
     }
 
     .hero-content {
@@ -2055,7 +2055,7 @@ html.is-android .stock-marquee {
         margin-top: 72px;
         padding: 0 18px;
         align-items: flex-end;
-        background: url('assets/hero-lynx-model-v1.png') right center / cover no-repeat;
+        background: url('assets/hero-lynx-model-v1.webp') right center / cover no-repeat;
         background-color: #d9d8df;
     }
 
@@ -3975,7 +3975,7 @@ h6 {
     background:
         linear-gradient(90deg, rgba(9, 10, 15, 0.98) 0%, rgba(9, 10, 15, 0.92) 20%, rgba(12, 13, 20, 0.72) 38%, rgba(14, 15, 22, 0.16) 68%, rgba(14, 15, 22, 0.05) 100%),
         linear-gradient(180deg, rgba(11, 12, 18, 0.04) 12%, rgba(11, 12, 18, 0.14) 52%, rgba(11, 12, 18, 0.78) 100%),
-        url('assets/hero-lynx-model-cinematic-v2.png') right center / auto 100% no-repeat;
+        url('assets/hero-lynx-model-cinematic-v2.webp') right center / auto 100% no-repeat;
     background-color: #090a11;
 }
 
@@ -4050,7 +4050,7 @@ h6 {
         background:
             linear-gradient(90deg, rgba(9, 10, 15, 0.82) 0%, rgba(11, 12, 18, 0.52) 66%, rgba(11, 12, 18, 0.2) 100%),
             linear-gradient(180deg, rgba(11, 12, 18, 0.04) 14%, rgba(11, 12, 18, 0.2) 50%, rgba(11, 12, 18, 0.86) 100%),
-            url('assets/hero-lynx-model-cinematic-v2.png') 64% center / cover no-repeat;
+            url('assets/hero-lynx-model-cinematic-v2.webp') 64% center / cover no-repeat;
     }
 
     .hero-content {
@@ -4146,7 +4146,7 @@ h6 {
         background:
             linear-gradient(90deg, rgba(9, 10, 15, 0.78) 0%, rgba(11, 12, 18, 0.48) 68%, rgba(11, 12, 18, 0.18) 100%),
             linear-gradient(180deg, rgba(11, 12, 18, 0.02) 18%, rgba(11, 12, 18, 0.2) 50%, rgba(11, 12, 18, 0.9) 100%),
-            url('assets/hero-lynx-model-cinematic-v2.png') 68% center / cover no-repeat;
+            url('assets/hero-lynx-model-cinematic-v2.webp') 68% center / cover no-repeat;
     }
 
     .hero-content {
@@ -4439,7 +4439,7 @@ h6 {
         margin-top: calc(72px + env(safe-area-inset-top));
         padding: 0 18px;
         align-items: flex-end;
-        background: url('assets/hero-lynx-model-v1.png') right center / cover no-repeat;
+        background: url('assets/hero-lynx-model-v1.webp') right center / cover no-repeat;
         background-color: #d9d8df;
     }
 
@@ -4778,4 +4778,76 @@ body.review-image-open { overflow: hidden; }
         font-size: 0.95rem;
         line-height: 1.58;
     }
+}
+
+/* Final responsive guardrails */
+.faq-section,
+.reviews-section,
+.app-footer {
+    content-visibility: auto;
+    contain-intrinsic-size: 800px;
+}
+
+@media (max-width: 768px) {
+    html,
+    body,
+    main,
+    .catalog-section,
+    .trending-section,
+    .faq-section,
+    .reviews-section,
+    .app-footer {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    body { overflow-x: clip; }
+
+    .products-grid,
+    .product-card,
+    .product-card-content,
+    .reviews-content,
+    .review-card,
+    .review-compose { min-width: 0; }
+
+    .product-card-title,
+    .cart-item-title,
+    .review-card p { overflow-wrap: anywhere; }
+
+    .modal-content,
+    .drawer-content {
+        width: 100%;
+        max-width: min(100vw, 440px);
+        overflow-x: clip;
+    }
+
+    .drawer-body {
+        min-width: 0;
+        overscroll-behavior: contain;
+    }
+
+    .cart-item {
+        grid-template-columns: 68px minmax(0, 1fr) 32px;
+        gap: 12px;
+    }
+
+    .cart-item-img {
+        width: 68px;
+        height: 88px;
+        border-radius: 8px;
+    }
+
+    .cart-item-actions { min-width: 0; }
+    .drawer-footer .btn { min-height: 50px; }
+}
+
+@media (max-width: 380px) {
+    .header-container { padding-inline: 10px; }
+    .catalog-section { padding-inline: 12px; }
+    .products-grid { gap: 28px 10px; }
+    .drawer-header,
+    .drawer-body,
+    .drawer-footer { padding-inline: 14px; }
+    .cart-item { grid-template-columns: 60px minmax(0, 1fr) 30px; gap: 10px; }
+    .cart-item-img { width: 60px; height: 80px; }
 }

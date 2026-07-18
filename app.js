@@ -51,10 +51,17 @@ const PRODUCT_MOCKUPS = {
     'textured-cable-knit-cabin-puffer-jacket-yellow': 'mockups-finales/textured-cable-knit-cabin-puffer-jacket-yellow-1-mockup.png'
 };
 
+function optimizedStoreImage(source = '') {
+    return String(source).replace(
+        /(mockups-finales\/[^?#]+)\.png(?=([?#]|$))/i,
+        '$1.webp'
+    );
+}
+
 function productImages(slug, count = 8) {
     const photos = Array.from({ length: count }, (_, index) => `assets/${slug}/${slug}-${index + 1}.webp`);
     const mockup = PRODUCT_MOCKUPS[slug];
-    return mockup ? [mockup, ...photos] : photos;
+    return mockup ? [optimizedStoreImage(mockup), ...photos] : photos;
 }
 
 // 1. DATA DE PRODUCTOS POR DEFECTO
@@ -663,6 +670,7 @@ let PRODUCTS = [];
 
 // 2. ESTADO DE LA APLICACIÓN
 let cart = [];
+const CART_STORAGE_KEY = 'lynx_cart_v2';
 let selectedCategory = 'all';
 let searchQuery = '';
 let currentProduct = null; // Para ver detalles
@@ -1135,7 +1143,7 @@ function setupReviewEvents() {
 
 // 4. LÓGICA DE INICIALIZACIÓN
 function mapDatabaseProduct(row) {
-    const images = Array.isArray(row.images) ? row.images.filter(Boolean) : [];
+    const images = Array.isArray(row.images) ? row.images.filter(Boolean).map(optimizedStoreImage) : [];
     const statusBadge = {
         preorder: 'PREVENTA',
         sold_out: 'AGOTADO',
@@ -1159,6 +1167,51 @@ function mapDatabaseProduct(row) {
         status: row.status || 'available',
         fitRecommendation: row.fit_recommendation !== false
     };
+}
+
+function prepareProducts(products) {
+    return products.map(product => {
+        const images = Array.isArray(product.images)
+            ? product.images.filter(Boolean).map(optimizedStoreImage)
+            : [];
+        return {
+            ...product,
+            images,
+            image: images[0] || 'assets/logo-transparent.png'
+        };
+    });
+}
+
+function persistCart() {
+    try {
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart.map(item => ({
+            productId: item.product.id,
+            size: item.size,
+            qty: item.qty
+        }))));
+    } catch (error) {
+        console.warn('No se pudo guardar el carrito.', error);
+    }
+}
+
+function restoreCart() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || '[]');
+        if (!Array.isArray(saved)) return;
+        cart = saved.map(item => {
+            const product = PRODUCTS.find(candidate => String(candidate.id) === String(item.productId));
+            if (!product || product.status === 'sold_out') return null;
+            const sizes = Array.isArray(product.sizes) && product.sizes.length ? product.sizes : ['ÚNICA'];
+            const size = sizes.includes(item.size) ? item.size : sizes[0];
+            const stock = Number(product.stock);
+            const max = Number.isFinite(stock) && stock > 0 ? stock : Number.MAX_SAFE_INTEGER;
+            const qty = Math.max(1, Math.min(Number(item.qty) || 1, max));
+            return { product, size, qty };
+        }).filter(Boolean);
+    } catch (error) {
+        cart = [];
+        localStorage.removeItem(CART_STORAGE_KEY);
+    }
 }
 
 async function loadDatabaseCatalog() {
@@ -1188,9 +1241,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Cargar productos: DEFAULT_PRODUCTS como base, más los agregados desde admin
+    const startupAdminProducts = localStorage.getItem('lynx_admin_products');
+    if (startupAdminProducts) {
+        const startupParsed = JSON.parse(startupAdminProducts);
+        const startupIds = startupParsed.map(product => product.id);
+        const startupDefaults = DEFAULT_PRODUCTS.filter(product => !startupIds.includes(product.id));
+        PRODUCTS = prepareProducts([...startupDefaults, ...startupParsed]);
+    } else {
+        PRODUCTS = prepareProducts(DEFAULT_PRODUCTS);
+    }
+    restoreCart();
+    renderProducts();
+    renderTrendingProducts();
+    renderCart();
+    lucide.createIcons();
+
     const databaseProducts = await loadDatabaseCatalog();
     if (databaseProducts?.length) {
-        PRODUCTS = databaseProducts;
+        PRODUCTS = prepareProducts(databaseProducts);
     } else {
     const adminProducts = localStorage.getItem('lynx_admin_products');
     if (adminProducts) {
@@ -1198,13 +1266,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Mezclar: DEFAULT_PRODUCTS primero, luego los del admin que no estén duplicados
         const adminIds = parsed.map(p => p.id);
         const defaults = DEFAULT_PRODUCTS.filter(p => !adminIds.includes(p.id));
-        PRODUCTS = [...defaults, ...parsed];
+        PRODUCTS = prepareProducts([...defaults, ...parsed]);
     } else {
-        PRODUCTS = [...DEFAULT_PRODUCTS];
+        PRODUCTS = prepareProducts(DEFAULT_PRODUCTS);
     }
     }
     // Limpiar el viejo formato por si acaso
     localStorage.removeItem('lynx_store_products');
+    restoreCart();
 
     renderProducts();
     renderTrendingProducts();
@@ -1216,6 +1285,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     syncReviewAccess();
     openProductFromUrl();
     setupTrendingCarousel();
+    renderCart();
     lucide.createIcons(); // Cargar íconos lucide
 });
 
@@ -1297,7 +1367,7 @@ function renderProducts() {
         <article class="product-card" id="product-${product.id}">
             <a class="product-card-img-wrapper" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ficha de ${escapeHtml(product.title)} en una pestaña nueva">
                 <span class="product-card-badge ${product.badge.toLowerCase().includes('stock') || product.badge.toLowerCase().includes('limit') || product.badge.toLowerCase().includes('última') ? 'limited' : ''}">${product.badge}</span>
-                <img class="product-card-primary-img" src="${product.image}" alt="${product.title}" loading="${productIndex < 4 ? 'eager' : 'lazy'}" decoding="async" ${productIndex < 4 ? 'fetchpriority="high"' : ''} style="pointer-events:none;">
+                <img class="product-card-primary-img" src="${product.image}" alt="${product.title}" loading="lazy" decoding="async" fetchpriority="low" style="pointer-events:none;">
                 ${product.images?.[1] ? `<img class="product-card-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="lazy" style="pointer-events:none;">` : ''}
             </a>
             <div class="product-card-content">
@@ -1330,7 +1400,7 @@ function renderTrendingProducts() {
         <article class="trending-card" ${isDuplicate ? 'aria-hidden="true"' : ''}>
             <a class="trending-card-image" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ficha de ${escapeHtml(product.title)} en una pestaña nueva" ${isDuplicate ? 'tabindex="-1"' : ''}>
                 <span class="trending-card-badge">${product.badge}</span>
-                <img class="trending-primary-img" src="${product.image}" alt="${isDuplicate ? '' : product.title}" loading="${!isDuplicate && productIndex < 3 ? 'eager' : 'lazy'}" decoding="async" ${!isDuplicate && productIndex < 3 ? 'fetchpriority="high"' : ''}>
+                <img class="trending-primary-img" src="${product.image}" alt="${isDuplicate ? '' : product.title}" loading="${!isDuplicate && productIndex < 2 ? 'eager' : 'lazy'}" decoding="async" ${!isDuplicate && productIndex < 2 ? 'fetchpriority="high"' : 'fetchpriority="low"'}>
                 ${product.images?.[1] ? `<img class="trending-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="lazy">` : ''}
             </a>
             <a class="trending-card-title" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer" ${isDuplicate ? 'tabindex="-1"' : ''}>${product.title}</a>
@@ -1975,6 +2045,12 @@ function setupEventListeners() {
 
     closeCartBtn.addEventListener('click', () => cartDrawer.classList.remove('active'));
 
+    window.addEventListener('storage', event => {
+        if (event.key !== CART_STORAGE_KEY) return;
+        restoreCart();
+        renderCart();
+    });
+
     // Navegar y Filtrar por Categoria
     categoryTags.forEach(tag => {
         tag.addEventListener('click', (e) => {
@@ -2316,10 +2392,14 @@ function openProductFromUrl() {
         const requestedSize = params.get('talla');
         const size = availableSizes.includes(requestedSize) ? requestedSize : availableSizes[0];
         const requestedQty = Math.max(1, Number(params.get('cantidad')) || 1);
-        if (addToCart(product, size, requestedQty)) {
+        const wasAdded = addToCart(product, size, requestedQty);
+        if (wasAdded || cart.length) {
             productModal.classList.remove('active');
             cartDrawer.classList.add('active');
         }
+        ['producto', 'comprar', 'talla', 'cantidad'].forEach(key => params.delete(key));
+        const cleanQuery = params.toString();
+        history.replaceState({}, '', `${location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}${location.hash}`);
     }
 }
 
@@ -2349,7 +2429,8 @@ function addToCart(product, size, qty) {
     } else {
         cart.push({ product, size, qty: qtyToAdd });
     }
-    
+
+    persistCart();
     renderCart();
     return true;
 }
@@ -2361,6 +2442,7 @@ function updateCartQty(index, delta) {
         if (cart[index].qty <= 0) {
             removeFromCart(index);
         } else {
+            persistCart();
             renderCart();
         }
     }
@@ -2368,6 +2450,7 @@ function updateCartQty(index, delta) {
 
 function removeFromCart(index) {
     cart.splice(index, 1);
+    persistCart();
     renderCart();
 }
 

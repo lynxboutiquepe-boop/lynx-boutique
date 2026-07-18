@@ -27,7 +27,10 @@ function text(value = '') {
 }
 
 function productImageUrl(source) {
-    const value = text(source).trim();
+    const value = text(source).trim().replace(
+        /(mockups-finales\/[^?#]+)\.png(?=([?#]|$))/i,
+        '$1.webp'
+    );
     if (!value) return '/assets/logo-transparent.png';
     // Las fotos locales deben resolverse desde la raíz, no desde la URL de la ficha.
     if (/^(?:https?:|data:|\/)/i.test(value)) return value;
@@ -106,7 +109,8 @@ function renderProduct(product) {
         };
         image.src = productImageUrl(source);
         image.alt = '';
-        image.loading = index < 3 ? 'eager' : 'lazy';
+        image.loading = index === 0 ? 'eager' : 'lazy';
+        image.fetchPriority = index === 0 ? 'high' : 'low';
         button.append(image);
         button.addEventListener('click', () => setImage(images, index));
         thumbnailList.append(button);

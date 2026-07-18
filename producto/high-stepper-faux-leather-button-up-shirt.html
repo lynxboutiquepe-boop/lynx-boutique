@@ -28,7 +28,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/producto.css?v=20260716-mobile-v5">
+    <link rel="stylesheet" href="/producto.css?v=20260718-responsive-v6">
 </head>
 <body>
     <header class="product-header">
@@ -51,16 +51,16 @@
                 </div>
                 <div class="thumbnail-list" id="thumbnail-list" aria-label="Fotos del producto">
                         <button type="button" class="active" aria-label="Ver foto 1 de High Stepper Faux Leather Button Up Shirt - Gris Oscuro">
-                            <img src="https://www.lynx.pe/assets/high-stepper-faux-leather-button-up-shirt/high-stepper-faux-leather-button-up-shirt-1.webp" alt="" loading="eager">
+                            <img src="https://www.lynx.pe/assets/high-stepper-faux-leather-button-up-shirt/high-stepper-faux-leather-button-up-shirt-1.webp" alt="" loading="eager" fetchpriority="high">
                         </button>
                         <button type="button" class="" aria-label="Ver foto 2 de High Stepper Faux Leather Button Up Shirt - Gris Oscuro">
-                            <img src="https://www.lynx.pe/assets/high-stepper-faux-leather-button-up-shirt/high-stepper-faux-leather-button-up-shirt-2.webp" alt="" loading="eager">
+                            <img src="https://www.lynx.pe/assets/high-stepper-faux-leather-button-up-shirt/high-stepper-faux-leather-button-up-shirt-2.webp" alt="" loading="lazy" fetchpriority="low">
                         </button>
                         <button type="button" class="" aria-label="Ver foto 3 de High Stepper Faux Leather Button Up Shirt - Gris Oscuro">
-                            <img src="https://www.lynx.pe/assets/high-stepper-faux-leather-button-up-shirt/high-stepper-faux-leather-button-up-shirt-3.webp" alt="" loading="eager">
+                            <img src="https://www.lynx.pe/assets/high-stepper-faux-leather-button-up-shirt/high-stepper-faux-leather-button-up-shirt-3.webp" alt="" loading="lazy" fetchpriority="low">
                         </button>
                         <button type="button" class="" aria-label="Ver foto 4 de High Stepper Faux Leather Button Up Shirt - Gris Oscuro">
-                            <img src="https://www.lynx.pe/assets/high-stepper-faux-leather-button-up-shirt/high-stepper-faux-leather-button-up-shirt-4.webp" alt="" loading="lazy">
+                            <img src="https://www.lynx.pe/assets/high-stepper-faux-leather-button-up-shirt/high-stepper-faux-leather-button-up-shirt-4.webp" alt="" loading="lazy" fetchpriority="low">
                         </button>
                 </div>
             </div>
@@ -85,8 +85,8 @@
             </div>
         </article>
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/supabase-config.js?v=20260716-admin-v1"></script>
-    <script src="/producto.js?v=20260718-seo-v1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="/supabase-config.js?v=20260716-admin-v1" defer></script>
+    <script src="/producto.js?v=20260718-speed-v2" defer></script>
 </body>
 </html>

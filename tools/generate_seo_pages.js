@@ -19,6 +19,13 @@ function absoluteUrl(value = '') {
     return `${origin}/${source.replace(/^\.?[\\/]+/, '')}`;
 }
 
+function optimizedStoreImage(value = '') {
+    return String(value).replace(
+        /(mockups-finales\/[^?#]+)\.png(?=([?#]|$))/i,
+        '$1.webp'
+    );
+}
+
 function statusContent(product) {
     if (product.status === 'sold_out') {
         return { badge: 'AGOTADO', note: 'AGOTADO POR EL MOMENTO', availability: 'https://schema.org/OutOfStock', sold: true };
@@ -65,7 +72,9 @@ function titleFor(product) {
 
 function productPage(product) {
     const url = `${origin}/producto/${encodeURIComponent(product.slug)}`;
-    const images = Array.isArray(product.images) && product.images.length ? product.images.filter(Boolean) : ['assets/logo-transparent.png'];
+    const images = Array.isArray(product.images) && product.images.length
+        ? product.images.filter(Boolean).map(optimizedStoreImage)
+        : ['assets/logo-transparent.png'];
     const imageUrls = images.map(absoluteUrl);
     const sizes = Array.isArray(product.sizes) && product.sizes.length ? product.sizes : ['ÚNICA'];
     const status = statusContent(product);
@@ -107,7 +116,7 @@ function productPage(product) {
     const schemaJson = JSON.stringify(schema).replace(/</g, '\\u003c');
     const thumbnails = images.map((source, index) => `
                         <button type="button" class="${index === 0 ? 'active' : ''}" aria-label="Ver foto ${index + 1} de ${escapeHtml(product.title)}">
-                            <img src="${escapeHtml(absoluteUrl(source))}" alt="" loading="${index < 3 ? 'eager' : 'lazy'}">
+                            <img src="${escapeHtml(absoluteUrl(source))}" alt="" loading="${index === 0 ? 'eager' : 'lazy'}" fetchpriority="${index === 0 ? 'high' : 'low'}">
                         </button>`).join('');
     const sizeButtons = sizes.map((size, index) => `<button type="button" class="${index === 0 ? 'active' : ''}">${escapeHtml(size)}</button>`).join('');
 
@@ -141,7 +150,7 @@ function productPage(product) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/producto.css?v=20260716-mobile-v5">
+    <link rel="stylesheet" href="/producto.css?v=20260718-responsive-v6">
 </head>
 <body>
     <header class="product-header">
@@ -186,9 +195,9 @@ function productPage(product) {
             </div>
         </article>
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/supabase-config.js?v=20260716-admin-v1"></script>
-    <script src="/producto.js?v=20260718-seo-v1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="/supabase-config.js?v=20260716-admin-v1" defer></script>
+    <script src="/producto.js?v=20260718-speed-v2" defer></script>
 </body>
 </html>`;
 }
