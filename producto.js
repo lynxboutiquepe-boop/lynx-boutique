@@ -9,6 +9,7 @@ const sizeList = document.getElementById('size-list');
 const quantityValue = document.getElementById('quantity-value');
 const quantityMinus = document.getElementById('quantity-minus');
 const quantityPlus = document.getElementById('quantity-plus');
+const addCartButton = document.getElementById('add-cart-button');
 const buyButton = document.getElementById('buy-button');
 
 // Vercel conserva la URL bonita en el navegador aunque sirva producto.html
@@ -61,10 +62,10 @@ function updateQuantity() {
     quantityValue.textContent = String(selectedQuantity);
     quantityMinus.disabled = selectedQuantity <= 1;
     quantityPlus.disabled = selectedQuantity >= max;
-    updateBuyLink();
+    updateActionLinks();
 }
 
-function updateBuyLink() {
+function updateActionLinks() {
     if (!currentProduct || currentProduct.status === 'sold_out') return;
     // Los productos creados desde Admin no tienen legacy_id; app.js los
     // identifica con este mismo rango para mantener el carrito compatible.
@@ -76,6 +77,9 @@ function updateBuyLink() {
         cantidad: String(selectedQuantity)
     });
     buyButton.href = `/?${params.toString()}`;
+    params.delete('comprar');
+    params.set('agregar', '1');
+    addCartButton.href = `/?${params.toString()}`;
 }
 
 function renderProduct(product) {
@@ -126,7 +130,7 @@ function renderProduct(product) {
         button.addEventListener('click', () => {
             selectedSize = size;
             sizeList.querySelectorAll('button').forEach(candidate => candidate.classList.toggle('active', candidate === button));
-            updateBuyLink();
+            updateActionLinks();
         });
         sizeList.append(button);
     });
@@ -136,10 +140,12 @@ function renderProduct(product) {
     updateQuantity();
 
     if (status.sold) {
+        addCartButton.textContent = 'PRODUCTO AGOTADO';
+        addCartButton.setAttribute('aria-disabled', 'true');
         buyButton.textContent = 'PRODUCTO AGOTADO';
         buyButton.setAttribute('aria-disabled', 'true');
     } else {
-        updateBuyLink();
+        updateActionLinks();
     }
 
     productLoading.hidden = true;

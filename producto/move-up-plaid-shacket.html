@@ -28,7 +28,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/producto.css?v=20260718-responsive-v6">
+    <link rel="stylesheet" href="/producto.css?v=20260718-cart-actions-v7">
 </head>
 <body>
     <header class="product-header">
@@ -83,13 +83,16 @@
                         <button type="button" id="quantity-minus" aria-label="Reducir cantidad">−</button><output id="quantity-value">1</output><button type="button" id="quantity-plus" aria-label="Aumentar cantidad">+</button>
                     </div></div>
                 </div>
-                <a class="primary-button" id="buy-button" href="/?producto=33&amp;comprar=1&amp;talla=M&amp;cantidad=1" >INICIAR PEDIDO</a>
+                <div class="purchase-actions">
+                    <a class="primary-button" id="add-cart-button" href="/?producto=33&amp;agregar=1&amp;talla=M&amp;cantidad=1" >AGREGAR AL CARRITO</a>
+                    <a class="secondary-button" id="buy-button" href="/?producto=33&amp;comprar=1&amp;talla=M&amp;cantidad=1" >INICIAR PEDIDO</a>
+                </div>
                 <p class="purchase-note">Inicia sesión en LYNX para finalizar tu pedido de forma segura.</p>
             </div>
         </article>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="/supabase-config.js?v=20260716-admin-v1" defer></script>
-    <script src="/producto.js?v=20260718-speed-v2" defer></script>
+    <script src="/producto.js?v=20260718-cart-actions-v3" defer></script>
 </body>
 </html>

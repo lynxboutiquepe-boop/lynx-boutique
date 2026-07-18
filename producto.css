@@ -76,6 +76,10 @@ body {
 .primary-button { display: inline-flex; align-items: center; justify-content: center; min-height: 54px; width: 100%; border: 0; border-radius: 12px; background: var(--violet); color: #fff; text-decoration: none; font: 800 .78rem/1 Outfit, sans-serif; letter-spacing: .09em; transition: transform .18s, background .18s; }
 .primary-button:hover { background: var(--violet-dark); transform: translateY(-1px); }
 .primary-button[aria-disabled="true"] { background: #c9c9d1; pointer-events: none; }
+.purchase-actions { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.secondary-button { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; width: 100%; border: 1px solid var(--ink); border-radius: 12px; background: #fff; color: var(--ink); text-decoration: none; font: 800 .76rem/1 Outfit, sans-serif; letter-spacing: .09em; transition: color .18s, background .18s, transform .18s; }
+.secondary-button:hover { background: var(--ink); color: #fff; transform: translateY(-1px); }
+.secondary-button[aria-disabled="true"] { border-color: #c9c9d1; color: #a3a3ad; pointer-events: none; }
 .purchase-note { margin: 12px 0 0; color: var(--muted); font-size: .72rem; line-height: 1.5; text-align: center; }
 
 @media (max-width: 760px) {

@@ -1375,6 +1375,9 @@ function renderProducts() {
                 <a class="product-card-title" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer">${product.title}</a>
                 <span class="product-card-price">S/. ${product.price.toFixed(2)}</span>
                 <div class="product-card-footer">
+                    <button class="btn btn-primary btn-block product-card-add" type="button" data-product-id="${product.id}" ${product.status === 'sold_out' ? 'disabled' : ''}>
+                        ${product.status === 'sold_out' ? 'AGOTADO' : 'AGREGAR AL CARRITO'}
+                    </button>
                     <a class="btn btn-secondary btn-block" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer">VER DETALLES</a>
                 </div>
             </div>
@@ -2051,6 +2054,17 @@ function setupEventListeners() {
         renderCart();
     });
 
+    productsGrid.addEventListener('click', event => {
+        const button = event.target.closest('.product-card-add');
+        if (!button || button.disabled) return;
+        const product = PRODUCTS.find(item => String(item.id) === button.dataset.productId);
+        if (!product) return;
+        const size = product.sizes?.length ? product.sizes[0] : 'ÚNICA';
+        if (!addToCart(product, size, 1)) return;
+        closeAllDrawers();
+        cartDrawer.classList.add('active');
+    });
+
     // Navegar y Filtrar por Categoria
     categoryTags.forEach(tag => {
         tag.addEventListener('click', (e) => {
@@ -2387,7 +2401,7 @@ function openProductFromUrl() {
 
     // Llegadas desde una ficha individual: se conserva la prenda, talla y
     // cantidad seleccionadas, y se abre la bolsa para continuar el pedido.
-    if (params.get('comprar') === '1') {
+    if (params.get('comprar') === '1' || params.get('agregar') === '1') {
         const availableSizes = product.sizes?.length ? product.sizes : ['ÚNICA'];
         const requestedSize = params.get('talla');
         const size = availableSizes.includes(requestedSize) ? requestedSize : availableSizes[0];
@@ -2397,7 +2411,7 @@ function openProductFromUrl() {
             productModal.classList.remove('active');
             cartDrawer.classList.add('active');
         }
-        ['producto', 'comprar', 'talla', 'cantidad'].forEach(key => params.delete(key));
+        ['producto', 'comprar', 'agregar', 'talla', 'cantidad'].forEach(key => params.delete(key));
         const cleanQuery = params.toString();
         history.replaceState({}, '', `${location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}${location.hash}`);
     }

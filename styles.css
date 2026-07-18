@@ -2654,6 +2654,23 @@ html.is-android .stock-marquee {
     margin-top: auto;
 }
 
+.product-card-footer {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.product-card-add:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+}
+
+@media (max-width: 768px) {
+    .product-card-footer {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Modals and Overlays Base */
 .modal-overlay, .drawer-overlay {
     position: fixed;
