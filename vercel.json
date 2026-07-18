@@ -1,12 +1,4 @@
 {
-  "rewrites": [
-    {
-      "source": "/admin",
-      "destination": "/admin.html"
-    },
-    {
-      "source": "/producto/:slug",
-      "destination": "/producto.html?slug=:slug"
-    }
-  ]
+  "cleanUrls": true,
+  "trailingSlash": false
 }

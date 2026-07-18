@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin.html
+Disallow: /producto.html
+
+Sitemap: https://lynx-boutique.vercel.app/sitemap.xml

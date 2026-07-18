@@ -157,5 +157,10 @@ async function loadProduct() {
 
 loadProduct().then(renderProduct).catch(() => {
     productLoading.hidden = true;
-    productNotFound.hidden = false;
+    // Las fichas SEO generadas ya contienen una copia completa del producto.
+    // Si Supabase falla temporalmente, conservamos ese contenido rastreable y
+    // utilizable en vez de reemplazarlo por un falso "no disponible".
+    if (productView.dataset.staticProduct !== 'true') {
+        productNotFound.hidden = false;
+    }
 });
