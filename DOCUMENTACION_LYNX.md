@@ -1,17 +1,19 @@
 # Documentación LYNX Boutique
 
-**Última actualización:** 16 de julio de 2026
+**Última actualización:** 18 de julio de 2026
 **Proyecto:** LYNX | Premium Streetwear Co.  
 **Carpeta local:** `C:\Users\Lynx\Documents\LYNX BOUTIQUE WEB\whatsapp-clothing-store`
 
 ## Estado actual
 
 - La web está publicada en Vercel.
-- URL temporal de producción: <https://lynx-boutique.vercel.app>
+- URL principal de producción: <https://www.lynx.pe>
+- `https://lynx.pe` redirige permanentemente a `https://www.lynx.pe`.
+- La dirección técnica `lynx-boutique.vercel.app` redirige al dominio oficial y no debe compartirse con clientes.
 - Proyecto de Vercel: `lynx-boutique`
 - El dominio personalizado añadido en Vercel es `lynx.pe`.
 - `www.lynx.pe` también está añadido y configurado para apuntar a producción.
-- En la última revisión, ambos dominios personalizados mostraban **Invalid Configuration** porque todavía faltaba configurar el DNS en Punto.pe.
+- Los dominios personalizados están configurados y cuentan con HTTPS activo.
 
 ## Conectar el dominio lynx.pe
 
@@ -38,8 +40,8 @@ Actualmente la publicación se hizo subiendo la carpeta manualmente a Vercel.
 2. Probar localmente abriendo `index.html`.
 3. En Vercel, abrir el proyecto `lynx-boutique`.
 4. Crear un nuevo deployment subiendo nuevamente la carpeta actualizada.
-5. Comprobar primero la URL `lynx-boutique.vercel.app`.
-6. Luego revisar `lynx.pe` y `www.lynx.pe`.
+5. Comprobar la URL oficial `https://www.lynx.pe`.
+6. Confirmar que `https://lynx.pe` y la dirección antigua de Vercel redirigen al dominio oficial.
 
 Para ver cambios locales sin caché, abrir `index.html` y presionar **Ctrl + F5**.
 
@@ -81,11 +83,10 @@ No eliminar todavía el código del Fit Lab hasta decidir si se reconstruye con 
 
 ## Próximos pasos
 
-1. Configurar los registros DNS en Punto.pe.
-2. Verificar que `lynx.pe` y `www.lynx.pe` aparezcan como **Valid Configuration** en Vercel.
-3. Probar la web desde móvil usando el dominio real.
-4. Revisar enlaces, imágenes y botón de WhatsApp.
-5. Más adelante decidir si se reconstruye el Fit Lab desde cero.
+1. Mantener `www.lynx.pe` como dominio principal y canónico.
+2. Probar la web desde móvil usando el dominio oficial.
+3. Revisar enlaces, imágenes y botón de WhatsApp.
+4. Más adelante decidir si se reconstruye el Fit Lab desde cero.
 
 ## Referencias oficiales
 

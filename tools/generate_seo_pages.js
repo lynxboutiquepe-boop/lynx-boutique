@@ -3,7 +3,7 @@ const path = require('path');
 
 const root = path.resolve(__dirname, '..');
 const products = JSON.parse(fs.readFileSync(path.join(root, 'catalog-seed.json'), 'utf8'));
-const origin = 'https://lynx-boutique.vercel.app';
+const origin = 'https://www.lynx.pe';
 const outputDirectory = path.join(root, 'producto');
 const lastModified = '2026-07-18';
 

@@ -48,10 +48,10 @@ const sitemapCount = (sitemap.match(/<url>/g) || []).length;
 if (sitemapCount !== products.length + 1) errors.push(`Expected ${products.length + 1} sitemap URLs, found ${sitemapCount}`);
 
 const robots = fs.readFileSync(path.join(root, 'robots.txt'), 'utf8');
-if (!robots.includes('Sitemap: https://lynx-boutique.vercel.app/sitemap.xml')) errors.push('robots.txt does not declare sitemap');
+if (!robots.includes('Sitemap: https://www.lynx.pe/sitemap.xml')) errors.push('robots.txt does not declare sitemap');
 
 const home = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-if (!home.includes('<link rel="canonical" href="https://lynx-boutique.vercel.app/">')) errors.push('Home canonical missing');
+if (!home.includes('<link rel="canonical" href="https://www.lynx.pe/">')) errors.push('Home canonical missing');
 if (!home.includes('"@type": "OnlineStore"')) errors.push('OnlineStore schema missing');
 
 if (errors.length) {

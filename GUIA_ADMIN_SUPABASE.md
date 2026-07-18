@@ -9,7 +9,7 @@
 - Tablas, seguridad RLS y almacenamiento de imágenes creados.
 - Catálogo cargado: **52 productos**.
 - Administrador autorizado: `lynxboutique.pe@gmail.com`.
-- URL de acceso: `https://lynx-boutique.vercel.app/admin.html`.
+- URL de acceso: `https://www.lynx.pe/admin`.
 
 La configuración inicial ya está terminada. Las secciones 2 a 6 quedan como referencia para mantenimiento o para reconstruir el proyecto en el futuro.
 
