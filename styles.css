@@ -4955,15 +4955,15 @@ body {
     margin-top: 0;
     align-items: flex-end;
     background:
-        linear-gradient(90deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.58) 29%, rgba(0, 0, 0, 0.08) 64%, rgba(0, 0, 0, 0.2) 100%),
-        url('assets/hero-collection-2026.webp') center / cover no-repeat;
+        linear-gradient(90deg, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.72) 31%, rgba(0, 0, 0, 0.2) 61%, rgba(0, 0, 0, 0.16) 100%),
+        url('assets/hero-lynx-model-cinematic-v2.webp') 61% center / cover no-repeat;
     background-color: #080808;
 }
 
 .hero-overlay {
     background:
-        linear-gradient(180deg, rgba(0, 0, 0, 0.06) 48%, rgba(0, 0, 0, 0.62) 100%),
-        radial-gradient(circle at 16% 52%, rgba(212, 175, 55, 0.12), transparent 34%);
+        linear-gradient(180deg, rgba(0, 0, 0, 0.04) 45%, rgba(0, 0, 0, 0.72) 100%),
+        radial-gradient(circle at 17% 52%, rgba(212, 175, 55, 0.16), transparent 36%);
 }
 
 .hero-content {
@@ -5243,12 +5243,14 @@ body {
         margin-top: calc(68px + env(safe-area-inset-top));
         padding: 0 18px;
         background:
-            linear-gradient(180deg, rgba(0, 0, 0, 0.04) 38%, rgba(0, 0, 0, 0.86) 88%),
-            url('assets/hero-collection-2026.webp') 72% center / cover no-repeat;
+            linear-gradient(180deg, rgba(0, 0, 0, 0.05) 32%, rgba(0, 0, 0, 0.92) 91%),
+            url('assets/hero-lynx-model-v1.webp') right center / cover no-repeat;
     }
 
     .hero-overlay {
-        background: linear-gradient(180deg, transparent 44%, rgba(0, 0, 0, 0.58) 100%);
+        background:
+            linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.68) 100%),
+            radial-gradient(circle at 18% 72%, rgba(212, 175, 55, 0.12), transparent 42%);
     }
 
     .hero-content {
@@ -5329,7 +5331,7 @@ body {
         min-height: 450px;
         height: 132vw;
         max-height: 540px;
-        background-position: 74% center;
+        background-position: right center;
     }
 
     .hero-title {
