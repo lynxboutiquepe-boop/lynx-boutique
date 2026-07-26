@@ -1254,6 +1254,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderProducts();
     renderTrendingProducts();
     renderCart();
+
+    // Los antiguos resultados de Google usaban rutas /c/CODIGO.
+    // Vercel los trae al catálogo mediante ?legacy=CODIGO para evitar un 404.
+    const legacyProductCode = new URLSearchParams(window.location.search).get('legacy');
+    if (legacyProductCode) {
+        requestAnimationFrame(() => {
+            document.getElementById('catalog')?.scrollIntoView({ block: 'start' });
+            window.history.replaceState(null, '', `${window.location.pathname}#catalog`);
+        });
+    }
     lucide.createIcons();
 
     const databaseProducts = await loadDatabaseCatalog();

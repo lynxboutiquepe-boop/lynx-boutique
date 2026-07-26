@@ -13,6 +13,16 @@
       ],
       "destination": "https://www.lynx.pe/:path*",
       "permanent": true
+    },
+    {
+      "source": "/c/POL-LRO-BLA",
+      "destination": "/producto/bold-flock-hoodie-black",
+      "permanent": true
+    },
+    {
+      "source": "/c/:legacyCode",
+      "destination": "/?legacy=:legacyCode",
+      "permanent": true
     }
   ],
   "headers": [
