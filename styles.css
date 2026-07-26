@@ -5338,3 +5338,50 @@ body {
         font-size: clamp(2rem, 11vw, 2.7rem);
     }
 }
+
+/* Compact classic hero + always-running announcement carousel */
+.stock-marquee-track {
+    animation: lynx-stock-loop 24s linear infinite;
+    animation-play-state: running;
+    will-change: transform;
+}
+
+@keyframes lynx-stock-loop {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+
+    to {
+        transform: translate3d(-50%, 0, 0);
+    }
+}
+
+.hero-section {
+    min-height: 450px;
+    height: 58vh;
+    max-height: 620px;
+}
+
+.hero-content {
+    margin-bottom: clamp(34px, 5vh, 58px);
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 410px;
+        height: clamp(410px, 108vw, 520px);
+        max-height: 520px;
+    }
+
+    .hero-content {
+        padding-bottom: 22px;
+    }
+}
+
+@media (max-width: 380px) {
+    .hero-section {
+        min-height: 400px;
+        height: 108vw;
+        max-height: 470px;
+    }
+}
