@@ -1180,12 +1180,7 @@ async function loadDatabaseCatalog() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // En la portada compacta, el aviso de stock va debajo del banner visual.
-    const hero = document.getElementById('home-hero');
-    const stockMarquee = document.querySelector('.stock-marquee');
-    if (window.matchMedia('(max-width: 768px)').matches && hero && stockMarquee) {
-        hero.insertAdjacentElement('afterend', stockMarquee);
-    }
+
 
     // Cargar productos: DEFAULT_PRODUCTS como base, más los agregados desde admin
     const databaseProducts = await loadDatabaseCatalog();
