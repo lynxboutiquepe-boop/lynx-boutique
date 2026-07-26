@@ -5,7 +5,7 @@ const root = path.resolve(__dirname, '..');
 const products = JSON.parse(fs.readFileSync(path.join(root, 'catalog-seed.json'), 'utf8'));
 const origin = 'https://www.lynx.pe';
 const outputDirectory = path.join(root, 'producto');
-const lastModified = '2026-07-18';
+const lastModified = '2026-07-26';
 
 function escapeHtml(value = '') {
     return String(value).replace(/[&<>'"]/g, character => ({
@@ -219,6 +219,7 @@ for (const product of products) {
 const activeProducts = products.filter(product => product.slug && product.status !== 'archived');
 const sitemapUrls = [
     { location: `${origin}/`, priority: '1.0', frequency: 'daily' },
+    { location: `${origin}/guia/lynx-streetwear-peru`, priority: '0.7', frequency: 'monthly' },
     ...activeProducts.map(product => ({ location: `${origin}/producto/${encodeURIComponent(product.slug)}`, priority: '0.8', frequency: 'weekly' }))
 ];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

@@ -45,7 +45,8 @@ for (const product of products) {
 
 const sitemap = fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8');
 const sitemapCount = (sitemap.match(/<url>/g) || []).length;
-if (sitemapCount !== products.length + 1) errors.push(`Expected ${products.length + 1} sitemap URLs, found ${sitemapCount}`);
+if (sitemapCount !== products.length + 2) errors.push(`Expected ${products.length + 2} sitemap URLs, found ${sitemapCount}`);
+if (!sitemap.includes('<loc>https://www.lynx.pe/guia/lynx-streetwear-peru</loc>')) errors.push('SEO guide missing from sitemap');
 
 const robots = fs.readFileSync(path.join(root, 'robots.txt'), 'utf8');
 if (!robots.includes('Sitemap: https://www.lynx.pe/sitemap.xml')) errors.push('robots.txt does not declare sitemap');
@@ -53,6 +54,11 @@ if (!robots.includes('Sitemap: https://www.lynx.pe/sitemap.xml')) errors.push('r
 const home = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 if (!home.includes('<link rel="canonical" href="https://www.lynx.pe/">')) errors.push('Home canonical missing');
 if (!home.includes('"@type": "OnlineStore"')) errors.push('OnlineStore schema missing');
+
+const guide = fs.readFileSync(path.join(root, 'guia', 'lynx-streetwear-peru.html'), 'utf8');
+if (!guide.includes('<link rel="canonical" href="https://www.lynx.pe/guia/lynx-streetwear-peru">')) errors.push('SEO guide canonical missing');
+if ((guide.match(/<h1[ >]/g) || []).length !== 1) errors.push('SEO guide must have exactly one H1');
+if (!guide.includes('"@type": "Article"') || !guide.includes('"@type": "FAQPage"')) errors.push('SEO guide structured data incomplete');
 
 if (errors.length) {
     console.error(errors.join('\n'));

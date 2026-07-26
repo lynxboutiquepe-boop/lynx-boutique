@@ -5436,3 +5436,19 @@ body {
         max-height: 455px;
     }
 }
+
+.footer-guide-link {
+    display: inline-flex;
+    margin-top: 14px;
+    color: var(--gold-soft);
+    font-family: var(--font-title);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.footer-guide-link:hover,
+.footer-guide-link:focus-visible {
+    color: var(--accent);
+}
