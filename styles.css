@@ -4868,3 +4868,471 @@ body.review-image-open { overflow: hidden; }
     .cart-item { grid-template-columns: 60px minmax(0, 1fr) 30px; gap: 10px; }
     .cart-item-img { width: 60px; height: 80px; }
 }
+
+/* LYNX Fusion 2026
+   Dark luxury direction inspired by the new collection artwork, integrated
+   over the current storefront without replacing its commerce components. */
+:root {
+    --bg-primary: #070707;
+    --bg-secondary: #111111;
+    --bg-tertiary: #191919;
+    --text-primary: #f8f6ef;
+    --text-secondary: #c8c5bb;
+    --text-muted: #8f8c83;
+    --accent: #d4af37;
+    --accent-hover: #ebca60;
+    --accent-rgb: 212, 175, 55;
+    --gold: #d4af37;
+    --gold-soft: #f1dc96;
+    --gold-rgb: 212, 175, 55;
+    --ivory-panel: #111111;
+    --heritage-ink: #f8f6ef;
+    --border-color: #292721;
+    --border-focus: #d4af37;
+}
+
+html,
+body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.app-header {
+    border-bottom-color: rgba(212, 175, 55, 0.18);
+    background: rgba(7, 7, 7, 0.94);
+    color: var(--text-primary);
+    backdrop-filter: blur(18px);
+}
+
+.logo-img {
+    filter: brightness(0) invert(1);
+}
+
+.desktop-nav .nav-link,
+.header-actions button {
+    color: #d5d2c9;
+}
+
+.desktop-nav .nav-link:hover,
+.desktop-nav .nav-link.active,
+.header-actions button:hover {
+    color: var(--gold-soft);
+}
+
+.desktop-nav .nav-link.active::after {
+    background: var(--accent);
+}
+
+.mobile-nav {
+    border-color: rgba(212, 175, 55, 0.22);
+    background: #0d0d0d;
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.48);
+}
+
+.mobile-nav-link {
+    color: var(--text-secondary);
+}
+
+.mobile-nav-link:hover,
+.mobile-nav-link.active {
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--gold-soft);
+}
+
+.cart-count {
+    background: var(--accent);
+    color: #080808;
+}
+
+.stock-marquee {
+    border-block: 1px solid rgba(212, 175, 55, 0.28);
+    background: #0d0d0d;
+    color: var(--gold-soft);
+}
+
+.hero-section {
+    min-height: clamp(560px, 71vh, 760px);
+    margin-top: 0;
+    align-items: flex-end;
+    background:
+        linear-gradient(90deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.58) 29%, rgba(0, 0, 0, 0.08) 64%, rgba(0, 0, 0, 0.2) 100%),
+        url('assets/hero-collection-2026.webp') center / cover no-repeat;
+    background-color: #080808;
+}
+
+.hero-overlay {
+    background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.06) 48%, rgba(0, 0, 0, 0.62) 100%),
+        radial-gradient(circle at 16% 52%, rgba(212, 175, 55, 0.12), transparent 34%);
+}
+
+.hero-content {
+    max-width: 620px;
+    margin: 0 0 clamp(58px, 8vh, 96px) clamp(24px, 6vw, 96px);
+    padding: 0;
+    text-align: left;
+}
+
+.hero-tag {
+    border-color: rgba(212, 175, 55, 0.56);
+    background: rgba(12, 12, 12, 0.68);
+    color: var(--gold-soft);
+}
+
+.hero-title {
+    color: #ffffff;
+    text-shadow: 0 10px 36px rgba(0, 0, 0, 0.55);
+}
+
+.gradient-text {
+    background: none;
+    color: var(--gold-soft);
+    -webkit-text-fill-color: var(--gold-soft);
+}
+
+.hero-description {
+    margin-left: 0;
+    color: #dedbd2;
+}
+
+.hero-content .btn-primary {
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: #080808;
+    box-shadow: 0 14px 34px rgba(212, 175, 55, 0.22);
+}
+
+.hero-content .btn-primary:hover {
+    border-color: var(--gold-soft);
+    background: var(--gold-soft);
+    color: #080808;
+}
+
+.info-strip {
+    border-block-color: rgba(212, 175, 55, 0.16);
+    background: #101010;
+    color: var(--text-secondary);
+}
+
+.info-item svg {
+    color: var(--accent);
+}
+
+.trending-section,
+.outfit-builder-section,
+.catalog-section,
+.faq-section {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.outfit-builder-section,
+.faq-section {
+    border-top: 1px solid rgba(212, 175, 55, 0.12);
+}
+
+.trending-eyebrow,
+.catalog-eyebrow,
+.faq-kicker,
+.builder-heading-kicker,
+.product-card-category {
+    color: var(--accent);
+}
+
+.trending-header h2,
+.section-title,
+.outfit-builder-heading h2,
+.faq-heading h2,
+.catalog-category-heading h3 {
+    color: var(--text-primary);
+}
+
+.trending-controls button {
+    border-color: rgba(212, 175, 55, 0.35);
+    background: #111111;
+    color: var(--gold-soft);
+}
+
+.trending-controls button:hover {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #070707;
+}
+
+.trending-card {
+    color: var(--text-primary);
+}
+
+.trending-card-image,
+.product-card-img-wrapper {
+    border: 1px solid #25231e;
+    background: #f0efeb;
+}
+
+.trending-card-title,
+.product-card-title {
+    color: var(--text-primary);
+}
+
+.trending-card-title:hover,
+.product-card-title:hover {
+    color: var(--gold-soft);
+}
+
+.trending-card-price,
+.product-card-price {
+    color: var(--gold-soft);
+}
+
+.trending-card-badge,
+.product-card-badge,
+.product-card-badge.limited {
+    border: 1px solid rgba(212, 175, 55, 0.75);
+    background: #0a0a0a;
+    color: var(--gold-soft);
+}
+
+.builder-preview-panel,
+.builder-controls,
+.builder-choice-group {
+    border-color: rgba(212, 175, 55, 0.16);
+    background: #101010;
+}
+
+.builder-stage {
+    background:
+        radial-gradient(circle at 50% 35%, rgba(212, 175, 55, 0.15), transparent 38%),
+        #e9e7e1;
+}
+
+.builder-choice-heading h3,
+.builder-total,
+.builder-choice-card strong {
+    color: var(--text-primary);
+}
+
+.builder-choice-card {
+    border-color: #302e28;
+    background: #161616;
+    color: var(--text-secondary);
+}
+
+.builder-choice-card.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.12);
+}
+
+.catalog-container {
+    color: var(--text-primary);
+}
+
+.search-box,
+.tag-btn {
+    border-color: #302e28;
+    background: #111111;
+    color: var(--text-secondary);
+}
+
+.search-box input {
+    color: var(--text-primary);
+}
+
+.search-box input::placeholder {
+    color: var(--text-muted);
+}
+
+.tag-btn:hover,
+.tag-btn.active {
+    border-color: var(--accent);
+    background: rgba(212, 175, 55, 0.12);
+    color: var(--gold-soft);
+}
+
+.product-card-footer .btn-primary {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #080808;
+}
+
+.product-card-footer .btn-primary:hover {
+    background: var(--gold-soft);
+}
+
+.product-card-footer .btn-secondary {
+    border-color: #524a30;
+    background: #111111;
+    color: var(--text-primary);
+}
+
+.product-card-footer .btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--gold-soft);
+}
+
+.reviews-section {
+    background:
+        radial-gradient(circle at 12% 18%, rgba(212, 175, 55, 0.13), transparent 31%),
+        linear-gradient(135deg, #090909, #12110e 58%, #070707);
+}
+
+.reviews-heading .faq-kicker {
+    color: var(--gold-soft);
+}
+
+.review-card {
+    border-color: rgba(212, 175, 55, 0.18);
+    background: rgba(255, 255, 255, 0.045);
+}
+
+.review-compose {
+    border: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+.faq-item {
+    border-color: #292721;
+    background: #111111;
+    color: var(--text-primary);
+}
+
+.faq-item summary:hover {
+    color: var(--gold-soft);
+}
+
+.faq-item p,
+.faq-heading p,
+.outfit-builder-heading p,
+.section-subtitle {
+    color: var(--text-secondary);
+}
+
+.app-footer {
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+    background: #050505;
+    color: var(--text-secondary);
+}
+
+.app-footer h3,
+.app-footer h4 {
+    color: var(--gold-soft);
+}
+
+.social-fab {
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+@media (max-width: 768px) {
+    .app-header,
+    .header-container {
+        height: 68px;
+    }
+
+    .header-container {
+        grid-template-columns: 46px 1fr 94px;
+    }
+
+    .logo-img {
+        height: 24px;
+        max-width: 138px;
+    }
+
+    .hero-section {
+        min-height: 480px;
+        height: clamp(480px, 124vw, 610px);
+        max-height: 610px;
+        margin-top: calc(68px + env(safe-area-inset-top));
+        padding: 0 18px;
+        background:
+            linear-gradient(180deg, rgba(0, 0, 0, 0.04) 38%, rgba(0, 0, 0, 0.86) 88%),
+            url('assets/hero-collection-2026.webp') 72% center / cover no-repeat;
+    }
+
+    .hero-overlay {
+        background: linear-gradient(180deg, transparent 44%, rgba(0, 0, 0, 0.58) 100%);
+    }
+
+    .hero-content {
+        margin: 0;
+        padding: 0 0 28px;
+    }
+
+    .hero-tag {
+        display: inline-flex;
+        margin-bottom: 12px;
+        font-size: 0.6rem;
+    }
+
+    .hero-title {
+        display: block;
+        max-width: 350px;
+        margin-bottom: 12px;
+        font-size: clamp(2.25rem, 11.5vw, 3.35rem);
+        line-height: 0.9;
+        letter-spacing: -0.04em;
+    }
+
+    .hero-description {
+        display: none;
+    }
+
+    .hero-content .btn-primary {
+        min-height: 44px;
+        padding: 0 18px;
+        border: 1px solid var(--accent);
+        border-radius: 6px;
+        background: var(--accent);
+        color: #080808;
+        font-size: 0.68rem;
+    }
+
+    .stock-marquee {
+        background: #0b0b0b;
+    }
+
+    .trending-section {
+        background: var(--bg-primary);
+    }
+
+    .trending-card-image {
+        border-radius: 10px;
+        background: #efeee9;
+    }
+
+    .trending-header {
+        text-align: left;
+    }
+
+    .product-card-footer {
+        gap: 7px;
+    }
+
+    .social-fab-group {
+        right: max(10px, env(safe-area-inset-right));
+        bottom: max(14px, env(safe-area-inset-bottom));
+        gap: 6px;
+    }
+
+    .social-fab {
+        width: 42px;
+        min-height: 42px;
+        height: 42px;
+    }
+
+    .social-fab .social-brand-icon {
+        width: 22px;
+        height: 22px;
+    }
+}
+
+@media (max-width: 380px) {
+    .hero-section {
+        min-height: 450px;
+        height: 132vw;
+        max-height: 540px;
+        background-position: 74% center;
+    }
+
+    .hero-title {
+        font-size: clamp(2rem, 11vw, 2.7rem);
+    }
+}
