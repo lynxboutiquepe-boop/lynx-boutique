@@ -5360,6 +5360,9 @@ body {
     min-height: 450px;
     height: 58vh;
     max-height: 620px;
+    background-size: auto, auto 100%;
+    background-position: center, right center;
+    background-repeat: no-repeat;
 }
 
 .hero-content {
@@ -5371,6 +5374,8 @@ body {
         min-height: 410px;
         height: clamp(410px, 108vw, 520px);
         max-height: 520px;
+        background-size: auto, cover;
+        background-position: center, right center;
     }
 
     .hero-content {
