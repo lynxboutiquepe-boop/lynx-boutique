@@ -58,7 +58,7 @@ if (!home.includes('"@type": "OnlineStore"')) errors.push('OnlineStore schema mi
 const vercelConfig = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
 const slugRedirects = JSON.parse(fs.readFileSync(path.join(root, 'product-slug-redirects.json'), 'utf8'));
 const productFallback = vercelConfig.rewrites?.find(route =>
-    route.source === '/producto/:slug' && route.destination === '/producto.html?slug=:slug'
+    route.source === '/producto/:slug' && route.destination === '/producto?slug=:slug'
 );
 if (!productFallback) errors.push('Dynamic product fallback is missing from vercel.json');
 for (const redirect of slugRedirects) {
