@@ -23,6 +23,72 @@
       "source": "/c/:legacyCode",
       "destination": "/?legacy=:legacyCode",
       "permanent": true
+    },
+    {
+      "source": "/producto/tyson-lost-saints-oversized-hoodie-negro-combinado",
+      "destination": "/producto/tyson-lost-saints",
+      "permanent": true
+    },
+    {
+      "source": "/producto/stacked-skinny-flare-sun-damage-nova-stretch-jean-vintage-wash",
+      "destination": "/producto/stacked-skinny-sun-damage",
+      "permanent": true
+    },
+    {
+      "source": "/producto/malcom-x-embroidered-hoodie-negro",
+      "destination": "/producto/malcom-x-hoodie",
+      "permanent": true
+    },
+    {
+      "source": "/producto/pearl-wildin-camo-button-up-shirt-negro",
+      "destination": "/producto/pearl-wildin-camo-button-up-shirt",
+      "permanent": true
+    },
+    {
+      "source": "/producto/ghost-distressed-printed-denim-jacket-negro",
+      "destination": "/producto/ghost-distressed-printed-denim-jacket",
+      "permanent": true
+    },
+    {
+      "source": "/producto/saints-rhinestones-sweatpants-azul-marino",
+      "destination": "/producto/saints-rhinestones-sweatpants",
+      "permanent": true
+    },
+    {
+      "source": "/producto/stacked-skinny-flare-be-brave-be-fearless-embroidered-jean-deslavado-azul-vintage",
+      "destination": "/producto/stacked-skinny-flare-be-brave-be-fearless-embridered-jean",
+      "permanent": true
+    },
+    {
+      "source": "/producto/pearl-wildin-camo-cargo-baggy-pants-negro",
+      "destination": "/producto/pearl-wildin-camo-cargo-baggy-pants",
+      "permanent": true
+    },
+    {
+      "source": "/producto/baggy-ghost-distressed-printed-jean-negro",
+      "destination": "/producto/baggy-ghost-distressed-printed-jean",
+      "permanent": true
+    },
+    {
+      "source": "/producto/saints-rhinestones-oversized-hoodie-azul-marino",
+      "destination": "/producto/saints-rhinestones-oversized-hoodie",
+      "permanent": true
+    },
+    {
+      "source": "/producto/lakers-wavey-oversized-zip-hoodie-morado",
+      "destination": "/producto/lakers-wavey-oversized-zip-hoodie-purple",
+      "permanent": true
+    },
+    {
+      "source": "/producto/lakers-wavey-wide-sweatpants-morado",
+      "destination": "/producto/lakers-wavey-wide-sweatpants-purple",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/producto/:slug",
+      "destination": "/producto.html?slug=:slug"
     }
   ],
   "headers": [

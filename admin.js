@@ -415,7 +415,19 @@ async function saveProduct(event) {
     try {
         const id = $('#product-id').value;
         const title = $('#product-title').value.trim();
-        const slug = slugify(title);
+        const existingProduct = id
+            ? state.products.find(product => String(product.id) === String(id))
+            : null;
+        // El slug es la URL pública permanente del producto. Al editar el
+        // título se conserva para no romper enlaces publicados o indexados.
+        const slug = existingProduct?.slug || slugify(title);
+        if (!slug) throw new Error('Escribe un nombre válido para generar el enlace del producto.');
+        const repeatedSlug = state.products.find(product =>
+            product.slug === slug && String(product.id) !== String(id)
+        );
+        if (repeatedSlug) {
+            throw new Error(`Ya existe un producto con este enlace: ${repeatedSlug.title}.`);
+        }
         const existingImages = $('#product-images').value.split('\n').map(value => value.trim()).filter(Boolean);
         const files = [...$('#product-image-files').files];
         const uploadedImages = files.length ? await uploadProductImages(files, slug) : [];

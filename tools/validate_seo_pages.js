@@ -55,6 +55,24 @@ const home = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 if (!home.includes('<link rel="canonical" href="https://www.lynx.pe/">')) errors.push('Home canonical missing');
 if (!home.includes('"@type": "OnlineStore"')) errors.push('OnlineStore schema missing');
 
+const vercelConfig = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
+const slugRedirects = JSON.parse(fs.readFileSync(path.join(root, 'product-slug-redirects.json'), 'utf8'));
+const productFallback = vercelConfig.rewrites?.find(route =>
+    route.source === '/producto/:slug' && route.destination === '/producto.html?slug=:slug'
+);
+if (!productFallback) errors.push('Dynamic product fallback is missing from vercel.json');
+for (const redirect of slugRedirects) {
+    const matchingRoute = vercelConfig.redirects?.find(route =>
+        route.source === `/producto/${redirect.old_slug}`
+        && route.destination === `/producto/${redirect.canonical_slug}`
+        && route.permanent === true
+    );
+    if (!matchingRoute) errors.push(`Missing permanent redirect for ${redirect.old_slug}`);
+    if (!products.some(product => product.slug === redirect.canonical_slug)) {
+        errors.push(`Redirect target is not a catalog product: ${redirect.canonical_slug}`);
+    }
+}
+
 const guide = fs.readFileSync(path.join(root, 'guia', 'lynx-streetwear-peru.html'), 'utf8');
 if (!guide.includes('<link rel="canonical" href="https://www.lynx.pe/guia/lynx-streetwear-peru">')) errors.push('SEO guide canonical missing');
 if ((guide.match(/<h1[ >]/g) || []).length !== 1) errors.push('SEO guide must have exactly one H1');

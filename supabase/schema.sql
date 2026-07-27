@@ -26,7 +26,7 @@ create table if not exists public.products (
   id bigint generated always as identity primary key,
   legacy_id integer unique,
   title text not null,
-  slug text,
+  slug text not null unique,
   category text not null check (category in ('hoodies-jackets', 't-shirts', 'jeans-pants', 'conjuntos')),
   price numeric(12,2) not null check (price >= 0),
   cost numeric(12,2) not null default 0 check (cost >= 0),
