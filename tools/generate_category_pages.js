@@ -31,8 +31,8 @@ const categories = [
         navLabel: 'Conjuntos',
         h1: 'Conjuntos LYNX',
         title: 'Conjuntos LYNX | Streetwear para Hombre en Perú',
-        description: 'Conoce los próximos conjuntos LYNX para hombre. Streetwear coordinado, drops limitados y novedades en Instagram y TikTok.',
-        intro: 'Estamos preparando conjuntos coordinados para que armes un outfit completo sin perder el estilo LYNX. Síguenos para enterarte del próximo drop.'
+        description: 'Compra conjuntos LYNX para hombre: hoodie o jacket con pants a juego. Streetwear coordinado, stock limitado y envíos a todo el Perú.',
+        intro: 'Combina hoodies, jackets y pants de la misma colección para conseguir un outfit completo con la identidad streetwear de LYNX.'
     }
 ];
 
@@ -53,7 +53,12 @@ function absoluteImage(value = '') {
 
 function categoryPage(category) {
     const url = `${origin}/categoria/${category.slug}`;
-    const categoryProducts = products.filter(product => product.category === category.productCategory);
+    const conjuntosOrder = [27, 35, 28, 36, 37, 29, 48, 49];
+    const categoryProducts = products
+        .filter(product => product.category === category.productCategory)
+        .sort((a, b) => category.productCategory === 'conjuntos'
+            ? conjuntosOrder.indexOf(a.legacy_id) - conjuntosOrder.indexOf(b.legacy_id)
+            : (a.sort_order || 0) - (b.sort_order || 0));
     const itemList = categoryProducts.map((product, index) => ({
         '@type': 'ListItem',
         position: index + 1,

@@ -72,6 +72,23 @@ for (const categoryPath of categoryPaths) {
         errors.push(`Category structured data incomplete: ${categoryPath}`);
     }
 }
+const conjuntosHtml = fs.readFileSync(path.join(root, 'categoria', 'conjuntos.html'), 'utf8');
+const conjuntoSlugs = [
+    'pearl-wildin-camo-button-up-shirt',
+    'pearl-wildin-camo-cargo-baggy-pants',
+    'ghost-distressed-printed-denim-jacket',
+    'baggy-ghost-distressed-printed-jean',
+    'saints-rhinestones-oversized-hoodie',
+    'saints-rhinestones-sweatpants',
+    'lakers-wavey-oversized-zip-hoodie-purple',
+    'lakers-wavey-wide-sweatpants-purple'
+];
+for (const slug of conjuntoSlugs) {
+    if (!conjuntosHtml.includes(`/producto/${slug}`)) errors.push(`Conjunto product missing: ${slug}`);
+}
+if ((conjuntosHtml.match(/class="category-product"/g) || []).length !== conjuntoSlugs.length) {
+    errors.push(`Expected ${conjuntoSlugs.length} products in Conjuntos`);
+}
 
 const robots = fs.readFileSync(path.join(root, 'robots.txt'), 'utf8');
 if (!robots.includes('Sitemap: https://www.lynx.pe/sitemap.xml')) errors.push('robots.txt does not declare sitemap');

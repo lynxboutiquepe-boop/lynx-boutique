@@ -370,7 +370,7 @@ const DEFAULT_PRODUCTS = [
     {
         id: 27,
         title: 'Pearl Wildin Camo Button Up Shirt - Negro',
-        category: 'hoodies-jackets',
+        category: 'conjuntos',
         price: 129.90,
         sizes: ['L'],
         images: productImages('pearl-wildin-camo-button-up-shirt', 4),
@@ -381,7 +381,7 @@ const DEFAULT_PRODUCTS = [
     {
         id: 28,
         title: 'Ghost Distressed Printed Denim Jacket - Negro',
-        category: 'hoodies-jackets',
+        category: 'conjuntos',
         price: 129.90,
         sizes: ['L'],
         images: productImages('ghost-distressed-printed-denim-jacket', 4),
@@ -392,7 +392,7 @@ const DEFAULT_PRODUCTS = [
     {
         id: 29,
         title: 'Saints Rhinestones Sweatpants - Azul Marino',
-        category: 'jeans-pants',
+        category: 'conjuntos',
         price: 109.90,
         sizes: ['XL'],
         fitRecommendation: false,
@@ -459,7 +459,7 @@ const DEFAULT_PRODUCTS = [
     {
         id: 35,
         title: 'Pearl Wildin Camo Cargo Baggy Pants - Negro',
-        category: 'jeans-pants',
+        category: 'conjuntos',
         price: 129.90,
         sizes: ['L'],
         fitRecommendation: false,
@@ -471,7 +471,7 @@ const DEFAULT_PRODUCTS = [
     {
         id: 36,
         title: 'Baggy Ghost Distressed Printed Jean - Negro',
-        category: 'jeans-pants',
+        category: 'conjuntos',
         price: 109.90,
         sizes: ['36'],
         images: productImages('baggy-ghost-distressed-printed-jean', 4),
@@ -482,7 +482,7 @@ const DEFAULT_PRODUCTS = [
     {
         id: 37,
         title: 'Saints Rhinestones Oversized Hoodie - Azul Marino',
-        category: 'hoodies-jackets',
+        category: 'conjuntos',
         price: 109.90,
         sizes: ['L'],
         images: productImages('saints-rhinestones-oversized-hoodie', 4),
@@ -609,7 +609,7 @@ const DEFAULT_PRODUCTS = [
     {
         id: 48,
         title: 'Lakers Wavey Oversized Zip Hoodie - Morado',
-        category: 'hoodies-jackets',
+        category: 'conjuntos',
         price: 119.90,
         sizes: ['M'],
         images: productImages('lakers-wavey-oversized-zip-hoodie-purple', 4),
@@ -620,7 +620,7 @@ const DEFAULT_PRODUCTS = [
     {
         id: 49,
         title: 'Lakers Wavey Wide Sweatpants - Morado',
-        category: 'jeans-pants',
+        category: 'conjuntos',
         price: 119.90,
         sizes: ['L'],
         fitRecommendation: false,
