@@ -91,7 +91,13 @@ function renderProduct(product) {
 
     document.title = `${text(product.title)} | LYNX`;
     document.querySelector('meta[name="description"]').content = text(product.description).slice(0, 155) || `Compra ${text(product.title)} en LYNX.`;
-    document.getElementById('product-category').textContent = text(product.category).replaceAll('-', ' ').toUpperCase();
+    const categoryLink = document.getElementById('product-category');
+    categoryLink.textContent = text(product.category).replaceAll('-', ' ').toUpperCase();
+    categoryLink.href = ({
+        'hoodies-jackets': '/categoria/hoodies',
+        'jeans-pants': '/categoria/jeans-y-pants',
+        'conjuntos': '/categoria/conjuntos'
+    })[product.category] || '/#catalog';
     document.getElementById('product-title').textContent = text(product.title);
     document.getElementById('product-price').textContent = `S/. ${Number(product.price || 0).toFixed(2)}`;
     document.getElementById('product-description').textContent = text(product.description);

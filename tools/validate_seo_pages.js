@@ -44,9 +44,34 @@ for (const product of products) {
 }
 
 const sitemap = fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8');
+const categoryPaths = [
+    '/categoria/hoodies',
+    '/categoria/jeans-y-pants',
+    '/categoria/conjuntos'
+];
 const sitemapCount = (sitemap.match(/<url>/g) || []).length;
-if (sitemapCount !== products.length + 2) errors.push(`Expected ${products.length + 2} sitemap URLs, found ${sitemapCount}`);
+if (sitemapCount !== products.length + 2 + categoryPaths.length) {
+    errors.push(`Expected ${products.length + 2 + categoryPaths.length} sitemap URLs, found ${sitemapCount}`);
+}
 if (!sitemap.includes('<loc>https://www.lynx.pe/guia/lynx-streetwear-peru</loc>')) errors.push('SEO guide missing from sitemap');
+for (const categoryPath of categoryPaths) {
+    if (!sitemap.includes(`<loc>https://www.lynx.pe${categoryPath}</loc>`)) {
+        errors.push(`Category missing from sitemap: ${categoryPath}`);
+    }
+    const categoryFile = path.join(root, `${categoryPath}.html`.replace(/^\//, ''));
+    if (!fs.existsSync(categoryFile)) {
+        errors.push(`Missing category page: ${categoryPath}`);
+        continue;
+    }
+    const categoryHtml = fs.readFileSync(categoryFile, 'utf8');
+    if ((categoryHtml.match(/<h1[ >]/g) || []).length !== 1) errors.push(`Category must have one H1: ${categoryPath}`);
+    if (!categoryHtml.includes(`<link rel="canonical" href="https://www.lynx.pe${categoryPath}">`)) {
+        errors.push(`Invalid category canonical: ${categoryPath}`);
+    }
+    if (!categoryHtml.includes('"@type":"CollectionPage"') || !categoryHtml.includes('"@type":"ItemList"')) {
+        errors.push(`Category structured data incomplete: ${categoryPath}`);
+    }
+}
 
 const robots = fs.readFileSync(path.join(root, 'robots.txt'), 'utf8');
 if (!robots.includes('Sitemap: https://www.lynx.pe/sitemap.xml')) errors.push('robots.txt does not declare sitemap');
@@ -54,6 +79,12 @@ if (!robots.includes('Sitemap: https://www.lynx.pe/sitemap.xml')) errors.push('r
 const home = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 if (!home.includes('<link rel="canonical" href="https://www.lynx.pe/">')) errors.push('Home canonical missing');
 if (!home.includes('"@type": "OnlineStore"')) errors.push('OnlineStore schema missing');
+for (const categoryPath of categoryPaths) {
+    if (!home.includes(`href="${categoryPath}"`)) errors.push(`Home link missing for ${categoryPath}`);
+}
+if (!home.includes('https://www.instagram.com/boutique_lynx/') || !home.includes('https://www.tiktok.com/@boutique_lynx')) {
+    errors.push('Official social profiles are missing from home');
+}
 
 const vercelConfig = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
 const slugRedirects = JSON.parse(fs.readFileSync(path.join(root, 'product-slug-redirects.json'), 'utf8'));

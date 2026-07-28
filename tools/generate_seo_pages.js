@@ -5,7 +5,12 @@ const root = path.resolve(__dirname, '..');
 const products = JSON.parse(fs.readFileSync(path.join(root, 'catalog-seed.json'), 'utf8'));
 const origin = 'https://www.lynx.pe';
 const outputDirectory = path.join(root, 'producto');
-const lastModified = '2026-07-26';
+const lastModified = '2026-07-27';
+const categoryPages = [
+    `${origin}/categoria/hoodies`,
+    `${origin}/categoria/jeans-y-pants`,
+    `${origin}/categoria/conjuntos`
+];
 
 function escapeHtml(value = '') {
     return String(value).replace(/[&<>'"]/g, character => ({
@@ -51,6 +56,14 @@ function categoryLabel(category) {
         't-shirts': 'T-shirts',
         'conjuntos': 'Conjuntos'
     })[category] || 'Streetwear';
+}
+
+function categoryUrl(category) {
+    return ({
+        'hoodies-jackets': `${origin}/categoria/hoodies`,
+        'jeans-pants': `${origin}/categoria/jeans-y-pants`,
+        'conjuntos': `${origin}/categoria/conjuntos`
+    })[category] || `${origin}/#catalog`;
 }
 
 function descriptionFor(product) {
@@ -109,7 +122,8 @@ function productPage(product) {
                 '@type': 'BreadcrumbList',
                 itemListElement: [
                     { '@type': 'ListItem', position: 1, name: 'LYNX Boutique Perú', item: `${origin}/` },
-                    { '@type': 'ListItem', position: 2, name: product.title, item: url }
+                    { '@type': 'ListItem', position: 2, name: categoryLabel(product.category), item: categoryUrl(product.category) },
+                    { '@type': 'ListItem', position: 3, name: product.title, item: url }
                 ]
             }
         ]
@@ -177,7 +191,7 @@ function productPage(product) {
             </div>
 
             <div class="product-copy">
-                <p class="eyebrow" id="product-category">${escapeHtml(categoryLabel(product.category).toUpperCase())}</p>
+                <a class="eyebrow" id="product-category" href="${escapeHtml(categoryUrl(product.category).replace(origin, ''))}">${escapeHtml(categoryLabel(product.category).toUpperCase())}</a>
                 <h1 id="product-title">${escapeHtml(product.title)}</h1>
                 <p class="product-price" id="product-price">S/. ${Number(product.price).toFixed(2)}</p>
                 <p class="stock-note ${status.sold ? 'sold' : ''}" id="stock-note">${escapeHtml(status.note)}</p>
@@ -216,9 +230,12 @@ for (const product of products) {
     fs.writeFileSync(path.join(outputDirectory, `${product.slug}.html`), productPage(product), 'utf8');
 }
 
+require('./generate_category_pages.js');
+
 const activeProducts = products.filter(product => product.slug && product.status !== 'archived');
 const sitemapUrls = [
     { location: `${origin}/`, priority: '1.0', frequency: 'daily' },
+    ...categoryPages.map(location => ({ location, priority: '0.9', frequency: 'daily' })),
     { location: `${origin}/guia/lynx-streetwear-peru`, priority: '0.7', frequency: 'monthly' },
     ...activeProducts.map(product => ({ location: `${origin}/producto/${encodeURIComponent(product.slug)}`, priority: '0.8', frequency: 'weekly' }))
 ];

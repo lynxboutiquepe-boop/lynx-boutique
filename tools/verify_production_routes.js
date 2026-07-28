@@ -4,6 +4,11 @@ const path = require('path');
 const root = path.resolve(__dirname, '..');
 const config = fs.readFileSync(path.join(root, 'supabase-config.js'), 'utf8');
 const redirects = JSON.parse(fs.readFileSync(path.join(root, 'product-slug-redirects.json'), 'utf8'));
+const categoryPaths = [
+    '/categoria/hoodies',
+    '/categoria/jeans-y-pants',
+    '/categoria/conjuntos'
+];
 const supabaseUrl = config.match(/url:\s*'([^']+)'/)?.[1];
 const supabaseKey = config.match(/publishableKey:\s*'([^']+)'/)?.[1];
 const siteUrl = process.env.LYNX_SITE_URL || 'https://www.lynx.pe';
@@ -51,19 +56,43 @@ async function main() {
     );
 
     const fallback = await responseStatus(`${siteUrl}/producto/verificacion-ruta-dinamica-lynx`);
+    const categoryChecks = await Promise.all(categoryPaths.map(async categoryPath => ({
+        path: categoryPath,
+        ...await responseStatus(`${siteUrl}${categoryPath}`)
+    })));
+    const brokenCategories = categoryChecks.filter(result => result.status !== 200);
+    const homeResponse = await fetch(`${siteUrl}/`);
+    const homeHtml = await homeResponse.text();
+    const officialSocialProfiles = [
+        'https://www.instagram.com/boutique_lynx/',
+        'https://www.tiktok.com/@boutique_lynx'
+    ];
+    const missingSocialProfiles = officialSocialProfiles.filter(profile => !homeHtml.includes(profile));
     const summary = {
         products: products.length,
         validProductRoutes: productChecks.length - brokenProducts.length,
         invalidSlugs: invalidSlugs.length,
         duplicateSlugs: duplicates.length,
         validLegacyRedirects: redirectChecks.length - brokenRedirects.length,
+        validCategoryRoutes: categoryChecks.length - brokenCategories.length,
+        officialSocialProfiles: officialSocialProfiles.length - missingSocialProfiles.length,
         dynamicFallbackStatus: fallback.status
     };
     console.log(JSON.stringify(summary, null, 2));
 
-    if (invalidSlugs.length || duplicates.length || brokenProducts.length || brokenRedirects.length || fallback.status !== 200) {
+    if (
+        invalidSlugs.length
+        || duplicates.length
+        || brokenProducts.length
+        || brokenRedirects.length
+        || brokenCategories.length
+        || missingSocialProfiles.length
+        || fallback.status !== 200
+    ) {
         if (brokenProducts.length) console.error('Rutas rotas:', brokenProducts);
         if (brokenRedirects.length) console.error('Redirecciones rotas:', brokenRedirects);
+        if (brokenCategories.length) console.error('Categorías rotas:', brokenCategories);
+        if (missingSocialProfiles.length) console.error('Perfiles sociales ausentes:', missingSocialProfiles);
         process.exit(1);
     }
 }

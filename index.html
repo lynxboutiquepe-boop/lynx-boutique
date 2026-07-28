@@ -59,7 +59,7 @@
     <!-- Lucide Icons (CDN) -->
     <script src="https://unpkg.com/lucide@latest" defer></script>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260726-seo-guide-v6">
+    <link rel="stylesheet" href="styles.css?v=20260727-category-seo-v7">
 </head>
 <body>
 
@@ -72,10 +72,9 @@
             
             <nav class="desktop-nav">
                 <button class="nav-link active" id="nav-all">Catálogo</button>
-                <button class="nav-link" id="nav-hoodies">Hoodies & Jackets</button>
-                <button class="nav-link" id="nav-tshirts">T-Shirts</button>
-                <button class="nav-link" id="nav-jeans">Jeans & Pants</button>
-                <button class="nav-link" id="nav-conjuntos">Conjuntos</button>
+                <a class="nav-link" id="nav-hoodies" href="/categoria/hoodies">Hoodies</a>
+                <a class="nav-link" id="nav-jeans" href="/categoria/jeans-y-pants">Jeans & Pants</a>
+                <a class="nav-link" id="nav-conjuntos" href="/categoria/conjuntos">Conjuntos</a>
             </nav>
 
             <div class="header-actions">
@@ -97,10 +96,9 @@
 
             <nav class="mobile-nav" id="mobile-nav" aria-hidden="true" aria-label="Categorías de la tienda">
                 <button class="mobile-nav-link active" data-category="all">Catálogo</button>
-                <button class="mobile-nav-link" data-category="hoodies-jackets">Hoodies & Jackets</button>
-                <button class="mobile-nav-link" data-category="t-shirts">T-Shirts</button>
-                <button class="mobile-nav-link" data-category="jeans-pants">Jeans & Pants</button>
-                <button class="mobile-nav-link" data-category="conjuntos">Conjuntos</button>
+                <a class="mobile-nav-link" href="/categoria/hoodies">Hoodies</a>
+                <a class="mobile-nav-link" href="/categoria/jeans-y-pants">Jeans & Pants</a>
+                <a class="mobile-nav-link" href="/categoria/conjuntos">Conjuntos</a>
                 <button class="mobile-nav-link mobile-account-link" id="mobile-account-btn" type="button"><i data-lucide="user-round"></i><span id="mobile-account-btn-label">Ingresar / registrarme</span></button>
             </nav>
         </div>
@@ -251,7 +249,6 @@
             <div class="category-tags" id="category-tags-container">
                 <button class="tag-btn active" data-category="all" id="tag-all">Todo</button>
                 <button class="tag-btn" data-category="hoodies-jackets" id="tag-hoodies">Hoodies & Jackets</button>
-                <button class="tag-btn" data-category="t-shirts" id="tag-tshirts">T-Shirts</button>
                 <button class="tag-btn" data-category="jeans-pants" id="tag-jeans">Jeans & Pants</button>
                 <button class="tag-btn" data-category="conjuntos" id="tag-conjuntos">Conjuntos</button>
             </div>
@@ -362,10 +359,11 @@
                 <a class="footer-guide-link" href="/guia/lynx-streetwear-peru">Guía de streetwear LYNX →</a>
             </div>
             <div class="footer-info">
-                <h4>ENVÍOS Y ENTREGAS</h4>
+                <h4>CATEGORÍAS LYNX</h4>
                 <ul>
-                    <li><i data-lucide="check"></i> Shalom (Provincia): Recoge en agencia local (2-3 días)</li>
-                    <li><i data-lucide="check"></i> Motorizado (Lima): Separa con S/. 50 y liquida al recibir</li>
+                    <li><a href="/categoria/hoodies"><i data-lucide="arrow-right"></i> Hoodies</a></li>
+                    <li><a href="/categoria/jeans-y-pants"><i data-lucide="arrow-right"></i> Jeans & Pants</a></li>
+                    <li><a href="/categoria/conjuntos"><i data-lucide="arrow-right"></i> Conjuntos</a></li>
                     <li><a class="footer-whatsapp-link" href="https://wa.me/51962210278?text=Hola%20LYNX%2C%20quiero%20informaci%C3%B3n%20sobre%20sus%20prendas." target="_blank" rel="noopener noreferrer" aria-label="Escribir a LYNX por WhatsApp al 962 210 278"><i data-lucide="phone"></i><span>Soporte WhatsApp: +51 962 210 278</span></a></li>
                 </ul>
             </div>
@@ -373,13 +371,13 @@
                 <h4>CONECTA CON LYNX</h4>
                 <p>Stock, tallas y pedidos con atención directa.</p>
                 <div class="social-links">
-                    <a href="https://www.instagram.com/boutique_lynx/" target="_blank" rel="noopener noreferrer" aria-label="Seguir a LYNX en Instagram">
+                    <a href="https://www.instagram.com/boutique_lynx/" target="_blank" rel="me noopener noreferrer" aria-label="Instagram oficial de LYNX Boutique Perú">
                         <img class="social-brand-icon" src="https://api.iconify.design/logos/instagram-icon.svg" alt="" width="20" height="20" loading="lazy">
-                        <span>Instagram</span>
+                        <span>Instagram oficial</span>
                     </a>
-                    <a href="https://www.tiktok.com/@boutique_lynx" target="_blank" rel="noopener noreferrer" aria-label="Seguir a LYNX en TikTok">
+                    <a href="https://www.tiktok.com/@boutique_lynx" target="_blank" rel="me noopener noreferrer" aria-label="TikTok oficial de LYNX Boutique Perú">
                         <img class="social-brand-icon" src="https://api.iconify.design/logos/tiktok-icon.svg" alt="" width="20" height="20" loading="lazy">
-                        <span>TikTok</span>
+                        <span>TikTok oficial</span>
                     </a>
                     <a href="https://wa.me/51962210278" target="_blank" rel="noopener noreferrer" aria-label="Contactar a LYNX por WhatsApp">
                         <img class="social-brand-icon" src="https://api.iconify.design/logos/whatsapp-icon.svg" alt="" width="20" height="20" loading="lazy">
