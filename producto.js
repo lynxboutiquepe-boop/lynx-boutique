@@ -162,7 +162,11 @@ async function loadProduct() {
     if ((!Number.isInteger(productId) || productId < 1) && !productSlug) throw new Error('Producto inválido');
     const client = window.getLynxSupabase?.();
     if (!client) throw new Error('No se pudo conectar al catálogo');
-    const request = client.from('products').select('*').neq('status', 'archived').limit(1);
+    const request = client
+        .from('products')
+        .select('id,legacy_id,title,slug,category,price,stock,sizes,images,description,badge,status,fit_recommendation,sort_order')
+        .neq('status', 'archived')
+        .limit(1);
     const { data, error } = productSlug
         ? await request.eq('slug', productSlug).maybeSingle()
         : await request.or(`id.eq.${productId},legacy_id.eq.${productId}`).maybeSingle();

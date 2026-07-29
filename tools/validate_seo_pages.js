@@ -74,6 +74,8 @@ for (const categoryPath of categoryPaths) {
 }
 const conjuntosHtml = fs.readFileSync(path.join(root, 'categoria', 'conjuntos.html'), 'utf8');
 const conjuntoSlugs = [
+    'in-the-cut-camo-sweatpants-grey-combo',
+    'in-the-cut-camo-zip-up-hoodie-grey-combo',
     'pearl-wildin-camo-button-up-shirt',
     'pearl-wildin-camo-cargo-baggy-pants',
     'ghost-distressed-printed-denim-jacket',

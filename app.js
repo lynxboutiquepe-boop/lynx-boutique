@@ -48,7 +48,18 @@ const PRODUCT_MOCKUPS = {
     'lakers-wavey-wide-sweatpants-purple': 'mockups-finales/lakers-wavey-wide-sweatpants-purple-1-mockup.png',
     'tumble-slim-flare-jeans-light-blue-wash': 'mockups-finales/tumble-slim-flare-jeans-light-blue-wash-1-mockup.png',
     'contrast-skinny-stacked-flared-cargo-pants-camouflage': 'mockups-finales/contrast-skinny-stacked-flared-cargo-pants-camouflage-1-mockup.png',
-    'textured-cable-knit-cabin-puffer-jacket-yellow': 'mockups-finales/textured-cable-knit-cabin-puffer-jacket-yellow-1-mockup.png'
+    'textured-cable-knit-cabin-puffer-jacket-yellow': 'mockups-finales/textured-cable-knit-cabin-puffer-jacket-yellow-1-mockup.png',
+    'in-the-cut-camo-sweatpants-grey-combo': 'mockups-finales/in-the-cut-camo-sweatpants-grey-combo-1-mockup.png',
+    'in-the-cut-camo-zip-up-hoodie-grey-combo': 'mockups-finales/in-the-cut-camo-zip-up-hoodie-grey-combo-1-mockup.png',
+    'tyson-die-rich-quarter-zip-sweatshirt-black-wash': 'mockups-finales/tyson-die-rich-quarter-zip-sweatshirt-black-wash-1-mockup.png',
+    'antisocial-rhinestone-pearl-oversized-hoodie-navy': 'mockups-finales/antisocial-rhinestone-pearl-oversized-hoodie-navy-1-mockup.png',
+    'cropped-utility-corduroy-collar-work-jacket-olive': 'mockups-finales/cropped-utility-corduroy-collar-work-jacket-olive-1-mockup.png',
+    'relaxed-96-faux-pebble-leather-varsity-jacket-navy': 'mockups-finales/relaxed-96-faux-pebble-leather-varsity-jacket-navy-1-mockup.png',
+    'rosa-parks-nah-embroidered-hoodie-black': 'mockups-finales/rosa-parks-nah-embroidered-hoodie-black-1-mockup.png',
+    'heartbreakers-players-club-hoodie-black': 'mockups-finales/heartbreakers-players-club-hoodie-black-1-mockup.png',
+    'nyc-all-star-hoodie-powder-blue': 'mockups-finales/nyc-all-star-hoodie-powder-blue-1-mockup.png',
+    'skeleton-stars-embroidered-oversized-hoodie-black': 'mockups-finales/skeleton-stars-embroidered-oversized-hoodie-black-1-mockup.png',
+    'cropped-paisley-jacquard-denim-work-jacket-dark-wash': 'mockups-finales/cropped-paisley-jacquard-denim-work-jacket-dark-wash-1-mockup.png'
 };
 
 function optimizedStoreImage(source = '') {
@@ -662,6 +673,139 @@ const DEFAULT_PRODUCTS = [
         get image() { return this.images[0]; },
         description: 'Chaqueta puffer amarilla con textura de tejido trenzado y volumen acolchado para destacar en climas fríos. Disponible en talla M.',
         badge: 'TALLA M'
+    },
+    {
+        id: 53,
+        title: 'In The Cut Camo Sweatpants - Gris Combinado',
+        category: 'conjuntos',
+        price: 125.00,
+        stock: 1,
+        sizes: ['L'],
+        fitRecommendation: false,
+        images: productImages('in-the-cut-camo-sweatpants-grey-combo', 4),
+        get image() { return this.images[0]; },
+        description: 'Pantalón deportivo camuflado en gris combinado, de pierna amplia y fit relajado. Combínalo con el hoodie In The Cut para completar el conjunto. Disponible en talla L.',
+        badge: 'TALLA L'
+    },
+    {
+        id: 54,
+        title: 'In The Cut Camo Zip Up Hoodie - Gris Combinado',
+        category: 'conjuntos',
+        price: 125.00,
+        stock: 1,
+        sizes: ['L'],
+        images: productImages('in-the-cut-camo-zip-up-hoodie-grey-combo', 4),
+        get image() { return this.images[0]; },
+        description: 'Hoodie camuflado gris con cierre completo, capucha y fit relajado. Combínalo con el sweatpant In The Cut para completar el conjunto. Disponible en talla L.',
+        badge: 'TALLA L'
+    },
+    {
+        id: 55,
+        title: 'Tyson Die Rich Quarter Zip Sweatshirt - Negro Deslavado',
+        category: 'hoodies-jackets',
+        price: 109.90,
+        stock: 1,
+        sizes: ['L'],
+        images: productImages('tyson-die-rich-quarter-zip-sweatshirt-black-wash', 4),
+        get image() { return this.images[0]; },
+        description: 'Sudadera Tyson en negro deslavado con cuello alto, cierre de un cuarto y gráficos Born Broke Die Rich. Disponible en talla L.',
+        badge: 'TALLA L'
+    },
+    {
+        id: 56,
+        title: 'Antisocial Rhinestone Pearl Oversized Hoodie - Azul Marino',
+        category: 'hoodies-jackets',
+        price: 109.90,
+        stock: 1,
+        sizes: ['M'],
+        images: productImages('antisocial-rhinestone-pearl-oversized-hoodie-navy', 4),
+        get image() { return this.images[0]; },
+        description: 'Hoodie oversized azul marino con lettering brillante, aplicaciones de rhinestones y perlas para un acabado premium. Disponible en talla M.',
+        badge: 'TALLA M'
+    },
+    {
+        id: 57,
+        title: 'Cropped Utility Corduroy Collar Work Jacket - Oliva',
+        category: 'hoodies-jackets',
+        price: 119.90,
+        stock: 1,
+        sizes: ['M'],
+        images: productImages('cropped-utility-corduroy-collar-work-jacket-olive', 4),
+        get image() { return this.images[0]; },
+        description: 'Chaqueta utility color oliva con corte cropped, bolsillos frontales y cuello de pana en contraste. Disponible en talla M.',
+        badge: 'TALLA M'
+    },
+    {
+        id: 58,
+        title: "Relaxed '96 Pebble Leather Varsity Jacket - Azul Marino",
+        category: 'hoodies-jackets',
+        price: 119.90,
+        stock: 1,
+        sizes: ['L'],
+        images: productImages('relaxed-96-faux-pebble-leather-varsity-jacket-navy', 4),
+        get image() { return this.images[0]; },
+        description: 'Chaqueta varsity azul marino en cuero sintético texturizado, con aplicaciones estilo 96 y silueta relajada. Disponible en talla L.',
+        badge: 'TALLA L'
+    },
+    {
+        id: 59,
+        title: 'Rosa Parks Nah Embroidered Hoodie - Negro',
+        category: 'hoodies-jackets',
+        price: 109.90,
+        stock: 4,
+        sizes: ['M', 'L'],
+        images: productImages('rosa-parks-nah-embroidered-hoodie-black', 4),
+        get image() { return this.images[0]; },
+        description: 'Hoodie negro con gráfico y bordado Rosa Parks 1955, capucha amplia y fit urbano. Stock: 1 unidad talla M y 3 unidades talla L.',
+        badge: 'TALLAS M Y L'
+    },
+    {
+        id: 60,
+        title: 'Heartbreakers Players Club Hoodie - Negro',
+        category: 'hoodies-jackets',
+        price: 109.90,
+        stock: 2,
+        sizes: ['M', 'L'],
+        images: productImages('heartbreakers-players-club-hoodie-black', 4),
+        get image() { return this.images[0]; },
+        description: 'Hoodie negro Heartbreakers Players Club con gráfico de corazón roto y acabado streetwear. Stock: 1 unidad talla M y 1 unidad talla L.',
+        badge: 'TALLAS M Y L'
+    },
+    {
+        id: 61,
+        title: 'NYC All Star Hoodie - Celeste',
+        category: 'hoodies-jackets',
+        price: 109.90,
+        stock: 1,
+        sizes: ['M'],
+        images: productImages('nyc-all-star-hoodie-powder-blue', 4),
+        get image() { return this.images[0]; },
+        description: 'Hoodie celeste NYC All Star Champions con efecto lavado, gráfico tonal y silueta relajada. Disponible en talla M.',
+        badge: 'TALLA M'
+    },
+    {
+        id: 62,
+        title: 'Skeleton Stars Embroidered Oversized Hoodie - Negro',
+        category: 'hoodies-jackets',
+        price: 119.90,
+        stock: 2,
+        sizes: ['M', 'L'],
+        images: productImages('skeleton-stars-embroidered-oversized-hoodie-black', 4),
+        get image() { return this.images[0]; },
+        description: 'Hoodie oversized negro con bordados Skeleton Stars y detalles de estrellas para un look oscuro y premium. Stock: 1 unidad talla M y 1 unidad talla L.',
+        badge: 'TALLAS M Y L'
+    },
+    {
+        id: 63,
+        title: 'Cropped Paisley Jacquard Denim Work Jacket - Azul Oscuro',
+        category: 'hoodies-jackets',
+        price: 119.90,
+        stock: 1,
+        sizes: ['M'],
+        images: productImages('cropped-paisley-jacquard-denim-work-jacket-dark-wash', 4),
+        get image() { return this.images[0]; },
+        description: 'Chaqueta de denim azul oscuro con jacquard paisley, cierre frontal y corte work jacket cropped. Disponible en talla M.',
+        badge: 'TALLA M'
     }
 ];
 
@@ -1157,7 +1301,6 @@ function mapDatabaseProduct(row) {
         title: row.title,
         category: row.category,
         price: Number(row.price),
-        cost: Number(row.cost || 0),
         stock: Number(row.stock || 0),
         sizes: row.sizes || [],
         images,
@@ -1220,7 +1363,7 @@ async function loadDatabaseCatalog() {
 
     const { data, error } = await client
         .from('products')
-        .select('*')
+        .select('id,legacy_id,title,slug,category,price,stock,sizes,images,description,badge,status,fit_recommendation,sort_order')
         .neq('status', 'archived')
         .order('sort_order', { ascending: true })
         .order('id', { ascending: true });

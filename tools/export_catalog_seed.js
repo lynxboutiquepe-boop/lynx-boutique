@@ -85,10 +85,12 @@ on conflict (legacy_id) do update set
   slug = excluded.slug,
   category = excluded.category,
   price = excluded.price,
+  stock = excluded.stock,
   sizes = excluded.sizes,
   images = excluded.images,
   description = excluded.description,
   badge = excluded.badge,
+  status = excluded.status,
   fit_recommendation = excluded.fit_recommendation,
   sort_order = excluded.sort_order;
 `;

@@ -53,7 +53,7 @@ function absoluteImage(value = '') {
 
 function categoryPage(category) {
     const url = `${origin}/categoria/${category.slug}`;
-    const conjuntosOrder = [27, 35, 28, 36, 37, 29, 48, 49];
+    const conjuntosOrder = [53, 54, 27, 35, 28, 36, 37, 29, 48, 49];
     const categoryProducts = products
         .filter(product => product.category === category.productCategory)
         .sort((a, b) => category.productCategory === 'conjuntos'

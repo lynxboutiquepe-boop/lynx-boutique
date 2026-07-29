@@ -142,7 +142,7 @@ async function initialize() {
 
 async function loadAll() {
     const [{ data: products, error: productError }, { data: finances, error: financeError }, { data: customers, error: customerError }, { data: reviews, error: reviewError }] = await Promise.all([
-        supabaseClient.from('products').select('*').order('sort_order', { ascending: true }).order('id'),
+        supabaseClient.rpc('get_admin_products'),
         supabaseClient.from('finance_entries').select('*').order('entry_date', { ascending: false }).order('created_at', { ascending: false }).limit(500),
         supabaseClient.from('customer_profiles').select('*').order('created_at', { ascending: false }).limit(2000),
         supabaseClient.from('customer_reviews').select('*').order('created_at', { ascending: false }).limit(500)
@@ -179,17 +179,39 @@ function currentMonthEntries() {
 
 function renderStats() {
     const visibleProducts = state.products.filter(product => product.status !== 'archived');
+    const sellableProducts = visibleProducts.filter(product => Number(product.stock || 0) > 0);
+    const costedProducts = sellableProducts.filter(product => Number(product.cost || 0) > 0);
     const entries = currentMonthEntries();
     const income = entries.filter(entry => entry.entry_type === 'income').reduce((sum, entry) => sum + Number(entry.amount), 0);
     const expense = entries.filter(entry => entry.entry_type === 'expense').reduce((sum, entry) => sum + Number(entry.amount), 0);
+    const inventoryUnits = sellableProducts.reduce((sum, product) => sum + Number(product.stock || 0), 0);
+    const inventoryValue = sellableProducts.reduce(
+        (sum, product) => sum + (Number(product.price || 0) * Number(product.stock || 0)),
+        0
+    );
+    const inventoryCost = costedProducts.reduce(
+        (sum, product) => sum + (Number(product.cost || 0) * Number(product.stock || 0)),
+        0
+    );
+    const costedRevenue = costedProducts.reduce(
+        (sum, product) => sum + (Number(product.price || 0) * Number(product.stock || 0)),
+        0
+    );
+    const costedUnits = costedProducts.reduce((sum, product) => sum + Number(product.stock || 0), 0);
 
     $('#stat-products').textContent = visibleProducts.length;
-    $('#stat-stock').textContent = visibleProducts.reduce((sum, product) => sum + Number(product.stock || 0), 0);
+    $('#stat-stock').textContent = inventoryUnits;
     $('#stat-preorder').textContent = visibleProducts.filter(product => product.status === 'preorder').length;
     $('#stat-soldout').textContent = visibleProducts.filter(product => product.status === 'sold_out').length;
     $('#stat-income').textContent = money(income);
     $('#stat-expense').textContent = money(expense);
     $('#stat-balance').textContent = money(income - expense);
+    $('#stat-inventory-value').textContent = money(inventoryValue);
+    $('#stat-inventory-units').textContent = `${inventoryUnits} ${inventoryUnits === 1 ? 'unidad' : 'unidades'}`;
+    $('#stat-inventory-cost').textContent = money(inventoryCost);
+    $('#stat-costed-revenue').textContent = money(costedRevenue);
+    $('#stat-inventory-profit').textContent = money(costedRevenue - inventoryCost);
+    $('#stat-costed-units').textContent = `Ganancia calculada sobre ${costedUnits} ${costedUnits === 1 ? 'prenda' : 'prendas'} con costo registrado.`;
     $('#stat-customers').textContent = state.customers.length;
     $('#stat-subscribers').textContent = state.customers.filter(customer => customer.email_verified && customer.marketing_opt_in).length;
 
@@ -490,7 +512,8 @@ async function importCatalog(button) {
         const response = await fetch('catalog-seed.json', { cache: 'no-store' });
         if (!response.ok) throw new Error('No se pudo leer catalog-seed.json');
         const seed = await response.json();
-        const { error } = await supabaseClient.from('products').upsert(seed, { onConflict: 'legacy_id' });
+        const publicSeed = seed.map(({ cost, ...product }) => product);
+        const { error } = await supabaseClient.from('products').upsert(publicSeed, { onConflict: 'legacy_id' });
         if (error) throw error;
         showToast(`${seed.length} productos importados correctamente.`);
         await loadAll();

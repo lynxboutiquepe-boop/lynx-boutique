@@ -160,6 +160,61 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
 .balance-card span { color: #a9abb4; font-size: .67rem; font-weight: 800; letter-spacing: .14em; }
 .balance-card strong { font-family: var(--title); font-size: 2rem; }
 .balance-card p { max-width: 380px; color: #bfc1ca; font-size: .75rem; line-height: 1.55; text-align: right; }
+.inventory-value-card {
+    position: relative;
+    overflow: hidden;
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 20px;
+    padding: 25px 28px;
+    border: 1px solid #c7ead7;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, #effbf4 0%, #e3f7ec 100%);
+}
+.inventory-value-card::after {
+    content: '';
+    position: absolute;
+    right: -55px;
+    bottom: -90px;
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    background: rgba(22, 140, 85, .08);
+}
+.inventory-value-icon {
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    border-radius: 15px;
+    background: var(--success);
+    color: #fff;
+}
+.inventory-value-icon svg { width: 25px; height: 25px; }
+.inventory-value-copy { min-width: 0; display: grid; gap: 5px; }
+.inventory-value-copy > span { color: var(--success); font-size: .67rem; font-weight: 800; letter-spacing: .13em; }
+.inventory-value-copy strong { font-family: var(--title); font-size: clamp(2rem, 5vw, 3.1rem); line-height: 1; letter-spacing: -.045em; }
+.inventory-value-copy p { color: #557061; font-size: .72rem; line-height: 1.5; }
+.inventory-value-detail { position: relative; z-index: 1; display: grid; gap: 5px; text-align: right; }
+.inventory-value-detail span { color: var(--success); font-family: var(--title); font-size: .9rem; font-weight: 800; }
+.inventory-value-detail small { color: #557061; font-size: .65rem; }
+.inventory-profit-grid {
+    position: relative;
+    z-index: 1;
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(22, 140, 85, .18);
+}
+.inventory-profit-grid > div { display: grid; gap: 4px; }
+.inventory-profit-grid small { color: #557061; font-size: .61rem; font-weight: 800; letter-spacing: .08em; }
+.inventory-profit-grid strong { font-family: var(--title); font-size: 1.15rem; }
+.inventory-profit-grid .profit strong { color: var(--success); }
+.inventory-profit-note { position: relative; z-index: 1; grid-column: 1 / -1; color: #557061; font-size: .65rem; }
 .dashboard-grid, .finance-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
 .content-card { padding: 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .card-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
@@ -264,6 +319,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
     .stat-card { min-height: 132px; padding: 17px; }
     .balance-card { align-items: flex-start; flex-direction: column; }
     .balance-card p { text-align: left; }
+    .inventory-value-card { grid-template-columns: auto minmax(0, 1fr); padding: 21px; }
+    .inventory-value-detail { grid-column: 2; text-align: left; }
+    .inventory-profit-grid, .inventory-profit-note { grid-column: 1 / -1; }
     .finance-grid { grid-template-columns: 1fr; }
     .toolbar { flex-direction: column; }
     .toolbar select { width: 100%; }
@@ -290,6 +348,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
 
 @media (max-width: 400px) {
     .stats-grid { grid-template-columns: 1fr; }
+    .inventory-value-card { grid-template-columns: 1fr; }
+    .inventory-value-detail { grid-column: 1; }
+    .inventory-profit-grid { grid-template-columns: 1fr; }
     .admin-brand span { display: none; }
     .admin-tab span { font-size: .7rem; }
 }

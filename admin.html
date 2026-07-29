@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="admin.css?v=20260716-product-reviews-v1">
+    <link rel="stylesheet" href="admin.css?v=20260729-inventory-profit-v2">
 </head>
 <body>
     <main class="login-shell" id="login-shell">
@@ -121,6 +121,24 @@
                         <div><span>BALANCE DEL MES</span><strong id="stat-balance">S/. 0.00</strong></div>
                         <p>Ingresos menos gastos registrados durante el mes actual.</p>
                     </div>
+                    <article class="inventory-value-card">
+                        <div class="inventory-value-icon" aria-hidden="true"><i data-lucide="circle-dollar-sign"></i></div>
+                        <div class="inventory-value-copy">
+                            <span>VENTA TOTAL ESTIMADA DEL INVENTARIO</span>
+                            <strong id="stat-inventory-value">S/. 0.00</strong>
+                            <p>Lo que ingresar&iacute;a si vendes todas las unidades disponibles a su precio actual.</p>
+                        </div>
+                        <div class="inventory-value-detail">
+                            <span id="stat-inventory-units">0 unidades</span>
+                            <small>Ingreso bruto antes de gastos</small>
+                        </div>
+                        <div class="inventory-profit-grid">
+                            <div><small>INVERSI&Oacute;N REGISTRADA</small><strong id="stat-inventory-cost">S/. 0.00</strong></div>
+                            <div><small>VENTA CON COSTO REGISTRADO</small><strong id="stat-costed-revenue">S/. 0.00</strong></div>
+                            <div class="profit"><small>GANANCIA BRUTA POTENCIAL</small><strong id="stat-inventory-profit">S/. 0.00</strong></div>
+                        </div>
+                        <p class="inventory-profit-note" id="stat-costed-units">Calculado solo con prendas que tienen costo registrado.</p>
+                    </article>
                     <div class="dashboard-grid">
                         <article class="content-card">
                             <div class="card-heading"><h3>Atención requerida</h3><span>Inventario</span></div>
@@ -277,6 +295,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="supabase-config.js?v=20260716-admin-v1"></script>
-    <script src="admin.js?v=20260716-product-reviews-v1"></script>
+    <script src="admin.js?v=20260729-inventory-profit-v2"></script>
 </body>
 </html>
