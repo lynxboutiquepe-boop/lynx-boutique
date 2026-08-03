@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="admin.css?v=20260729-inventory-profit-v2">
+    <link rel="stylesheet" href="admin.css?v=20260802-control-center-v1">
 </head>
 <body>
     <main class="login-shell" id="login-shell">
@@ -80,6 +80,7 @@
                 <span>ADMIN</span>
             </a>
             <div class="admin-user">
+                <span class="system-status"><i></i> Sistema activo</span>
                 <span id="admin-email"></span>
                 <button class="icon-text-btn" id="logout-btn" type="button"><i data-lucide="log-out"></i> Salir</button>
             </div>
@@ -94,6 +95,7 @@
                 <nav class="admin-tabs" aria-label="Secciones del panel">
                     <button class="admin-tab active" type="button" data-panel="dashboard-panel"><i data-lucide="layout-dashboard"></i><span>Resumen</span></button>
                     <button class="admin-tab" type="button" data-panel="products-panel"><i data-lucide="shirt"></i><span>Productos</span></button>
+                    <button class="admin-tab" type="button" data-panel="sales-panel"><i data-lucide="receipt-text"></i><span>Ventas</span></button>
                     <button class="admin-tab" type="button" data-panel="customers-panel"><i data-lucide="users"></i><span>Clientes</span></button>
                     <button class="admin-tab" type="button" data-panel="reviews-panel"><i data-lucide="star"></i><span>Reseñas</span></button>
                     <button class="admin-tab" type="button" data-panel="finance-panel"><i data-lucide="wallet-cards"></i><span>Caja</span></button>
@@ -104,10 +106,15 @@
             <main class="admin-content">
                 <section class="admin-panel active" id="dashboard-panel">
                     <div class="panel-heading">
-                        <div><span class="eyebrow">ESTADO GENERAL</span><h2>Resumen del negocio</h2></div>
+                        <div><span class="eyebrow">LYNX CONTROL CENTER</span><h2 id="dashboard-greeting">Resumen del negocio</h2><p class="panel-subtitle" id="dashboard-date"></p></div>
                         <button class="secondary-btn refresh-btn" type="button"><i data-lucide="refresh-cw"></i> Actualizar</button>
                     </div>
-                    <div class="stats-grid">
+                    <div class="executive-strip">
+                        <div><span>BALANCE DEL MES</span><strong id="stat-balance">S/. 0.00</strong><small id="balance-context">Ingresos menos gastos</small></div>
+                        <button class="quick-action" type="button" data-go-panel="finance-panel"><i data-lucide="plus"></i><span>Registrar<br>movimiento</span></button>
+                        <button class="quick-action" type="button" data-go-panel="products-panel"><i data-lucide="package-plus"></i><span>Gestionar<br>inventario</span></button>
+                    </div>
+                    <div class="stats-grid compact-stats">
                         <article class="stat-card"><span>Productos</span><strong id="stat-products">0</strong><small>registrados</small></article>
                         <article class="stat-card"><span>Stock disponible</span><strong id="stat-stock">0</strong><small>unidades</small></article>
                         <article class="stat-card warning"><span>Preventas</span><strong id="stat-preorder">0</strong><small>productos</small></article>
@@ -116,10 +123,6 @@
                         <article class="stat-card expense"><span>Gastos del mes</span><strong id="stat-expense">S/. 0</strong><small>movimientos</small></article>
                         <article class="stat-card"><span>Clientes</span><strong id="stat-customers">0</strong><small>cuentas registradas</small></article>
                         <article class="stat-card income"><span>Suscritos</span><strong id="stat-subscribers">0</strong><small>aceptaron novedades</small></article>
-                    </div>
-                    <div class="balance-card">
-                        <div><span>BALANCE DEL MES</span><strong id="stat-balance">S/. 0.00</strong></div>
-                        <p>Ingresos menos gastos registrados durante el mes actual.</p>
                     </div>
                     <article class="inventory-value-card">
                         <div class="inventory-value-icon" aria-hidden="true"><i data-lucide="circle-dollar-sign"></i></div>
@@ -140,6 +143,11 @@
                         <p class="inventory-profit-note" id="stat-costed-units">Calculado solo con prendas que tienen costo registrado.</p>
                     </article>
                     <div class="dashboard-grid">
+                        <article class="content-card performance-card">
+                            <div class="card-heading"><div><h3>Rendimiento</h3><p>Ingresos y gastos · últimos 6 meses</p></div><span>6 MESES</span></div>
+                            <div class="chart-legend"><span><i class="income-dot"></i>Ingresos</span><span><i class="expense-dot"></i>Gastos</span></div>
+                            <div class="finance-chart" id="finance-chart" aria-label="Gráfico de ingresos y gastos"></div>
+                        </article>
                         <article class="content-card">
                             <div class="card-heading"><h3>Atención requerida</h3><span>Inventario</span></div>
                             <div id="attention-list" class="attention-list"></div>
@@ -149,6 +157,18 @@
                             <div id="recent-finance-list" class="mini-list"></div>
                         </article>
                     </div>
+                </section>
+
+                <section class="admin-panel" id="sales-panel">
+                    <div class="panel-heading">
+                        <div><span class="eyebrow">OPERACIÓN COMERCIAL</span><h2>Historial de ventas</h2><p class="panel-subtitle">Ventas registradas, unidades y valor generado.</p></div>
+                        <button class="primary-btn go-finance-sale" type="button"><i data-lucide="plus"></i> Registrar venta</button>
+                    </div>
+                    <div class="sales-summary" id="sales-summary"></div>
+                    <div class="table-shell sales-table-shell">
+                        <table class="data-table"><thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Precio unitario</th><th>Total</th><th>Nota</th></tr></thead><tbody id="sales-tbody"></tbody></table>
+                    </div>
+                    <div class="mobile-sales-list" id="mobile-sales-list"></div>
                 </section>
 
                 <section class="admin-panel" id="products-panel">
@@ -293,8 +313,16 @@
         </form>
     </dialog>
 
+    <dialog class="confirm-dialog" id="confirm-dialog">
+        <div class="confirm-card">
+            <div class="confirm-icon"><i data-lucide="triangle-alert"></i></div>
+            <div><span class="eyebrow">CONFIRMACIÓN</span><h2 id="confirm-title">¿Continuar?</h2><p id="confirm-message"></p></div>
+            <div class="dialog-actions"><button class="secondary-btn" id="confirm-cancel" type="button">Cancelar</button><button class="danger-btn" id="confirm-accept" type="button">Confirmar</button></div>
+        </div>
+    </dialog>
+
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="supabase-config.js?v=20260716-admin-v1"></script>
-    <script src="admin.js?v=20260729-inventory-profit-v2"></script>
+    <script src="admin.js?v=20260802-control-center-v1"></script>
 </body>
 </html>

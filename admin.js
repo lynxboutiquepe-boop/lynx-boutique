@@ -13,6 +13,7 @@ const STATUS_META = {
 const state = {
     user: null,
     products: [],
+    sales: [],
     finances: [],
     customers: [],
     reviews: []
@@ -141,19 +142,22 @@ async function initialize() {
 }
 
 async function loadAll() {
-    const [{ data: products, error: productError }, { data: finances, error: financeError }, { data: customers, error: customerError }, { data: reviews, error: reviewError }] = await Promise.all([
+    const [{ data: products, error: productError }, { data: sales, error: salesError }, { data: finances, error: financeError }, { data: customers, error: customerError }, { data: reviews, error: reviewError }] = await Promise.all([
         supabaseClient.rpc('get_admin_products'),
+        supabaseClient.from('sales').select('*, products(title)').order('created_at', { ascending: false }).limit(1000),
         supabaseClient.from('finance_entries').select('*').order('entry_date', { ascending: false }).order('created_at', { ascending: false }).limit(500),
         supabaseClient.from('customer_profiles').select('*').order('created_at', { ascending: false }).limit(2000),
         supabaseClient.from('customer_reviews').select('*').order('created_at', { ascending: false }).limit(500)
     ]);
 
     if (productError) throw productError;
+    if (salesError) throw salesError;
     if (financeError) throw financeError;
     if (customerError) throw customerError;
     if (reviewError) throw reviewError;
 
     state.products = products || [];
+    state.sales = sales || [];
     state.finances = finances || [];
     state.customers = customers || [];
     state.reviews = reviews || [];
@@ -163,6 +167,8 @@ async function loadAll() {
 function renderEverything() {
     renderStats();
     renderProducts();
+    renderSales();
+    renderFinanceChart();
     renderFinance();
     renderCustomers();
     renderReviews();
@@ -214,6 +220,9 @@ function renderStats() {
     $('#stat-costed-units').textContent = `Ganancia calculada sobre ${costedUnits} ${costedUnits === 1 ? 'prenda' : 'prendas'} con costo registrado.`;
     $('#stat-customers').textContent = state.customers.length;
     $('#stat-subscribers').textContent = state.customers.filter(customer => customer.email_verified && customer.marketing_opt_in).length;
+    const hour = new Date().getHours();
+    $('#dashboard-greeting').textContent = `${hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches'}, LYNX`;
+    $('#dashboard-date').textContent = new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
 
     const recent = state.finances.slice(0, 5);
     $('#recent-finance-list').innerHTML = recent.length ? recent.map(entry => `
@@ -222,6 +231,40 @@ function renderStats() {
             <b class="amount-${entry.entry_type}">${entry.entry_type === 'income' ? '+' : '-'}${money(entry.amount)}</b>
         </div>
     `).join('') : '<p class="empty-state">Todavía no hay movimientos.</p>';
+}
+
+function renderFinanceChart() {
+    const formatter = new Intl.DateTimeFormat('es-PE', { month: 'short' });
+    const months = Array.from({ length: 6 }, (_, index) => {
+        const date = new Date();
+        date.setDate(1);
+        date.setMonth(date.getMonth() - (5 - index));
+        const prefix = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        const entries = state.finances.filter(entry => String(entry.entry_date).startsWith(prefix));
+        return {
+            label: formatter.format(date).replace('.', ''),
+            income: entries.filter(entry => entry.entry_type === 'income').reduce((sum, entry) => sum + Number(entry.amount), 0),
+            expense: entries.filter(entry => entry.entry_type === 'expense').reduce((sum, entry) => sum + Number(entry.amount), 0)
+        };
+    });
+    const max = Math.max(1, ...months.flatMap(month => [month.income, month.expense]));
+    $('#finance-chart').innerHTML = months.map(month => `
+        <div class="chart-month"><div class="chart-bars"><i class="income-bar" style="height:${Math.max(3, month.income / max * 100)}%" title="Ingresos: ${money(month.income)}"></i><i class="expense-bar" style="height:${Math.max(3, month.expense / max * 100)}%" title="Gastos: ${money(month.expense)}"></i></div><span>${escapeHtml(month.label)}</span></div>
+    `).join('');
+}
+
+function renderSales() {
+    const monthSales = state.sales.filter(sale => {
+        const date = new Date(sale.created_at);
+        const now = new Date();
+        return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+    });
+    const total = monthSales.reduce((sum, sale) => sum + Number(sale.total), 0);
+    const units = monthSales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
+    $('#sales-summary').innerHTML = `<article><span>VENTAS DEL MES</span><strong>${monthSales.length}</strong></article><article><span>UNIDADES VENDIDAS</span><strong>${units}</strong></article><article class="highlight"><span>INGRESO GENERADO</span><strong>${money(total)}</strong></article>`;
+    const rows = state.sales.map(sale => `<tr><td>${localDateTime(sale.created_at)}</td><td><strong>${escapeHtml(sale.products?.title || 'Producto')}</strong></td><td>${sale.quantity}</td><td>${money(sale.unit_price)}</td><td class="amount-income">${money(sale.total)}</td><td>${escapeHtml(sale.note || '—')}</td></tr>`).join('');
+    $('#sales-tbody').innerHTML = rows || '<tr><td class="empty-state" colspan="6">Todavía no hay ventas registradas.</td></tr>';
+    $('#mobile-sales-list').innerHTML = state.sales.length ? state.sales.map(sale => `<article class="mobile-sale-card"><div><strong>${escapeHtml(sale.products?.title || 'Producto')}</strong><span>${localDateTime(sale.created_at)} · ${sale.quantity} und.</span></div><b>${money(sale.total)}</b></article>`).join('') : '<p class="empty-state">Todavía no hay ventas registradas.</p>';
 }
 
 function renderAttention() {
@@ -260,8 +303,8 @@ function renderProducts() {
             <tr>
                 <td><div class="product-cell"><img src="${escapeHtml(image)}" alt=""><div><strong>${escapeHtml(product.title)}</strong><span>${escapeHtml(product.category)}</span></div></div></td>
                 <td><select class="status-select product-status-control" data-id="${product.id}">${productStatusOptions(product.status)}</select></td>
-                <td><strong>${money(product.price)}</strong></td>
-                <td>${Number(product.stock || 0)}</td>
+                <td><label class="quick-edit"><span>S/</span><input class="quick-product-value" data-id="${product.id}" data-field="price" type="number" min="0" step="0.01" value="${Number(product.price || 0)}" aria-label="Precio de ${escapeHtml(product.title)}"></label></td>
+                <td><label class="quick-edit stock"><input class="quick-product-value" data-id="${product.id}" data-field="stock" type="number" min="0" step="1" value="${Number(product.stock || 0)}" aria-label="Stock de ${escapeHtml(product.title)}"><span>und.</span></label></td>
                 <td>${escapeHtml((product.sizes || []).join(', ') || '—')}</td>
                 <td><div class="row-actions"><button class="row-action edit-product" data-id="${product.id}" title="Editar"><i data-lucide="pencil"></i></button><button class="row-action delete delete-product" data-id="${product.id}" title="Eliminar"><i data-lucide="trash-2"></i></button></div></td>
             </tr>`;
@@ -496,9 +539,37 @@ async function updateProductStatus(id, status) {
     await loadAll();
 }
 
+async function quickUpdateProduct(id, field, rawValue, input) {
+    const value = field === 'stock' ? Math.max(0, Math.round(Number(rawValue))) : Math.max(0, Number(rawValue));
+    if (!Number.isFinite(value)) return;
+    input.disabled = true;
+    const payload = { [field]: value };
+    if (field === 'stock') payload.status = value === 0 ? 'sold_out' : value <= 2 ? 'low_stock' : 'available';
+    const { error } = await supabaseClient.from('products').update(payload).eq('id', id);
+    input.disabled = false;
+    if (error) throw error;
+    showToast(`${field === 'stock' ? 'Stock' : 'Precio'} actualizado.`);
+    await loadAll();
+}
+
+function requestConfirmation({ title, message, acceptLabel = 'Confirmar' }) {
+    return new Promise(resolve => {
+        const dialog = $('#confirm-dialog');
+        $('#confirm-title').textContent = title;
+        $('#confirm-message').textContent = message;
+        $('#confirm-accept').textContent = acceptLabel;
+        const finish = value => { dialog.close(); resolve(value); };
+        $('#confirm-cancel').onclick = () => finish(false);
+        $('#confirm-accept').onclick = () => finish(true);
+        dialog.oncancel = event => { event.preventDefault(); finish(false); };
+        dialog.showModal();
+        lucide.createIcons();
+    });
+}
+
 async function deleteProduct(id) {
     const product = state.products.find(item => String(item.id) === String(id));
-    if (!product || !confirm(`¿Eliminar definitivamente “${product.title}”?`)) return;
+    if (!product || !await requestConfirmation({ title: 'Eliminar producto', message: `“${product.title}” se eliminará definitivamente. Te recomendamos archivarlo si podría volver al catálogo.`, acceptLabel: 'Eliminar definitivamente' })) return;
     const { error } = await supabaseClient.from('products').delete().eq('id', id);
     if (error) throw error;
     showToast('Producto eliminado.');
@@ -579,7 +650,7 @@ async function saveFinance(event) {
 }
 
 async function deleteFinance(id) {
-    if (!confirm('¿Eliminar este movimiento de caja?')) return;
+    if (!await requestConfirmation({ title: 'Eliminar movimiento', message: 'Este movimiento desaparecerá del historial y cambiará el balance calculado.', acceptLabel: 'Eliminar movimiento' })) return;
     const { error } = await supabaseClient.from('finance_entries').delete().eq('id', id);
     if (error) throw error;
     showToast('Movimiento eliminado.');
@@ -688,6 +759,8 @@ function bindEvents() {
         $$('.admin-tab').forEach(item => item.classList.toggle('active', item === tab));
         $$('.admin-panel').forEach(panel => panel.classList.toggle('active', panel.id === tab.dataset.panel));
     }));
+    $$('[data-go-panel]').forEach(button => button.addEventListener('click', () => $(`.admin-tab[data-panel="${button.dataset.goPanel}"]`)?.click()));
+    $('.go-finance-sale')?.addEventListener('click', () => { $('.admin-tab[data-panel="finance-panel"]')?.click(); $('#sale-product')?.focus(); });
 
     $$('.refresh-btn').forEach(button => button.addEventListener('click', async () => {
         setButtonLoading(button, true, 'Actualizando...');
@@ -719,6 +792,12 @@ function bindEvents() {
     }));
 
     ['#products-tbody', '#mobile-product-list'].forEach(selector => $(selector).addEventListener('change', async event => {
+        const quick = event.target.closest('.quick-product-value');
+        if (quick) {
+            try { await quickUpdateProduct(quick.dataset.id, quick.dataset.field, quick.value, quick); }
+            catch (error) { showToast(error.message, 'error'); await loadAll(); }
+            return;
+        }
         const control = event.target.closest('.product-status-control');
         if (!control) return;
         try { await updateProductStatus(control.dataset.id, control.value); }
