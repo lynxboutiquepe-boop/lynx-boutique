@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="admin.css?v=20260802-cash-status-fix-v2">
+    <link rel="stylesheet" href="admin.css?v=20260803-sale-picker-v3">
 </head>
 <body>
     <main class="login-shell" id="login-shell">
@@ -250,7 +250,13 @@
                     <div class="finance-grid">
                         <form class="content-card admin-form" id="sale-form">
                             <div class="card-heading"><h3>Registrar venta</h3><span>Ingreso automático</span></div>
-                            <label><span>Producto</span><select id="sale-product" required></select></label>
+                            <div class="sale-product-field">
+                                <label for="sale-product-search"><span>Producto</span></label>
+                                <div class="sale-product-search-wrap"><i data-lucide="search"></i><input id="sale-product-search" type="search" autocomplete="off" placeholder="Buscar por nombre, color o categoría..." role="combobox" aria-expanded="false" aria-controls="sale-product-results"></div>
+                                <input id="sale-product" type="hidden" required>
+                                <div class="sale-product-results" id="sale-product-results" role="listbox" hidden></div>
+                                <div class="sale-product-preview" id="sale-product-preview"><div class="sale-product-preview-empty"><i data-lucide="shirt"></i><span>Busca y selecciona una prenda para previsualizarla.</span></div></div>
+                            </div>
                             <div class="form-grid two">
                                 <label><span>Cantidad</span><input id="sale-quantity" type="number" min="1" value="1" required></label>
                                 <label><span>Nota</span><input id="sale-note" type="text" placeholder="Cliente o referencia"></label>
@@ -324,6 +330,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="supabase-config.js?v=20260716-admin-v1"></script>
-    <script src="admin.js?v=20260802-cash-status-fix-v2"></script>
+    <script src="admin.js?v=20260803-sale-picker-v3"></script>
 </body>
 </html>

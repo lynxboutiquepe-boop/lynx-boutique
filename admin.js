@@ -327,9 +327,47 @@ function renderProducts() {
 
 function renderSaleProducts() {
     const products = state.products.filter(product => !['sold_out', 'archived'].includes(product.status));
-    $('#sale-product').innerHTML = products.length ? products.map(product =>
-        `<option value="${product.id}">${escapeHtml(product.title)} · ${money(product.price)} · Stock ${product.stock}</option>`
-    ).join('') : '<option value="">No hay productos disponibles</option>';
+    const selected = products.find(product => String(product.id) === $('#sale-product').value);
+    if (selected) renderSaleProductPreview(selected);
+    else clearSaleProductSelection();
+    renderSaleProductResults($('#sale-product-search').value);
+}
+
+function saleProductHaystack(product) {
+    return `${product.title || ''} ${product.color || ''} ${product.category || ''} ${(product.sizes || []).join(' ')}`.toLowerCase();
+}
+
+function renderSaleProductResults(query = '') {
+    const normalized = query.trim().toLowerCase();
+    const products = state.products.filter(product => !['sold_out', 'archived'].includes(product.status))
+        .filter(product => !normalized || saleProductHaystack(product).includes(normalized)).slice(0, 8);
+    $('#sale-product-results').innerHTML = products.length ? products.map(product => `
+        <button class="sale-product-option" type="button" role="option" data-id="${product.id}">
+            <img src="${escapeHtml(safeImageUrl(product.images?.[0]))}" alt=""><span><strong>${escapeHtml(product.title)}</strong><small>${escapeHtml(product.color || product.category)} · ${money(product.price)} · Stock ${product.stock}</small></span>
+        </button>`).join('') : '<p class="sale-product-no-results">No encontramos prendas con esa búsqueda.</p>';
+}
+
+function renderSaleProductPreview(product) {
+    const meta = STATUS_META[product.status] || STATUS_META.available;
+    $('#sale-product-preview').innerHTML = `
+        <img src="${escapeHtml(safeImageUrl(product.images?.[0]))}" alt="Previsualización de ${escapeHtml(product.title)}">
+        <div><span class="sale-preview-kicker">PRENDA SELECCIONADA</span><strong>${escapeHtml(product.title)}</strong><p>${escapeHtml(product.color || 'Sin color')} · ${escapeHtml((product.sizes || []).join(', ') || 'Sin tallas')}</p><div class="sale-preview-meta"><b>${money(product.price)}</b><span>${product.stock} ${Number(product.stock) === 1 ? 'unidad' : 'unidades'}</span><span>${escapeHtml(meta.label)}</span></div></div>
+        <button class="sale-product-clear" type="button" aria-label="Quitar selección"><i data-lucide="x"></i></button>`;
+    lucide.createIcons();
+}
+
+function selectSaleProduct(product) {
+    $('#sale-product').value = product.id;
+    $('#sale-product-search').value = product.title;
+    $('#sale-product-search').setAttribute('aria-expanded', 'false');
+    $('#sale-product-results').hidden = true;
+    renderSaleProductPreview(product);
+}
+
+function clearSaleProductSelection() {
+    $('#sale-product').value = '';
+    $('#sale-product-preview').innerHTML = '<div class="sale-product-preview-empty"><i data-lucide="shirt"></i><span>Busca y selecciona una prenda para previsualizarla.</span></div>';
+    lucide.createIcons();
 }
 
 function renderFinance() {
@@ -765,7 +803,7 @@ function bindEvents() {
         $$('.admin-panel').forEach(panel => panel.classList.toggle('active', panel.id === tab.dataset.panel));
     }));
     $$('[data-go-panel]').forEach(button => button.addEventListener('click', () => $(`.admin-tab[data-panel="${button.dataset.goPanel}"]`)?.click()));
-    $('.go-finance-sale')?.addEventListener('click', () => { $('.admin-tab[data-panel="finance-panel"]')?.click(); $('#sale-product')?.focus(); });
+    $('.go-finance-sale')?.addEventListener('click', () => { $('.admin-tab[data-panel="finance-panel"]')?.click(); $('#sale-product-search')?.focus(); });
 
     $$('.refresh-btn').forEach(button => button.addEventListener('click', async () => {
         setButtonLoading(button, true, 'Actualizando...');
@@ -785,6 +823,34 @@ function bindEvents() {
     $('#review-status-filter').addEventListener('change', renderReviews);
     $('#export-customers-btn').addEventListener('click', exportSubscribedCustomers);
     $('#sale-form').addEventListener('submit', registerSale);
+    $('#sale-product-search').addEventListener('focus', event => {
+        renderSaleProductResults(event.target.value);
+        $('#sale-product-results').hidden = false;
+        event.target.setAttribute('aria-expanded', 'true');
+    });
+    $('#sale-product-search').addEventListener('input', event => {
+        $('#sale-product').value = '';
+        renderSaleProductResults(event.target.value);
+        $('#sale-product-results').hidden = false;
+        event.target.setAttribute('aria-expanded', 'true');
+    });
+    $('#sale-product-results').addEventListener('click', event => {
+        const option = event.target.closest('.sale-product-option');
+        if (!option) return;
+        const product = state.products.find(item => String(item.id) === option.dataset.id);
+        if (product) selectSaleProduct(product);
+    });
+    $('#sale-product-preview').addEventListener('click', event => {
+        if (!event.target.closest('.sale-product-clear')) return;
+        $('#sale-product-search').value = '';
+        clearSaleProductSelection();
+        $('#sale-product-search').focus();
+    });
+    document.addEventListener('click', event => {
+        if (event.target.closest('.sale-product-field')) return;
+        $('#sale-product-results').hidden = true;
+        $('#sale-product-search').setAttribute('aria-expanded', 'false');
+    });
     $('#finance-form').addEventListener('submit', saveFinance);
 
     ['#products-tbody', '#mobile-product-list'].forEach(selector => $(selector).addEventListener('click', async event => {
