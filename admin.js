@@ -190,6 +190,10 @@ function renderStats() {
     const entries = currentMonthEntries();
     const income = entries.filter(entry => entry.entry_type === 'income').reduce((sum, entry) => sum + Number(entry.amount), 0);
     const expense = entries.filter(entry => entry.entry_type === 'expense').reduce((sum, entry) => sum + Number(entry.amount), 0);
+    const accountBalance = state.finances.reduce(
+        (total, entry) => total + (entry.entry_type === 'income' ? Number(entry.amount) : -Number(entry.amount)),
+        0
+    );
     const inventoryUnits = sellableProducts.reduce((sum, product) => sum + Number(product.stock || 0), 0);
     const inventoryValue = sellableProducts.reduce(
         (sum, product) => sum + (Number(product.price || 0) * Number(product.stock || 0)),
@@ -212,6 +216,7 @@ function renderStats() {
     $('#stat-income').textContent = money(income);
     $('#stat-expense').textContent = money(expense);
     $('#stat-balance').textContent = money(income - expense);
+    $('#stat-account-balance').textContent = money(accountBalance);
     $('#stat-inventory-value').textContent = money(inventoryValue);
     $('#stat-inventory-units').textContent = `${inventoryUnits} ${inventoryUnits === 1 ? 'unidad' : 'unidades'}`;
     $('#stat-inventory-cost').textContent = money(inventoryCost);

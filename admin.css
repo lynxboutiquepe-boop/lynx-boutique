@@ -483,6 +483,21 @@ body { background: var(--bg); background-image: radial-gradient(circle at 78% 0,
 .data-table tbody tr:hover { background: #fafaff; }
 .product-cell img { background: var(--surface-soft); }
 input, select, textarea, .quick-edit input { background: #fff; color: var(--ink); }
+.status-select {
+    border: 1px solid #d9dbe5;
+    background: #fff;
+    color: #17181d;
+    color-scheme: light;
+}
+.status-select:hover { border-color: #b9b6ff; }
+.status-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(95,89,247,.13); outline: 0; }
+.status-select option { background: #fff; color: #17181d; }
+.stat-card.account-balance {
+    border-color: #cbc9ff;
+    background: linear-gradient(135deg, #f3f2ff, #fff);
+}
+.stat-card.account-balance span { color: #504be3; }
+.stat-card.account-balance strong { color: #34307e; }
 .product-form, .confirm-card { background: #fff; }
 .toast { background: #17181d; border-color: transparent; }
 

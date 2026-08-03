@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="admin.css?v=20260802-control-center-v1">
+    <link rel="stylesheet" href="admin.css?v=20260802-cash-status-fix-v2">
 </head>
 <body>
     <main class="login-shell" id="login-shell">
@@ -121,6 +121,7 @@
                         <article class="stat-card danger"><span>Agotados</span><strong id="stat-soldout">0</strong><small>productos</small></article>
                         <article class="stat-card income"><span>Ingresos del mes</span><strong id="stat-income">S/. 0</strong><small>ventas y otros</small></article>
                         <article class="stat-card expense"><span>Gastos del mes</span><strong id="stat-expense">S/. 0</strong><small>movimientos</small></article>
+                        <article class="stat-card account-balance"><span>DINERO QUE DEBE HABER EN CUENTA</span><strong id="stat-account-balance">S/. 0.00</strong><small>Ingresos menos gastos desde el inicio</small></article>
                         <article class="stat-card"><span>Clientes</span><strong id="stat-customers">0</strong><small>cuentas registradas</small></article>
                         <article class="stat-card income"><span>Suscritos</span><strong id="stat-subscribers">0</strong><small>aceptaron novedades</small></article>
                     </div>
@@ -323,6 +324,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="supabase-config.js?v=20260716-admin-v1"></script>
-    <script src="admin.js?v=20260802-control-center-v1"></script>
+    <script src="admin.js?v=20260802-cash-status-fix-v2"></script>
 </body>
 </html>
