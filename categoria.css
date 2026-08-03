@@ -191,6 +191,24 @@ a {
     transition: transform 0.45s ease;
 }
 
+.category-product.is-sold-out figure::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background: rgba(7, 7, 7, 0.38);
+    pointer-events: none;
+}
+
+.category-product.is-sold-out figure span {
+    border-color: #f7f7f5;
+    background: #070707;
+    color: #f7f7f5;
+}
+
+.category-product.is-sold-out img {
+    filter: grayscale(0.75);
+}
+
 .category-product:hover img {
     transform: scale(1.035);
 }
