@@ -63,10 +63,12 @@ const PRODUCT_MOCKUPS = {
 };
 
 function optimizedStoreImage(source = '') {
-    return String(source).replace(
+    const optimized = String(source).replace(
         /(mockups-finales\/[^?#]+)\.png(?=([?#]|$))/i,
         '$1.webp'
     );
+    if (!optimized || /^(?:https?:|data:|blob:|\/)/i.test(optimized)) return optimized;
+    return `/${optimized.replace(/^\.\//, '')}`;
 }
 
 function productImages(slug, count = 8) {
