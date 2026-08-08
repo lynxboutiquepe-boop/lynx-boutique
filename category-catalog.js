@@ -29,11 +29,19 @@
         return 'DISPONIBLE';
     }
 
+    function normalizeImageUrl(value) {
+        let image = String(value || '').trim();
+        if (!image) return '/assets/logo-transparent.png';
+        image = image.replace(/(mockups-finales\/[^?#]+)\.png(?=([?#]|$))/i, '$1.webp');
+        if (/^(https?:\/\/|data:image\/|\/)/i.test(image)) return image;
+        return `/${image.replace(/^\.\//, '')}`;
+    }
+
     function productCard(product, category) {
         const stock = Number(product.stock || 0);
         const soldOut = product.status === 'sold_out' || (product.status !== 'preorder' && stock <= 0);
         const images = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
-        const image = images[0] || '/assets/logo-transparent.png';
+        const image = normalizeImageUrl(images[0]);
         const slug = encodeURIComponent(product.slug || '');
         return `
             <a class="category-product${soldOut ? ' is-sold-out' : ''}" href="/producto/${slug}" ${soldOut ? 'aria-label="Agotado: ' + escapeHtml(product.title) + '"' : ''}>

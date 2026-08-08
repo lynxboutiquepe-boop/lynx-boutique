@@ -817,6 +817,8 @@ let cart = [];
 const CART_STORAGE_KEY = 'lynx_cart_v2';
 let selectedCategory = 'all';
 let searchQuery = '';
+const CATALOG_PAGE_SIZE = 24;
+let catalogVisibleLimit = CATALOG_PAGE_SIZE;
 let currentProduct = null; // Para ver detalles
 let catalogScrollFrame = null;
 let customerUser = null;
@@ -855,6 +857,7 @@ const accountDialog = document.getElementById('account-dialog');
 const mobileNav = document.getElementById('mobile-nav');
 const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 const catalogCountText = document.getElementById('catalog-count-text');
+const catalogLoadMore = document.getElementById('catalog-load-more');
 const trendingTrack = document.getElementById('trending-track');
 const trendingViewport = document.getElementById('trending-viewport');
 const trendingPrevBtn = document.getElementById('trending-prev');
@@ -1465,6 +1468,7 @@ function imageFallback(image) {
 }
 
 function renderProducts() {
+    const supportsProductHover = window.innerWidth > 768 && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     // Filtrar productos
     let filtered = PRODUCTS.filter(product => {
         const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
@@ -1478,15 +1482,19 @@ function renderProducts() {
         return categoryDifference || a.id - b.id;
     });
 
+    const totalFiltered = filtered.length;
+    const visibleProducts = filtered.slice(0, catalogVisibleLimit);
     const categoryCounts = filtered.reduce((counts, product) => {
         counts[product.category] = (counts[product.category] || 0) + 1;
         return counts;
     }, {});
 
     // Actualizar texto de cantidad
-    catalogCountText.textContent = filtered.length === 1 
-        ? 'Mostrando 1 producto' 
-        : `Mostrando ${filtered.length} productos`;
+    catalogCountText.textContent = totalFiltered === 1
+        ? 'Mostrando 1 producto'
+        : `Mostrando ${Math.min(totalFiltered, catalogVisibleLimit)} de ${totalFiltered} productos`;
+
+    catalogLoadMore.hidden = totalFiltered <= catalogVisibleLimit;
 
     if (filtered.length === 0) {
         const isEmptyTshirts = selectedCategory === 't-shirts';
@@ -1502,7 +1510,7 @@ function renderProducts() {
     }
 
     let lastRenderedCategory = null;
-    productsGrid.innerHTML = filtered.map((product, productIndex) => {
+    productsGrid.innerHTML = visibleProducts.map((product, productIndex) => {
         const isNewCategory = product.category !== lastRenderedCategory;
         const categoryMeta = CATALOG_CATEGORY_META[product.category] || { label: product.category.toUpperCase() };
         const categoryHeading = isNewCategory ? `
@@ -1521,7 +1529,7 @@ function renderProducts() {
             <a class="product-card-img-wrapper" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ficha de ${escapeHtml(product.title)} en una pestaña nueva">
                 <span class="product-card-badge ${product.badge.toLowerCase().includes('stock') || product.badge.toLowerCase().includes('limit') || product.badge.toLowerCase().includes('última') ? 'limited' : ''}">${product.badge}</span>
                 <img class="product-card-primary-img" src="${product.image}" alt="${product.title}" loading="lazy" decoding="async" fetchpriority="low" style="pointer-events:none;">
-                ${product.images?.[1] ? `<img class="product-card-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="lazy" style="pointer-events:none;">` : ''}
+                ${supportsProductHover && product.images?.[1] ? `<img class="product-card-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="lazy" style="pointer-events:none;">` : ''}
             </a>
             <div class="product-card-content">
                 <span class="product-card-category">${product.category}</span>
@@ -1547,6 +1555,7 @@ function renderProducts() {
 
 function renderTrendingProducts() {
     if (!trendingTrack) return;
+    const supportsProductHover = window.innerWidth > 768 && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
     const featuredProducts = TRENDING_PRODUCT_IDS
         .map(id => PRODUCTS.find(product => product.id === id))
@@ -1557,18 +1566,18 @@ function renderTrendingProducts() {
             <a class="trending-card-image" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ficha de ${escapeHtml(product.title)} en una pestaña nueva" ${isDuplicate ? 'tabindex="-1"' : ''}>
                 <span class="trending-card-badge">${product.badge}</span>
                 <img class="trending-primary-img" src="${product.image}" alt="${isDuplicate ? '' : product.title}" loading="${!isDuplicate && productIndex < 2 ? 'eager' : 'lazy'}" decoding="async" ${!isDuplicate && productIndex < 2 ? 'fetchpriority="high"' : 'fetchpriority="low"'}>
-                ${product.images?.[1] ? `<img class="trending-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="lazy">` : ''}
+                ${supportsProductHover && product.images?.[1] ? `<img class="trending-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="lazy">` : ''}
             </a>
             <a class="trending-card-title" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer" ${isDuplicate ? 'tabindex="-1"' : ''}>${product.title}</a>
             <span class="trending-card-price">S/. ${product.price.toFixed(2)}</span>
         </article>
     `).join('');
 
-    // Cinco copias dejan margen suficiente para arrastres y gestos rápidos.
-    // La copia central es la accesible; las demás son continuidad visual.
-    trendingTrack.innerHTML = [0, 1, 2, 3, 4].map(groupIndex => `
+    // Tres copias mantienen el bucle fluido sin triplicar trabajo innecesario.
+    // La copia central es la accesible; las laterales dan continuidad visual.
+    trendingTrack.innerHTML = [0, 1, 2].map(groupIndex => `
         <div class="trending-loop-group" data-loop-group="${groupIndex}">
-            ${renderGroup(groupIndex !== 2)}
+            ${renderGroup(groupIndex !== 1)}
         </div>
     `).join('');
 
@@ -1918,9 +1927,9 @@ function renderCart() {
                 
                 <!-- Qty Editor inside cart -->
                 <div class="qty-selector" style="transform: scale(0.85); transform-origin: left center; margin-top: 8px;">
-                    <button type="button" class="qty-btn dec-cart-qty" data-index="${index}"><i data-lucide="minus"></i></button>
-                    <input type="number" value="${item.qty}" min="1" readonly style="width: 35px;">
-                    <button type="button" class="qty-btn inc-cart-qty" data-index="${index}"><i data-lucide="plus"></i></button>
+                    <button type="button" class="qty-btn dec-cart-qty" data-index="${index}" aria-label="Reducir cantidad de ${escapeHtml(item.product.title)}"><i data-lucide="minus"></i></button>
+                    <input type="number" value="${item.qty}" min="1" readonly aria-label="Cantidad de ${escapeHtml(item.product.title)}" style="width: 35px;">
+                    <button type="button" class="qty-btn inc-cart-qty" data-index="${index}" aria-label="Aumentar cantidad de ${escapeHtml(item.product.title)}"><i data-lucide="plus"></i></button>
                 </div>
             </div>
             <div class="cart-item-actions">
@@ -2224,6 +2233,7 @@ function setupEventListeners() {
             categoryTags.forEach(t => t.classList.remove('active'));
             tag.classList.add('active');
             selectedCategory = tag.getAttribute('data-category');
+            catalogVisibleLimit = CATALOG_PAGE_SIZE;
             
             // Sincronizar con desktop nav si aplica
             syncNavLinks(selectedCategory);
@@ -2260,11 +2270,12 @@ function setupEventListeners() {
                 return;
             }
 
-            selectedCategory = 'all';
-            setActiveCategoryTag('all');
+            selectedCategory = navCategory;
+            setActiveCategoryTag(navCategory);
+            catalogVisibleLimit = CATALOG_PAGE_SIZE;
             renderProducts();
             requestAnimationFrame(() => {
-                document.getElementById(`catalog-group-${navCategory}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         });
     });
@@ -2286,6 +2297,12 @@ function setupEventListeners() {
 
     searchInput.addEventListener('input', (e) => {
         searchQuery = e.target.value;
+        catalogVisibleLimit = CATALOG_PAGE_SIZE;
+        renderProducts();
+    });
+
+    catalogLoadMore?.addEventListener('click', () => {
+        catalogVisibleLimit += CATALOG_PAGE_SIZE;
         renderProducts();
     });
 
@@ -2334,7 +2351,6 @@ function setupEventListeners() {
 
     // Flujo de Checkout
     goToCheckoutBtn.addEventListener('click', async () => {
-        if (!await requireCustomerAccount('checkout')) return;
         openCheckoutDrawer();
     });
 
@@ -2400,11 +2416,12 @@ function navigateToCatalogCategory(navCategory) {
         return;
     }
 
-    selectedCategory = 'all';
-    setActiveCategoryTag('all');
+    selectedCategory = navCategory;
+    setActiveCategoryTag(navCategory);
+    catalogVisibleLimit = CATALOG_PAGE_SIZE;
     renderProducts();
     requestAnimationFrame(() => {
-        document.getElementById(`catalog-group-${navCategory}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 }
 
@@ -2630,8 +2647,6 @@ function closeAllDrawers() {
 
 // 8. FINALIZACIÓN Y ENVÍO A WHATSAPP
 async function submitOrder() {
-    if (!await requireCustomerAccount('checkout')) return;
-
     // Validar formulario manualmente
     const name = document.getElementById('checkout-name').value.trim();
     const phone = document.getElementById('checkout-phone').value.trim();
@@ -2674,7 +2689,7 @@ async function submitOrder() {
     const message = `🔥 *NUEVO PEDIDO - LYNX STREETWEAR* 🔥\n\n` +
                     `👤 *DATOS DEL CLIENTE:*\n` +
                     `- *Nombre:* ${name}\n` +
-                    `- *Cuenta:* ${customerUser.email}\n` +
+                    `${customerUser?.email ? `- *Cuenta:* ${customerUser.email}\n` : ''}` +
                     `- *Celular:* ${phone}\n` +
                     `- *Ciudad:* ${city}\n` +
                     `- *Dirección:* ${address}\n\n` +

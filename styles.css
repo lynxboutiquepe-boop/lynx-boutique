@@ -2290,6 +2290,58 @@ html.is-android .stock-marquee {
     }
 }
 
+/* Storefront audit fixes — stable responsive and catalog layer */
+.catalog-load-more {
+    min-width: 210px;
+    min-height: 50px;
+    display: block;
+    margin: 44px auto 0;
+    padding: 12px 24px;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--gold-soft);
+    cursor: pointer;
+    font-family: var(--font-title);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+}
+.catalog-load-more:hover { background: var(--accent); color: #080808; }
+.catalog-load-more[hidden] { display: none; }
+
+@media (max-width: 768px) {
+    .catalog-section {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 54px 16px 72px;
+        overflow: clip;
+    }
+    .catalog-container,
+    .catalog-header,
+    .filter-controls,
+    .search-box {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+    .catalog-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        align-items: stretch;
+        gap: 18px;
+        margin-bottom: 20px;
+    }
+    .search-box {
+        min-height: 50px;
+        padding: 12px 14px 12px 42px;
+        border-radius: 8px;
+    }
+    .search-box input { width: 100%; min-width: 0; }
+    .category-tags { max-width: calc(100vw - 32px); }
+}
+
 /* Mobile reliability layer: keep the final responsive rules in one place. */
 @media (max-width: 768px) {
     html,
@@ -5451,4 +5503,39 @@ body {
 .footer-guide-link:hover,
 .footer-guide-link:focus-visible {
     color: var(--accent);
+}
+
+/* Final audit guardrail: keep the live catalog inside every mobile viewport. */
+@media (max-width: 768px) {
+    #catalog.catalog-section {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+        margin-inline: 0;
+        padding: 54px 16px 72px;
+        overflow: clip;
+    }
+    #catalog .catalog-container,
+    #catalog .catalog-header,
+    #catalog .filter-controls,
+    #catalog .search-box {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+    #catalog .catalog-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        align-items: stretch;
+        gap: 18px;
+        margin-bottom: 20px;
+    }
+    #catalog .search-box {
+        min-height: 50px;
+        padding: 12px 14px 12px 42px;
+        border-radius: 8px;
+    }
+    #catalog .search-box input { width: 100%; min-width: 0; }
+    #catalog .category-tags { max-width: calc(100vw - 32px); }
 }
