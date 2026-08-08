@@ -72,10 +72,10 @@
             </a>
             
             <nav class="desktop-nav">
-                <button class="nav-link active" id="nav-all">Catálogo</button>
-                <a class="nav-link" id="nav-hoodies" href="/categoria/hoodies">Hoodies</a>
-                <a class="nav-link" id="nav-jeans" href="/categoria/jeans-y-pants">Jeans & Pants</a>
-                <a class="nav-link" id="nav-conjuntos" href="/categoria/conjuntos">Conjuntos</a>
+                <button class="nav-link active" id="nav-all" type="button">Catálogo</button>
+                <button class="nav-link" id="nav-hoodies" type="button">Hoodies</button>
+                <button class="nav-link" id="nav-jeans" type="button">Jeans & Pants</button>
+                <button class="nav-link" id="nav-conjuntos" type="button">Conjuntos</button>
             </nav>
 
             <div class="header-actions">
@@ -96,10 +96,10 @@
             </div>
 
             <nav class="mobile-nav" id="mobile-nav" aria-hidden="true" aria-label="Categorías de la tienda">
-                <button class="mobile-nav-link active" data-category="all">Catálogo</button>
-                <a class="mobile-nav-link" href="/categoria/hoodies">Hoodies</a>
-                <a class="mobile-nav-link" href="/categoria/jeans-y-pants">Jeans & Pants</a>
-                <a class="mobile-nav-link" href="/categoria/conjuntos">Conjuntos</a>
+                <button class="mobile-nav-link active" type="button" data-category="all">Catálogo</button>
+                <button class="mobile-nav-link" type="button" data-category="hoodies-jackets">Hoodies</button>
+                <button class="mobile-nav-link" type="button" data-category="jeans-pants">Jeans & Pants</button>
+                <button class="mobile-nav-link" type="button" data-category="conjuntos">Conjuntos</button>
                 <button class="mobile-nav-link mobile-account-link" id="mobile-account-btn" type="button"><i data-lucide="user-round"></i><span id="mobile-account-btn-label">Ingresar / registrarme</span></button>
             </nav>
         </div>
@@ -678,6 +678,6 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="supabase-config.js?v=20260716-admin-v1" defer></script>
-    <script src="app.js?v=20260808-store-audit-fix-v1" defer></script>
+    <script src="app.js?v=20260808-single-page-nav-v1" defer></script>
 </body>
 </html>

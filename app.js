@@ -814,6 +814,7 @@ let PRODUCTS = [];
 
 // 2. ESTADO DE LA APLICACIÓN
 let cart = [];
+let productModalReturnUrl = null;
 const CART_STORAGE_KEY = 'lynx_cart_v2';
 let selectedCategory = 'all';
 let searchQuery = '';
@@ -1526,20 +1527,20 @@ function renderProducts() {
 
         return `${categoryHeading}
         <article class="product-card" id="product-${product.id}">
-            <a class="product-card-img-wrapper" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ficha de ${escapeHtml(product.title)} en una pestaña nueva">
+            <a class="product-card-img-wrapper product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}" aria-label="Ver detalles de ${escapeHtml(product.title)}">
                 <span class="product-card-badge ${product.badge.toLowerCase().includes('stock') || product.badge.toLowerCase().includes('limit') || product.badge.toLowerCase().includes('última') ? 'limited' : ''}">${product.badge}</span>
                 <img class="product-card-primary-img" src="${product.image}" alt="${product.title}" loading="lazy" decoding="async" fetchpriority="low" style="pointer-events:none;">
                 ${supportsProductHover && product.images?.[1] ? `<img class="product-card-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="lazy" style="pointer-events:none;">` : ''}
             </a>
             <div class="product-card-content">
                 <span class="product-card-category">${product.category}</span>
-                <a class="product-card-title" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer">${product.title}</a>
+                <a class="product-card-title product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}">${product.title}</a>
                 <span class="product-card-price">S/. ${product.price.toFixed(2)}</span>
                 <div class="product-card-footer">
                     <button class="btn btn-primary btn-block product-card-add" type="button" data-product-id="${product.id}" ${product.status === 'sold_out' ? 'disabled' : ''}>
                         ${product.status === 'sold_out' ? 'AGOTADO' : 'AGREGAR AL CARRITO'}
                     </button>
-                    <a class="btn btn-secondary btn-block" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer">VER DETALLES</a>
+                    <a class="btn btn-secondary btn-block product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}">VER DETALLES</a>
                 </div>
             </div>
         </article>
@@ -1563,12 +1564,12 @@ function renderTrendingProducts() {
 
     const renderGroup = isDuplicate => featuredProducts.map((product, productIndex) => `
         <article class="trending-card" ${isDuplicate ? 'aria-hidden="true"' : ''}>
-            <a class="trending-card-image" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ficha de ${escapeHtml(product.title)} en una pestaña nueva" ${isDuplicate ? 'tabindex="-1"' : ''}>
+            <a class="trending-card-image product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}" aria-label="Ver detalles de ${escapeHtml(product.title)}" ${isDuplicate ? 'tabindex="-1"' : ''}>
                 <span class="trending-card-badge">${product.badge}</span>
                 <img class="trending-primary-img" src="${product.image}" alt="${isDuplicate ? '' : product.title}" loading="${!isDuplicate && productIndex < 2 ? 'eager' : 'lazy'}" decoding="async" ${!isDuplicate && productIndex < 2 ? 'fetchpriority="high"' : 'fetchpriority="low"'}>
                 ${supportsProductHover && product.images?.[1] ? `<img class="trending-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="lazy">` : ''}
             </a>
-            <a class="trending-card-title" href="${productUrl(product)}" target="_blank" rel="noopener noreferrer" ${isDuplicate ? 'tabindex="-1"' : ''}>${product.title}</a>
+            <a class="trending-card-title product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}" ${isDuplicate ? 'tabindex="-1"' : ''}>${product.title}</a>
             <span class="trending-card-price">S/. ${product.price.toFixed(2)}</span>
         </article>
     `).join('');
@@ -2210,6 +2211,24 @@ function setupEventListeners() {
 
     closeCartBtn.addEventListener('click', () => cartDrawer.classList.remove('active'));
 
+    cartDrawer.addEventListener('click', event => {
+        if (event.target === cartDrawer) cartDrawer.classList.remove('active');
+    });
+
+    checkoutDrawer.addEventListener('click', event => {
+        if (event.target === checkoutDrawer) checkoutDrawer.classList.remove('active');
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.key !== 'Escape') return;
+        if (accountDialog?.open) {
+            closeAccountDialog();
+            return;
+        }
+        closeAllDrawers();
+        setMobileMenuOpen(false);
+    });
+
     window.addEventListener('storage', event => {
         if (event.key !== CART_STORAGE_KEY) return;
         restoreCart();
@@ -2227,6 +2246,16 @@ function setupEventListeners() {
         cartDrawer.classList.add('active');
     });
 
+    const openFloatingProduct = event => {
+        const link = event.target.closest('.product-detail-link');
+        if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        event.preventDefault();
+        const productId = Number(link.dataset.productId);
+        if (productId) openProductDetails(productId);
+    };
+    productsGrid.addEventListener('click', openFloatingProduct);
+    trendingTrack?.addEventListener('click', openFloatingProduct);
+
     // Navegar y Filtrar por Categoria
     categoryTags.forEach(tag => {
         tag.addEventListener('click', (e) => {
@@ -2242,7 +2271,8 @@ function setupEventListeners() {
     });
 
     navLinks.forEach(link => {
-        link.addEventListener('click', () => {
+        link.addEventListener('click', event => {
+            event.preventDefault();
             const navCategory = link.id === 'nav-all'
                 ? 'all'
                 : Object.keys(CATALOG_CATEGORY_META).find(category => CATALOG_CATEGORY_META[category].navId === link.id);
@@ -2281,7 +2311,8 @@ function setupEventListeners() {
     });
 
     mobileNavLinks.forEach(link => {
-        link.addEventListener('click', () => {
+        link.addEventListener('click', event => {
+            event.preventDefault();
             navigateToCatalogCategory(link.dataset.category);
             setMobileMenuOpen(false);
         });
@@ -2443,6 +2474,13 @@ function updateCatalogNavOnScroll() {
     const catalog = document.getElementById('catalog');
     if (!catalog) return;
 
+    // Cuando hay un filtro activo, el menú debe conservar esa categoría
+    // aunque la animación de desplazamiento todavía no haya terminado.
+    if (selectedCategory !== 'all') {
+        syncNavLinks(selectedCategory);
+        return;
+    }
+
     const headerOffset = (document.getElementById('main-header')?.offsetHeight || 72) + 36;
     const headings = [...document.querySelectorAll('.catalog-category-heading')];
 
@@ -2544,13 +2582,22 @@ function openProductDetails(id, { syncUrl = true } = {}) {
     `).join('');
 
     productModal.classList.add('active');
-    if (syncUrl) history.replaceState({ productId: product.id }, '', productUrl(product));
+    if (syncUrl) {
+        productModalReturnUrl = `${location.pathname}${location.search}${location.hash}`;
+        history.replaceState({ productId: product.id }, '', productUrl(product));
+    }
     document.title = `${product.title} | LYNX`;
     lucide.createIcons();
 }
 
 function closeProductDetails() {
     productModal.classList.remove('active');
+    if (productModalReturnUrl) {
+        history.replaceState({}, '', productModalReturnUrl);
+        productModalReturnUrl = null;
+        document.title = 'LYNX | Premium Streetwear Co.';
+        return;
+    }
     const url = new URL(location.href);
     if (url.searchParams.has('producto')) {
         url.searchParams.delete('producto');
