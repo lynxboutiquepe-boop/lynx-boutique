@@ -14,8 +14,8 @@ Deno.serve(async (request) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const resendKey = Deno.env.get('RESEND_API_KEY')!
-    const fromEmail = Deno.env.get('DISCOUNT_FROM_EMAIL') || 'LYNX Boutique <lynxboutique.pe@gmail.com>'
+    const mailBridgeUrl = Deno.env.get('LYNX_MAIL_URL')!
+    const mailBridgeSecret = Deno.env.get('LYNX_MAIL_SECRET')!
 
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authorization } },
@@ -31,17 +31,18 @@ Deno.serve(async (request) => {
     const code = existing?.code || `LYNX10-${crypto.randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase()}`
     await admin.from('welcome_discount_codes').upsert({ user_id: user.id, email: user.email, code })
 
-    const emailResponse = await fetch('https://api.resend.com/emails', {
+    const emailResponse = await fetch(mailBridgeUrl, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: fromEmail,
-        to: [user.email],
+        secret: mailBridgeSecret,
+        to: user.email,
         subject: 'Tu 10% de descuento en LYNX',
         html: `<div style="background:#090909;color:#fff;padding:40px;font-family:Arial,sans-serif"><h1 style="color:#e1bb38">BIENVENIDO A LYNX</h1><p>Tu correo ya está verificado. Este es tu código privado para la primera compra:</p><p style="font-size:30px;font-weight:800;letter-spacing:3px">${code}</p><p>También te avisaremos sobre promociones, nuevo stock y nuestros próximos lives.</p><p style="color:#999;font-size:12px">Si no deseas recibir novedades, puedes cancelar la suscripción desde cualquiera de nuestros correos.</p></div>`,
       }),
     })
-    if (!emailResponse.ok) throw new Error('No se pudo enviar el correo de descuento.')
+    const emailResult = await emailResponse.json().catch(() => null)
+    if (!emailResponse.ok || !emailResult?.ok) throw new Error('No se pudo enviar el correo de descuento.')
 
     await admin.from('welcome_discount_codes').update({ sent_at: new Date().toISOString() }).eq('user_id', user.id)
     await admin.from('customer_profiles').update({ welcome_discount_sent_at: new Date().toISOString() }).eq('user_id', user.id)

@@ -1006,7 +1006,9 @@ function showDiscountSent(email, verified = false) {
     const message = document.getElementById('discount-sent-message');
     message.textContent = verified
         ? `Correo verificado. Estamos enviando tu código privado del 10% a ${email}. No se mostrará en esta página.`
-        : `Enviamos un enlace a ${email}. Ábrelo para verificar tu correo; después recibirás allí tu código privado del 10%.`;
+        : `Enviamos un código a ${email}. Escríbelo abajo; al verificarlo recibirás allí tu descuento privado del 10%.`;
+    const otpForm = document.getElementById('discount-otp-form');
+    if (otpForm) otpForm.hidden = verified;
 }
 
 function openAccountDialog(_mode = 'discount', message = '') {
@@ -2310,6 +2312,32 @@ function setupCustomerAccountEvents() {
         document.getElementById('customer-email-form')?.reset();
         showDiscountForm();
         updateAccountButton();
+    });
+
+    document.getElementById('discount-otp-form')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = event.currentTarget.querySelector('button[type="submit"]');
+        const email = pendingVerificationEmail || document.getElementById('customer-email')?.value.trim();
+        const token = document.getElementById('discount-email-otp')?.value.trim();
+        if (!email || !token) {
+            setAccountMessage('discount-otp-message', 'Escribe el código que llegó a tu correo.');
+            return;
+        }
+        setCustomerButtonLoading(button, true, 'VERIFICANDO...');
+        try {
+            const { data, error } = await customerSupabase.auth.verifyOtp({ email, token, type: 'email' });
+            if (error) throw error;
+            customerUser = data.user;
+            setAccountMessage('discount-otp-message', 'Correo verificado. Estamos enviando tu descuento.', true);
+            await requestWelcomeDiscountEmail();
+            showDiscountSent(email, true);
+            updateAccountButton();
+        } catch (error) {
+            setAccountMessage('discount-otp-message', customerErrorMessage(error));
+        } finally {
+            setCustomerButtonLoading(button, false);
+            lucide.createIcons();
+        }
     });
 }
 

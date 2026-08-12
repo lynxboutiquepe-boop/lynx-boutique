@@ -60,7 +60,7 @@
     <!-- Lucide Icons (CDN) -->
     <script src="https://unpkg.com/lucide@latest" defer></script>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260812-email-motion-v6">
+    <link rel="stylesheet" href="styles.css?v=20260812-email-otp-v7">
 </head>
 <body>
     <div class="page-scroll-progress" id="page-scroll-progress" aria-hidden="true"></div>
@@ -657,7 +657,12 @@
                 <span class="discount-sent-icon"><i data-lucide="mail-check"></i></span>
                 <span class="account-eyebrow">REVISA TU CORREO</span>
                 <h2>UN PASO<br><em>Y ES TUYO</em></h2>
-                <p id="discount-sent-message">Te enviamos un enlace de verificación. Cuando lo abras, tu código del 10% llegará por correo.</p>
+                <p id="discount-sent-message">Te enviamos un código de verificación. Escríbelo aquí para confirmar tu correo.</p>
+                <form class="account-form discount-otp-form" id="discount-otp-form">
+                    <label><span>Código recibido</span><input id="discount-email-otp" type="text" inputmode="numeric" autocomplete="one-time-code" required maxlength="8" placeholder="00000000"></label>
+                    <p class="account-message" id="discount-otp-message" aria-live="polite"></p>
+                    <button class="btn btn-primary btn-block" type="submit"><span>VERIFICAR Y RECIBIR 10%</span><i data-lucide="check"></i></button>
+                </form>
                 <button class="account-secondary-btn" id="discount-use-another-email" type="button">USAR OTRO CORREO</button>
             </div>
         </div>
@@ -666,7 +671,7 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="supabase-config.js?v=20260716-admin-v1" defer></script>
-    <script src="app.js?v=20260812-email-motion-v6" defer></script>
+    <script src="app.js?v=20260812-email-otp-v7" defer></script>
     <script src="tiktok-videos.js?v=20260812-preview-fix-v2" defer></script>
 </body>
 </html>

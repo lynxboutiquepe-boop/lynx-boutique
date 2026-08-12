@@ -5669,6 +5669,10 @@ body {
 .discount-sent-view { text-align:center; }
 .discount-sent-icon { width:76px; height:76px; display:grid; place-items:center; margin:0 auto 24px; border:1px solid #c8a232; border-radius:50%; background:#fff8dc; color:#9b7818; }
 .discount-sent-icon svg { width:34px; height:34px; }
+.discount-otp-form { margin-top:22px; text-align:left; }
+.discount-otp-form input { text-align:center; font-size:1.15rem; font-weight:800; letter-spacing:.28em; }
+.discount-otp-form .btn { display:flex; align-items:center; justify-content:center; gap:10px; }
+.discount-otp-form .btn svg { width:17px; }
 .discount-sent-view .account-secondary-btn { width:100%; margin-top:26px; }
 
 @media (max-width:700px) {
