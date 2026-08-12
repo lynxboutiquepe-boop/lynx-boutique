@@ -2310,6 +2310,41 @@ html.is-android .stock-marquee {
 .catalog-load-more:hover { background: var(--accent); color: #080808; }
 .catalog-load-more[hidden] { display: none; }
 
+.catalog-category-more {
+    grid-column: 1 / -1;
+    width: min(100%, 360px);
+    min-height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin: 4px auto 14px;
+    padding: 13px 24px;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--gold-soft);
+    cursor: pointer;
+    font-family: var(--font-title);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    transition: color .25s ease, background .25s ease, transform .25s ease;
+}
+.catalog-category-more:hover {
+    color: #080808;
+    background: var(--accent);
+    transform: translateY(-2px);
+}
+.catalog-category-more span { font-size: 1rem; }
+
+@media (max-width: 768px) {
+    .catalog-category-more {
+        width: 100%;
+        margin-top: 0;
+    }
+}
+
 @media (max-width: 768px) {
     .catalog-section {
         width: 100%;
@@ -5503,6 +5538,153 @@ body {
 .footer-guide-link:hover,
 .footer-guide-link:focus-visible {
     color: var(--accent);
+}
+
+/* TikTok showcase — local preview */
+.nav-link-anchor, .mobile-nav-anchor { text-decoration: none; }
+.tiktok-showcase { position:relative; padding:74px clamp(20px,5vw,84px) 58px; overflow:hidden; border-block:1px solid rgba(212,175,55,.18); background:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px),radial-gradient(circle at 85% 8%,rgba(212,175,55,.1),transparent 28rem),#080808; background-size:42px 42px,42px 42px,auto,auto; color:#fff; }
+.tiktok-showcase::before { content:'LYNX'; position:absolute; top:16px; right:-22px; color:rgba(255,255,255,.025); font-family:var(--font-title); font-size:clamp(8rem,19vw,20rem); font-weight:900; line-height:1; pointer-events:none; }
+.tiktok-showcase-heading { position:relative; z-index:1; max-width:1480px; margin:0 auto 30px; display:flex; align-items:end; justify-content:space-between; gap:28px; }
+.tiktok-showcase-kicker { color:var(--accent); font-size:.68rem; font-weight:800; letter-spacing:.22em; }
+.tiktok-showcase h2 { margin:9px 0 8px; font-family:var(--font-title); font-size:clamp(2rem,4vw,4rem); line-height:.92; letter-spacing:-.035em; }
+.tiktok-showcase-heading p { max-width:560px; color:#aaa; font-size:.93rem; line-height:1.6; }
+.tiktok-profile-link { display:inline-flex; align-items:center; gap:10px; padding:14px 18px; border:1px solid rgba(212,175,55,.56); color:var(--gold-soft); font-size:.68rem; font-weight:800; letter-spacing:.11em; text-decoration:none; }
+.tiktok-profile-link:hover { background:var(--accent); color:#080808; }
+.tiktok-profile-link svg { width:16px; }
+.tiktok-video-rail { position:relative; z-index:1; max-width:1480px; margin:0 auto; display:grid; grid-auto-flow:column; grid-auto-columns:minmax(260px,1fr); gap:12px; overflow-x:auto; padding:2px 2px 12px; scroll-snap-type:x mandatory; scrollbar-width:none; }
+.tiktok-video-rail::-webkit-scrollbar { display:none; }
+.tiktok-video-card { scroll-snap-align:start; min-width:0; padding:9px; border:1px solid #2b2b2b; background:rgba(14,14,14,.94); box-shadow:0 18px 45px rgba(0,0,0,.24); transition:transform .3s ease,border-color .3s ease; }
+.tiktok-video-card:hover { transform:translateY(-5px); border-color:rgba(212,175,55,.62); }
+.tiktok-card-top { min-height:39px; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:9px; padding:0 3px 8px; }
+.tiktok-card-top span { color:var(--accent); font-size:.66rem; font-weight:800; letter-spacing:.16em; }
+.tiktok-card-top strong { overflow:hidden; color:#eee; font-size:.7rem; letter-spacing:.07em; text-overflow:ellipsis; text-transform:uppercase; white-space:nowrap; }
+.tiktok-card-top .tiktok-card-mark { color:#707070; font-size:.48rem; white-space:nowrap; }
+.tiktok-player-frame { position:relative; width:100%; aspect-ratio:9/16; overflow:hidden; background:#030303; }
+.tiktok-player-frame::after { content:''; position:absolute; inset:0; border:1px solid rgba(255,255,255,.07); pointer-events:none; }
+.tiktok-player-frame iframe { width:100%; height:100%; display:block; border:0; background:#050505; }
+.tiktok-player-launch { position:relative; width:100%; height:100%; display:grid; place-items:center; align-content:center; gap:18px; overflow:hidden; border:0; background:#090909 var(--tiktok-cover) center/cover no-repeat; color:#fff; cursor:pointer; }
+.tiktok-player-launch::before { content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.04) 46%,rgba(0,0,0,.72) 100%); transition:background .25s ease; }
+.tiktok-player-launch:hover::before { background:linear-gradient(180deg,rgba(0,0,0,.02) 44%,rgba(0,0,0,.58) 100%); }
+.tiktok-player-play { width:68px; height:68px; position:relative; display:grid; place-items:center; border:1px solid var(--accent); border-radius:50%; background:rgba(0,0,0,.56); box-shadow:0 0 0 10px rgba(212,175,55,.05); transition:transform .25s ease,background .25s ease; }
+.tiktok-player-play::after { content:''; margin-left:5px; border-top:9px solid transparent; border-bottom:9px solid transparent; border-left:15px solid var(--gold-soft); }
+.tiktok-player-launch:hover .tiktok-player-play { transform:scale(1.08); background:var(--accent); }
+.tiktok-player-launch:hover .tiktok-player-play::after { border-left-color:#070707; }
+.tiktok-player-launch small { position:absolute; left:0; right:0; bottom:18px; color:#fff; font-size:.5rem; font-weight:800; letter-spacing:.18em; text-shadow:0 2px 8px #000; }
+.tiktok-player-fallback { position:absolute; left:8px; right:8px; bottom:8px; z-index:3; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 9px; background:rgba(0,0,0,.76); backdrop-filter:blur(8px); color:#aaa; font-size:.48rem; }
+.tiktok-player-fallback a { color:var(--gold-soft); font-weight:800; text-decoration:none; }
+.tiktok-card-footer { min-height:38px; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 3px 0; }
+.tiktok-card-footer > span { color:#777; font-size:.5rem; font-weight:800; letter-spacing:.17em; }
+.tiktok-card-footer a { color:var(--gold-soft); font-size:.55rem; font-weight:800; letter-spacing:.08em; text-decoration:none; }
+.tiktok-showcase-footer { position:relative; z-index:1; max-width:1480px; margin:9px auto 0; display:flex; align-items:center; justify-content:space-between; color:#666; font-size:.5rem; font-weight:700; letter-spacing:.18em; }
+.tiktok-showcase-footer div { display:flex; gap:5px; }
+.tiktok-showcase-footer i { width:24px; height:1px; display:block; background:#333; }
+.tiktok-showcase-footer i:first-child { background:var(--accent); }
+.tiktok-empty-card { grid-column:1/-1; width:min(100%,820px); min-height:210px; display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:24px; padding:32px; border:1px solid #2a2a2a; background:linear-gradient(135deg,#111,#090909); }
+.tiktok-empty-icon { width:72px; height:72px; display:grid; place-items:center; border:1px solid var(--accent); border-radius:50%; color:var(--accent); font-size:2rem; }
+.tiktok-empty-card strong { display:block; margin-bottom:8px; font-family:var(--font-title); font-size:1.3rem; }
+.tiktok-empty-card p { color:#999; line-height:1.55; }
+.tiktok-empty-card a { color:var(--gold-soft); font-size:.72rem; font-weight:800; text-decoration:none; }
+@media (max-width:768px) {
+    .tiktok-showcase { padding:54px 16px 42px; }
+    .tiktok-showcase-heading { align-items:start; flex-direction:column; margin-bottom:26px; }
+    .tiktok-showcase-heading p { font-size:.82rem; }
+    .tiktok-video-rail { grid-auto-columns:minmax(248px,79vw); gap:11px; }
+    .tiktok-showcase-footer { margin-top:5px; }
+    .tiktok-showcase-footer > span:first-child { display:none; }
+    .tiktok-empty-card { grid-template-columns:54px 1fr; gap:16px; padding:22px 18px; }
+    .tiktok-empty-icon { width:54px; height:54px; }
+    .tiktok-empty-card a { grid-column:2; }
+}
+
+/* Interactive storefront + email-only welcome offer */
+.page-scroll-progress {
+    position: fixed; inset: 0 0 auto; z-index: 10000; height: 3px;
+    transform: scaleX(0); transform-origin: left center;
+    background: linear-gradient(90deg, #b58a12, #ffe783, #d4af37);
+    box-shadow: 0 0 16px rgba(255, 221, 105, .5); pointer-events: none;
+}
+.page-pointer-glow {
+    position: fixed; top: 0; left: 0; z-index: 0; width: 380px; height: 380px;
+    border-radius: 50%; background: radial-gradient(circle, rgba(212,175,55,.075), transparent 68%);
+    pointer-events: none; will-change: transform;
+}
+.motion-reveal {
+    opacity: 0; transform: translate3d(0, 34px, 0); filter: blur(5px);
+    transition: opacity .85s cubic-bezier(.2,.75,.2,1) var(--reveal-delay,0ms),
+                transform .85s cubic-bezier(.2,.75,.2,1) var(--reveal-delay,0ms),
+                filter .85s ease var(--reveal-delay,0ms);
+}
+.motion-reveal.is-visible { opacity: 1; transform: translate3d(0,0,0); filter: blur(0); }
+.product-card, .trending-card {
+    transform: perspective(1100px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg));
+    transform-style: preserve-3d; transition: transform .32s ease, opacity .85s ease, filter .85s ease;
+}
+.product-card-img-wrapper::after {
+    content:''; position:absolute; inset:-70% -35%; z-index:2;
+    background:linear-gradient(110deg,transparent 40%,rgba(255,255,255,.24) 50%,transparent 60%);
+    transform:translateX(-70%) rotate(8deg); transition:transform .8s cubic-bezier(.2,.7,.2,1); pointer-events:none;
+}
+.product-card:hover .product-card-img-wrapper::after { transform:translateX(70%) rotate(8deg); }
+.hero-content > * { animation: heroElementIn .85s cubic-bezier(.2,.8,.2,1) both; }
+.hero-content > *:nth-child(2) { animation-delay:.1s; }
+.hero-content > *:nth-child(3) { animation-delay:.2s; }
+.hero-content > *:nth-child(4) { animation-delay:.3s; }
+@keyframes heroElementIn { from { opacity:0; transform:translateY(28px); filter:blur(5px); } to { opacity:1; transform:none; filter:none; } }
+
+.discount-dialog { width:min(900px,calc(100% - 28px)); border-radius:0; overflow:visible; }
+.discount-dialog::backdrop { background:rgba(0,0,0,.78); backdrop-filter:blur(12px); }
+.discount-card {
+    width:100%; max-width:none; min-height:520px; display:grid; grid-template-columns:.88fr 1.12fr;
+    padding:0; overflow:hidden; border:1px solid rgba(212,175,55,.38);
+    background:#f7f5ef; box-shadow:0 38px 120px rgba(0,0,0,.65);
+}
+.discount-card > .account-close {
+    z-index:12; border:1px solid rgba(255,255,255,.18);
+    background:rgba(10,10,10,.72); color:#fff; backdrop-filter:blur(10px);
+}
+.discount-card-art {
+    position:relative; min-height:520px; display:grid; place-content:center; text-align:center; overflow:hidden;
+    color:#f8de72; background:radial-gradient(circle at 50% 45%,#24200e 0,#10100c 36%,#050505 72%);
+}
+.discount-card-art::before { content:'LYNX'; position:absolute; inset:auto -20px 8px; color:rgba(255,255,255,.035); font-family:var(--font-title); font-size:7rem; font-weight:900; }
+.discount-card-art strong { position:relative; z-index:2; font-family:var(--font-title); font-size:clamp(5rem,10vw,8rem); line-height:.8; letter-spacing:-.08em; text-shadow:0 0 34px rgba(212,175,55,.25); }
+.discount-card-art small { position:relative; z-index:2; margin-top:25px; font-size:.58rem; font-weight:800; letter-spacing:.35em; }
+.discount-orbit { position:absolute; left:50%; top:50%; border:1px solid rgba(212,175,55,.32); border-radius:50%; animation:discountOrbit 11s linear infinite; }
+.discount-orbit::after { content:''; position:absolute; left:50%; top:-4px; width:8px; height:8px; border-radius:50%; background:#f4d45d; box-shadow:0 0 18px #f4d45d; }
+.discount-orbit-one { width:280px; height:280px; margin:-140px; }
+.discount-orbit-two { width:390px; height:390px; margin:-195px; animation-direction:reverse; animation-duration:16s; opacity:.45; }
+@keyframes discountOrbit { to { transform:rotate(360deg); } }
+.discount-card-content { align-self:center; padding:56px clamp(28px,5vw,64px); color:#141414; }
+.discount-card-content h2 { margin:12px 0 18px; font-family:var(--font-title); font-size:clamp(2.25rem,5vw,4rem); line-height:.92; letter-spacing:-.055em; }
+.discount-card-content h2 em { color:#a17b11; font-size:.47em; font-style:normal; letter-spacing:.04em; }
+.discount-card-content > p { color:#68655d; font-size:.88rem; line-height:1.65; }
+.discount-email-form { margin-top:26px; }
+.discount-email-form .btn { display:flex; align-items:center; justify-content:center; gap:12px; }
+.discount-email-form .btn svg { width:17px; }
+.discount-consent { display:flex; align-items:flex-start; gap:10px; color:#69665e; cursor:pointer; font-size:.68rem; line-height:1.5; }
+.discount-consent input { width:17px; height:17px; margin-top:2px; flex:0 0 auto; accent-color:#c69b22; }
+.discount-consent strong { color:#26241e; }
+.discount-safe-note { display:flex; align-items:center; gap:8px; margin-top:18px; color:#777269; font-size:.64rem; }
+.discount-safe-note svg { width:16px; color:#9b7818; }
+.discount-sent-view { text-align:center; }
+.discount-sent-icon { width:76px; height:76px; display:grid; place-items:center; margin:0 auto 24px; border:1px solid #c8a232; border-radius:50%; background:#fff8dc; color:#9b7818; }
+.discount-sent-icon svg { width:34px; height:34px; }
+.discount-sent-view .account-secondary-btn { width:100%; margin-top:26px; }
+
+@media (max-width:700px) {
+    .page-pointer-glow { display:none; }
+    .discount-dialog { width:calc(100% - 20px); max-height:calc(100dvh - 20px); }
+    .discount-card { min-height:0; grid-template-columns:1fr; max-height:calc(100dvh - 20px); overflow:auto; }
+    .discount-card-art { min-height:180px; }
+    .discount-card-art strong { font-size:4.8rem; }
+    .discount-card-art small { margin-top:14px; }
+    .discount-orbit-one { width:170px; height:170px; margin:-85px; }
+    .discount-orbit-two { width:235px; height:235px; margin:-117px; }
+    .discount-card-content { padding:30px 22px calc(28px + env(safe-area-inset-bottom)); }
+}
+@media (prefers-reduced-motion:reduce) {
+    .motion-reveal { opacity:1; transform:none; filter:none; transition:none; }
+    .discount-orbit, .hero-content > * { animation:none; }
 }
 
 /* Final audit guardrail: keep the live catalog inside every mobile viewport. */

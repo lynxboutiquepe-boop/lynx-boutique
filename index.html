@@ -60,9 +60,11 @@
     <!-- Lucide Icons (CDN) -->
     <script src="https://unpkg.com/lucide@latest" defer></script>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260808-store-audit-fix-v1">
+    <link rel="stylesheet" href="styles.css?v=20260812-email-motion-v6">
 </head>
 <body>
+    <div class="page-scroll-progress" id="page-scroll-progress" aria-hidden="true"></div>
+    <div class="page-pointer-glow" aria-hidden="true"></div>
 
     <!-- Header Section -->
     <header class="app-header" id="main-header">
@@ -76,6 +78,7 @@
                 <button class="nav-link" id="nav-hoodies" type="button">Hoodies</button>
                 <button class="nav-link" id="nav-jeans" type="button">Jeans & Pants</button>
                 <button class="nav-link" id="nav-conjuntos" type="button">Conjuntos</button>
+                <a class="nav-link nav-link-anchor" href="#lynx-tiktok">Videos</a>
             </nav>
 
             <div class="header-actions">
@@ -85,9 +88,9 @@
                 <button class="header-search-btn" id="header-search-btn" aria-label="Buscar productos">
                     <i data-lucide="search"></i>
                 </button>
-                <button class="account-btn" id="account-btn" aria-label="Ingresar o crear cuenta">
-                    <i data-lucide="user-round"></i>
-                    <span id="account-btn-label">Cuenta</span>
+                <button class="account-btn" id="account-btn" aria-label="Obtener 10% de descuento">
+                    <i data-lucide="mail"></i>
+                    <span id="account-btn-label">10% OFF</span>
                 </button>
                 <button class="cart-btn" id="open-cart-btn" aria-label="Abrir carrito">
                     <i data-lucide="shopping-bag"></i>
@@ -100,7 +103,8 @@
                 <button class="mobile-nav-link" type="button" data-category="hoodies-jackets">Hoodies</button>
                 <button class="mobile-nav-link" type="button" data-category="jeans-pants">Jeans & Pants</button>
                 <button class="mobile-nav-link" type="button" data-category="conjuntos">Conjuntos</button>
-                <button class="mobile-nav-link mobile-account-link" id="mobile-account-btn" type="button"><i data-lucide="user-round"></i><span id="mobile-account-btn-label">Ingresar / registrarme</span></button>
+                <a class="mobile-nav-link mobile-nav-anchor" href="#lynx-tiktok">Videos</a>
+                <button class="mobile-nav-link mobile-account-link" id="mobile-account-btn" type="button"><i data-lucide="mail"></i><span id="mobile-account-btn-label">Obtener 10% OFF</span></button>
             </nav>
         </div>
     </header>
@@ -261,6 +265,26 @@
             <button class="catalog-load-more" id="catalog-load-more" type="button" hidden>VER MÁS PRENDAS</button>
         </div>
     </main>
+
+    <!-- Videos de TikTok -->
+    <section class="tiktok-showcase" id="lynx-tiktok" aria-labelledby="tiktok-showcase-title">
+        <div class="tiktok-showcase-heading">
+            <div>
+                <span class="tiktok-showcase-kicker">LYNX EN MOVIMIENTO</span>
+                <h2 id="tiktok-showcase-title">MIRA CÓMO QUEDA</h2>
+                <p>Fits reales, nuevos drops y detalles que una foto no siempre muestra.</p>
+            </div>
+            <a class="tiktok-profile-link" href="https://www.tiktok.com/@boutique_lynx" target="_blank" rel="noopener noreferrer">
+                <span>SEGUIR EN TIKTOK</span><i data-lucide="arrow-up-right"></i>
+            </a>
+        </div>
+        <div class="tiktok-video-rail" id="tiktok-video-rail" aria-live="polite"></div>
+        <div class="tiktok-showcase-footer">
+            <span>DESLIZA PARA VER MÁS</span>
+            <div aria-hidden="true"><i></i><i></i><i></i></div>
+            <span>@BOUTIQUE_LYNX</span>
+        </div>
+    </section>
 
     <!-- Reseñas de clientes -->
     <section class="reviews-section" id="resenas" aria-labelledby="reviews-title">
@@ -608,69 +632,33 @@
         </div>
     </div>
 
-    <!-- Customer Account -->
-    <dialog class="account-dialog" id="account-dialog">
-        <div class="account-card">
+    <!-- Email-only welcome discount -->
+    <dialog class="account-dialog discount-dialog" id="account-dialog">
+        <div class="account-card discount-card">
             <button class="account-close" id="account-close-btn" type="button" aria-label="Cerrar"><i data-lucide="x"></i></button>
-            <div id="account-auth-view">
-                <div class="account-heading">
-                    <span class="account-eyebrow">MI CUENTA LYNX</span>
-                    <h2 id="account-auth-title">Inicia sesión</h2>
-                    <p id="account-auth-intro">Usa tu correo verificado para continuar con tu pedido.</p>
-                </div>
-                <div class="account-tabs" role="tablist" aria-label="Acceso de clientes">
-                    <button class="account-tab active" id="show-login-tab" type="button">Iniciar sesión</button>
-                    <button class="account-tab" id="show-register-tab" type="button">Registrarme</button>
-                </div>
-                <form class="account-form" id="customer-login-form">
-                    <label><span>Correo</span><input id="customer-login-email" type="email" autocomplete="email" required placeholder="tu@correo.com"></label>
-                    <label><span>Contraseña</span><input id="customer-login-password" type="password" autocomplete="current-password" required placeholder="Tu contraseña"></label>
-                    <p class="account-message" id="customer-login-message" aria-live="polite"></p>
-                    <button class="btn btn-primary btn-block" type="submit">INGRESAR</button>
-                    <button class="account-text-btn" id="customer-reset-password" type="button">Olvidé mi contraseña</button>
-                </form>
-                <form class="account-form" id="customer-register-form" hidden>
-                    <div class="account-verification-note"><i data-lucide="mail-check"></i><span><strong>Registro con correo verificado.</strong> Te enviaremos un enlace para activar tu cuenta antes de hacer pedidos.</span></div>
-                    <label><span>Correo electrónico</span><input id="customer-register-email" type="email" autocomplete="email" required placeholder="tu@correo.com"></label>
-                    <label><span>Nombre y apellido</span><input id="customer-register-name" type="text" autocomplete="name" required placeholder="Tu nombre completo"></label>
-                    <label><span>WhatsApp</span><input id="customer-register-phone" type="tel" autocomplete="tel" required placeholder="987654321"></label>
-                    <div class="account-form-grid">
-                        <label><span>Contraseña</span><input id="customer-register-password" type="password" autocomplete="new-password" minlength="8" required placeholder="Mínimo 8 caracteres"></label>
-                        <label><span>Confirmar</span><input id="customer-register-confirm" type="password" autocomplete="new-password" minlength="8" required placeholder="Repite la contraseña"></label>
-                    </div>
-                    <label class="account-consent"><input id="customer-register-marketing" type="checkbox"><span><strong>Quiero recibir novedades y descuentos.</strong> Es opcional y puedes cambiarlo luego.</span></label>
-                    <p class="account-message" id="customer-register-message" aria-live="polite"></p>
-                    <button class="btn btn-primary btn-block" type="submit">CREAR MI CUENTA</button>
-                    <button class="account-secondary-btn" id="customer-resend-verification" type="button" hidden><i data-lucide="send"></i> Reenviar correo de verificación</button>
-                </form>
+            <div class="discount-card-art" aria-hidden="true">
+                <span class="discount-orbit discount-orbit-one"></span>
+                <span class="discount-orbit discount-orbit-two"></span>
+                <strong>10%</strong><small>WELCOME DROP</small>
             </div>
-            <div id="account-profile-view" hidden>
-                <div class="account-heading">
-                    <span class="account-eyebrow">MI CUENTA LYNX</span>
-                    <h2>Mis datos</h2>
-                    <p id="customer-profile-email"></p>
-                </div>
-                <form class="account-form" id="customer-profile-form">
-                    <label><span>Nombre y apellido</span><input id="customer-profile-name" type="text" autocomplete="name" required></label>
-                    <label><span>WhatsApp</span><input id="customer-profile-phone" type="tel" autocomplete="tel" required></label>
-                    <label class="account-consent"><input id="customer-profile-marketing" type="checkbox"><span><strong>Recibir novedades y descuentos.</strong> Puedes retirar este permiso cuando quieras.</span></label>
-                    <p class="account-message" id="customer-profile-message" aria-live="polite"></p>
-                    <button class="btn btn-primary btn-block" type="submit">GUARDAR MIS DATOS</button>
-                    <button class="account-secondary-btn" id="customer-logout-btn" type="button"><i data-lucide="log-out"></i> Cerrar sesión</button>
+            <div class="discount-card-content" id="discount-form-view">
+                <span class="account-eyebrow">BIENVENIDO A LYNX</span>
+                <h2>10% OFF<br><em>EN TU PRIMERA COMPRA</em></h2>
+                <p>Déjanos tu correo. Primero lo verificas y luego recibirás tu código privado de descuento por email.</p>
+                <form class="account-form discount-email-form" id="customer-email-form">
+                    <label><span>Tu correo electrónico</span><input id="customer-email" type="email" autocomplete="email" required placeholder="tu@correo.com"></label>
+                    <label class="discount-consent"><input id="customer-email-consent" type="checkbox" required><span>Acepto recibir por correo <strong>promociones, avisos de nuevo stock y alertas cuando LYNX esté en live.</strong> Puedo cancelar la suscripción cuando quiera.</span></label>
+                    <p class="account-message" id="customer-email-message" aria-live="polite"></p>
+                    <button class="btn btn-primary btn-block" type="submit"><span>QUIERO MI 10%</span><i data-lucide="arrow-right"></i></button>
                 </form>
+                <div class="discount-safe-note"><i data-lucide="shield-check"></i><span>Sin contraseña ni cuenta. Solo un correo verificado.</span></div>
             </div>
-            <div id="account-recovery-view" hidden>
-                <div class="account-heading">
-                    <span class="account-eyebrow">SEGURIDAD LYNX</span>
-                    <h2>Crea una nueva contraseña</h2>
-                    <p>Escribe una contraseña de al menos 8 caracteres para recuperar tu cuenta.</p>
-                </div>
-                <form class="account-form" id="customer-recovery-form">
-                    <label><span>Nueva contraseña</span><input id="customer-recovery-password" type="password" autocomplete="new-password" minlength="8" required></label>
-                    <label><span>Confirmar contraseña</span><input id="customer-recovery-confirm" type="password" autocomplete="new-password" minlength="8" required></label>
-                    <p class="account-message" id="customer-recovery-message" aria-live="polite"></p>
-                    <button class="btn btn-primary btn-block" type="submit">GUARDAR CONTRASEÑA</button>
-                </form>
+            <div class="discount-card-content discount-sent-view" id="discount-sent-view" hidden>
+                <span class="discount-sent-icon"><i data-lucide="mail-check"></i></span>
+                <span class="account-eyebrow">REVISA TU CORREO</span>
+                <h2>UN PASO<br><em>Y ES TUYO</em></h2>
+                <p id="discount-sent-message">Te enviamos un enlace de verificación. Cuando lo abras, tu código del 10% llegará por correo.</p>
+                <button class="account-secondary-btn" id="discount-use-another-email" type="button">USAR OTRO CORREO</button>
             </div>
         </div>
     </dialog>
@@ -678,6 +666,7 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="supabase-config.js?v=20260716-admin-v1" defer></script>
-    <script src="app.js?v=20260808-product-gallery-fix-v1" defer></script>
+    <script src="app.js?v=20260812-email-motion-v6" defer></script>
+    <script src="tiktok-videos.js?v=20260812-preview-fix-v2" defer></script>
 </body>
 </html>

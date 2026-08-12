@@ -528,6 +528,39 @@ input, select, textarea, .quick-edit input { background: #fff; color: var(--ink)
 .product-form, .confirm-card { background: #fff; }
 .toast { background: #17181d; border-color: transparent; }
 
+/* TikTok manager — local preview */
+.tiktok-admin-grid { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(260px,.65fr); gap:18px; margin-bottom:20px; }
+.tiktok-admin-form { display:grid; gap:14px; }
+.tiktok-admin-help { display:grid; align-content:start; gap:10px; background:linear-gradient(145deg,#1b1c24,#101116); color:#fff; }
+.tiktok-admin-help h3 { font-family:var(--font-title); font-size:1.25rem; }
+.tiktok-admin-help p { color:#b8bac4; font-size:.72rem; line-height:1.6; }
+.tiktok-admin-help ol { display:grid; gap:8px; padding-left:18px; color:#ddd; font-size:.7rem; }
+.tiktok-admin-list { display:grid; gap:10px; }
+.tiktok-admin-item { display:grid; grid-template-columns:52px minmax(0,1fr) auto auto; align-items:center; gap:14px; padding:13px 15px; border:1px solid var(--line); border-radius:12px; background:#fff; }
+.tiktok-admin-item.is-hidden { opacity:.58; }
+.tiktok-admin-number { color:var(--accent); font-family:var(--font-title); font-size:1.15rem; font-weight:800; }
+.tiktok-admin-copy { min-width:0; display:grid; gap:5px; }
+.tiktok-admin-copy strong { overflow:hidden; font-size:.76rem; text-overflow:ellipsis; white-space:nowrap; }
+.tiktok-admin-copy a { color:var(--muted); font-size:.63rem; text-decoration:none; }
+.tiktok-admin-status { padding:5px 8px; border-radius:999px; background:var(--success-soft); color:var(--success); font-size:.55rem; font-weight:800; letter-spacing:.08em; }
+.tiktok-admin-item.is-hidden .tiktok-admin-status { background:#eeeef2; color:var(--muted); }
+.tiktok-admin-actions { display:flex; gap:5px; }
+.tiktok-admin-actions button { width:32px; height:32px; display:grid; place-items:center; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); cursor:pointer; }
+.tiktok-admin-actions button:hover { border-color:var(--accent); color:var(--accent); }
+.tiktok-admin-actions button:disabled { cursor:default; opacity:.3; }
+.tiktok-admin-actions button.danger:hover { border-color:var(--danger); color:var(--danger); }
+.tiktok-admin-actions svg { width:14px; }
+.tiktok-admin-empty { min-height:170px; display:grid; place-items:center; align-content:center; gap:8px; border:1px dashed #cfd1dc; border-radius:12px; color:var(--muted); text-align:center; }
+.tiktok-admin-empty svg { color:var(--accent); }
+.tiktok-admin-empty strong { color:var(--ink); font-size:.78rem; }
+.tiktok-admin-empty span { font-size:.67rem; }
+@media (max-width:760px) {
+    .tiktok-admin-grid { grid-template-columns:1fr; }
+    .tiktok-admin-item { grid-template-columns:38px minmax(0,1fr) auto; }
+    .tiktok-admin-status { grid-column:2; justify-self:start; }
+    .tiktok-admin-actions { grid-column:3; grid-row:1/span 2; display:grid; grid-template-columns:repeat(2,32px); }
+}
+
 @media (max-width: 760px) {
     .admin-sidebar { background: rgba(255,255,255,.97); }
     .admin-tab.active { background: var(--accent-soft); color: var(--accent); }

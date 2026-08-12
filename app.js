@@ -68,7 +68,9 @@ function optimizedStoreImage(source = '') {
         '$1.webp'
     );
     if (!optimized || /^(?:https?:|data:|blob:|\/)/i.test(optimized)) return optimized;
-    return `/${optimized.replace(/^\.\//, '')}`;
+    // Keep store assets relative so they work on localhost and when index.html
+    // is opened directly from its folder (file://).
+    return optimized.replace(/^\.\//, '');
 }
 
 function productImages(slug, count = 8) {
@@ -821,7 +823,9 @@ const CART_STORAGE_KEY = 'lynx_cart_v2';
 let selectedCategory = 'all';
 let searchQuery = '';
 const CATALOG_PAGE_SIZE = 24;
+const HOME_PRODUCTS_PER_CATEGORY = 6;
 let catalogVisibleLimit = CATALOG_PAGE_SIZE;
+let catalogExpanded = false;
 let currentProduct = null; // Para ver detalles
 let catalogScrollFrame = null;
 let customerUser = null;
@@ -829,6 +833,8 @@ let customerProfile = null;
 let pendingCustomerAction = null;
 let pendingVerificationEmail = '';
 const customerSupabase = window.getLynxSupabase?.() || null;
+const DISCOUNT_POPUP_SESSION_KEY = 'lynx_discount_popup_seen_v1';
+const DISCOUNT_EMAIL_SENT_KEY = 'lynx_discount_email_requested_v1';
 
 // 3. SELECCIÓN DE ELEMENTOS DEL DOM
 const productsGrid = document.getElementById('products-grid-container');
@@ -879,10 +885,10 @@ const builderBuyBtn = document.getElementById('builder-buy-btn');
 const TRENDING_PRODUCT_IDS = [14, 15, 16, 17, 13, 8, 6, 3, 21];
 const CATALOG_CATEGORY_ORDER = ['hoodies-jackets', 't-shirts', 'jeans-pants', 'conjuntos'];
 const CATALOG_CATEGORY_META = {
-    'hoodies-jackets': { label: 'HOODIES & JACKETS', navId: 'nav-hoodies' },
+    'hoodies-jackets': { label: 'HOODIES & JACKETS', moreLabel: 'HOODIES', navId: 'nav-hoodies' },
     't-shirts': { label: 'T-SHIRTS', navId: 'nav-tshirts' },
-    'jeans-pants': { label: 'JEANS & PANTS', navId: 'nav-jeans' },
-    'conjuntos': { label: 'CONJUNTOS', navId: 'nav-conjuntos' }
+    'jeans-pants': { label: 'JEANS & PANTS', moreLabel: 'JEANS', navId: 'nav-jeans' },
+    'conjuntos': { label: 'CONJUNTOS', moreLabel: 'CONJUNTOS', navId: 'nav-conjuntos' }
 };
 
 // Formulario de Checkout e Información de Pago
@@ -959,11 +965,11 @@ function setCustomerButtonLoading(button, loading, label = 'Procesando...') {
 }
 
 function updateAccountButton() {
-    const name = customerProfile?.full_name?.trim().split(/\s+/)[0];
-    accountBtn?.classList.toggle('is-authenticated', Boolean(customerUser));
-    accountBtn?.setAttribute('aria-label', customerUser ? 'Abrir mi cuenta' : 'Ingresar o crear cuenta');
-    if (accountBtnLabel) accountBtnLabel.textContent = name || (customerUser ? 'Mi cuenta' : 'Cuenta');
-    if (mobileAccountBtnLabel) mobileAccountBtnLabel.textContent = name ? `Cuenta de ${name}` : (customerUser ? 'Mi cuenta' : 'Ingresar / registrarme');
+    const isVerified = Boolean(customerUser?.email_confirmed_at);
+    accountBtn?.classList.toggle('is-authenticated', isVerified);
+    accountBtn?.setAttribute('aria-label', isVerified ? 'Correo verificado' : 'Obtener 10% de descuento');
+    if (accountBtnLabel) accountBtnLabel.textContent = isVerified ? 'Verificado' : '10% OFF';
+    if (mobileAccountBtnLabel) mobileAccountBtnLabel.textContent = isVerified ? 'Correo verificado' : 'Obtener 10% OFF';
 }
 
 async function loadCustomerProfile() {
@@ -988,81 +994,50 @@ function prefillCheckoutFromProfile() {
     if (phoneInput && !phoneInput.value) phoneInput.value = customerProfile.phone || '';
 }
 
-function showAccountMode(mode = 'login') {
-    const login = mode === 'login';
-    document.getElementById('account-auth-title').textContent = login ? 'Inicia sesión' : 'Regístrate con tu correo';
-    document.getElementById('account-auth-intro').textContent = login
-        ? 'Usa tu correo verificado para continuar con tu pedido.'
-        : 'Crea tu cuenta gratis. Te enviaremos un enlace para verificar el correo antes de comprar.';
-    document.getElementById('show-login-tab')?.classList.toggle('active', login);
-    document.getElementById('show-register-tab')?.classList.toggle('active', !login);
-    document.getElementById('customer-login-form').hidden = !login;
-    document.getElementById('customer-register-form').hidden = login;
+function showDiscountForm() {
+    document.getElementById('discount-form-view').hidden = false;
+    document.getElementById('discount-sent-view').hidden = true;
+    setAccountMessage('customer-email-message');
 }
 
-function fillCustomerProfileForm(message = '') {
-    document.getElementById('account-auth-view').hidden = true;
-    document.getElementById('account-profile-view').hidden = false;
-    document.getElementById('customer-profile-email').textContent = customerUser?.email || '';
-    document.getElementById('customer-profile-name').value = customerProfile?.full_name || customerUser?.user_metadata?.full_name || '';
-    document.getElementById('customer-profile-phone').value = customerProfile?.phone || customerUser?.user_metadata?.phone || '';
-    document.getElementById('customer-profile-marketing').checked = Boolean(customerProfile?.marketing_opt_in);
-    setAccountMessage('customer-profile-message', message);
+function showDiscountSent(email, verified = false) {
+    document.getElementById('discount-form-view').hidden = true;
+    document.getElementById('discount-sent-view').hidden = false;
+    const message = document.getElementById('discount-sent-message');
+    message.textContent = verified
+        ? `Correo verificado. Estamos enviando tu código privado del 10% a ${email}. No se mostrará en esta página.`
+        : `Enviamos un enlace a ${email}. Ábrelo para verificar tu correo; después recibirás allí tu código privado del 10%.`;
 }
 
-function openAccountDialog(mode = 'login', message = '') {
-    document.getElementById('account-recovery-view').hidden = true;
-    if (customerUser) {
-        fillCustomerProfileForm(message);
-    } else {
-        document.getElementById('account-auth-view').hidden = false;
-        document.getElementById('account-profile-view').hidden = true;
-        showAccountMode(mode);
-        setAccountMessage('customer-login-message', mode === 'login' ? message : '');
-        setAccountMessage('customer-register-message', mode === 'register' ? message : '');
-    }
+function openAccountDialog(_mode = 'discount', message = '') {
+    if (customerUser?.email_confirmed_at) showDiscountSent(customerUser.email, true);
+    else showDiscountForm();
+    if (message && !customerUser?.email_confirmed_at) setAccountMessage('customer-email-message', message);
     if (!accountDialog.open) accountDialog.showModal();
     lucide.createIcons();
 }
 
-function showCustomerRecovery() {
-    document.getElementById('account-auth-view').hidden = true;
-    document.getElementById('account-profile-view').hidden = true;
-    document.getElementById('account-recovery-view').hidden = false;
-    setAccountMessage('customer-recovery-message');
-    if (!accountDialog.open) accountDialog.showModal();
-}
-
-function closeAccountDialog(clearPending = true) {
-    if (clearPending) pendingCustomerAction = null;
+function closeAccountDialog() {
+    sessionStorage.setItem(DISCOUNT_POPUP_SESSION_KEY, '1');
     if (accountDialog?.open) accountDialog.close();
 }
 
-async function requireCustomerAccount(action) {
-    if (!customerSupabase) {
-        alert('El registro de clientes no está disponible en este momento. Inténtalo nuevamente en unos minutos.');
-        return false;
-    }
-    if (!customerUser) {
-        pendingCustomerAction = action;
-        openAccountDialog('register', 'Crea tu cuenta con un correo real y verifícalo para enviar el pedido. Tu carrito seguirá guardado.');
-        return false;
-    }
-    if (!customerProfile) await loadCustomerProfile();
-    if (!customerProfile?.full_name?.trim() || !customerProfile?.phone?.trim()) {
-        pendingCustomerAction = action;
-        openAccountDialog('login', 'Completa tu nombre y WhatsApp para continuar con el pedido.');
-        return false;
-    }
+async function requireCustomerAccount() {
+    // Buying no longer requires a customer account. Delivery details are only
+    // requested at checkout.
     return true;
 }
 
-async function continuePendingCustomerAction() {
-    const action = pendingCustomerAction;
-    pendingCustomerAction = null;
-    closeAccountDialog(false);
-    if (action === 'checkout') openCheckoutDrawer();
-    if (action === 'outfit') await sendOutfitToWhatsApp();
+async function requestWelcomeDiscountEmail() {
+    if (!customerSupabase || !customerUser?.email_confirmed_at) return;
+    const requestedFor = localStorage.getItem(DISCOUNT_EMAIL_SENT_KEY);
+    if (requestedFor === customerUser.email) return;
+    const { error } = await customerSupabase.functions.invoke('send-welcome-discount');
+    if (error) {
+        console.warn('El correo de descuento todavía no pudo enviarse.', error.message);
+        return;
+    }
+    localStorage.setItem(DISCOUNT_EMAIL_SENT_KEY, customerUser.email);
 }
 
 function openCheckoutDrawer() {
@@ -1081,8 +1056,15 @@ async function initializeCustomerAccount() {
     }
     updateAccountButton();
     syncReviewAccess();
-    const initialAuthType = new URLSearchParams(location.hash.slice(1)).get('type');
-    if (initialAuthType === 'recovery') showCustomerRecovery();
+    if (customerUser?.email_confirmed_at) {
+        await requestWelcomeDiscountEmail();
+        if (location.hash.includes('access_token') || location.search.includes('code=')) {
+            showDiscountSent(customerUser.email, true);
+            if (!accountDialog.open) accountDialog.showModal();
+        }
+    } else if (!sessionStorage.getItem(DISCOUNT_POPUP_SESSION_KEY)) {
+        window.setTimeout(() => openAccountDialog(), 1800);
+    }
     customerSupabase.auth.onAuthStateChange((event, nextSession) => {
         window.setTimeout(async () => {
             customerUser = nextSession?.user || null;
@@ -1093,8 +1075,66 @@ async function initializeCustomerAccount() {
                 updateAccountButton();
             }
             syncReviewAccess();
-            if (event === 'PASSWORD_RECOVERY') showCustomerRecovery();
+            if (customerUser?.email_confirmed_at && event === 'SIGNED_IN') {
+                await requestWelcomeDiscountEmail();
+                showDiscountSent(customerUser.email, true);
+                if (!accountDialog.open) accountDialog.showModal();
+            }
         }, 0);
+    });
+}
+
+function setupStoreMotion() {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const progress = document.getElementById('page-scroll-progress');
+    const updateProgress = () => {
+        if (!progress) return;
+        const available = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+        progress.style.transform = `scaleX(${Math.min(1, scrollY / available)})`;
+    };
+    updateProgress();
+    window.addEventListener('scroll', updateProgress, { passive: true });
+
+    if (reducedMotion) return;
+    const revealTargets = document.querySelectorAll([
+        '.trending-section', '.outfit-builder-section', '.catalog-header',
+        '.catalog-category-heading', '.product-card', '.catalog-category-more',
+        '.tiktok-showcase-heading', '.tiktok-video-card', '.reviews-section',
+        '.app-footer .footer-container'
+    ].join(','));
+    revealTargets.forEach((element, index) => {
+        element.classList.add('motion-reveal');
+        element.style.setProperty('--reveal-delay', `${Math.min(index % 6, 5) * 55}ms`);
+    });
+    const revealObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            revealObserver.unobserve(entry.target);
+        });
+    }, { threshold: 0.08, rootMargin: '0px 0px -5% 0px' });
+    revealTargets.forEach(element => revealObserver.observe(element));
+
+    const glow = document.querySelector('.page-pointer-glow');
+    if (glow && matchMedia('(hover:hover) and (pointer:fine)').matches) {
+        window.addEventListener('pointermove', event => {
+            glow.style.transform = `translate3d(${event.clientX - 190}px, ${event.clientY - 190}px, 0)`;
+        }, { passive: true });
+    }
+
+    document.querySelectorAll('.product-card, .trending-card').forEach(card => {
+        card.addEventListener('pointermove', event => {
+            if (!matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+            const rect = card.getBoundingClientRect();
+            const x = (event.clientX - rect.left) / rect.width - .5;
+            const y = (event.clientY - rect.top) / rect.height - .5;
+            card.style.setProperty('--tilt-x', `${-y * 2.2}deg`);
+            card.style.setProperty('--tilt-y', `${x * 2.2}deg`);
+        });
+        card.addEventListener('pointerleave', () => {
+            card.style.setProperty('--tilt-x', '0deg');
+            card.style.setProperty('--tilt-y', '0deg');
+        });
     });
 }
 
@@ -1222,7 +1262,7 @@ async function loadPublishedReviews() {
 
 function setupReviewEvents() {
     document.getElementById('review-login-btn')?.addEventListener('click', () => {
-        openAccountDialog('login', 'Inicia sesión con tu correo verificado para dejar una reseña.');
+        alert('Las reseñas verificadas estarán disponibles nuevamente muy pronto.');
     });
 
     reviewImagesInput?.addEventListener('change', () => {
@@ -1249,7 +1289,7 @@ function setupReviewEvents() {
         event.preventDefault();
         if (!customerUser || !customerProfile?.email_verified) {
             syncReviewAccess();
-            openAccountDialog('login', 'Inicia sesión con tu correo verificado para dejar una reseña.');
+            alert('Las reseñas verificadas estarán disponibles nuevamente muy pronto.');
             return;
         }
 
@@ -1445,6 +1485,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     openProductFromUrl();
     setupTrendingCarousel();
     renderCart();
+    setupStoreMotion();
     lucide.createIcons(); // Cargar íconos lucide
 });
 
@@ -1465,8 +1506,9 @@ function imageFallback(image) {
     if (image.dataset.imageFallbackBound) return;
     image.dataset.imageFallbackBound = 'true';
     image.addEventListener('error', () => {
-        if (new URL(image.currentSrc || image.src, location.href).pathname === '/assets/logo-transparent.png') return;
-        image.src = '/assets/logo-transparent.png';
+        const failedPath = new URL(image.currentSrc || image.src, location.href).pathname.replace(/\\/g, '/');
+        if (failedPath.endsWith('/assets/logo-transparent.png')) return;
+        image.src = 'assets/logo-transparent.png';
     });
 }
 
@@ -1486,18 +1528,30 @@ function renderProducts() {
     });
 
     const totalFiltered = filtered.length;
-    const visibleProducts = filtered.slice(0, catalogVisibleLimit);
+    const isCompactHomeCatalog = selectedCategory === 'all' && !searchQuery.trim() && !catalogExpanded;
+    const visibleProducts = isCompactHomeCatalog
+        ? CATALOG_CATEGORY_ORDER.flatMap(category =>
+            filtered.filter(product => product.category === category).slice(0, HOME_PRODUCTS_PER_CATEGORY)
+        )
+        : filtered.slice(0, catalogVisibleLimit);
     const categoryCounts = filtered.reduce((counts, product) => {
+        counts[product.category] = (counts[product.category] || 0) + 1;
+        return counts;
+    }, {});
+    const visibleCategoryCounts = visibleProducts.reduce((counts, product) => {
         counts[product.category] = (counts[product.category] || 0) + 1;
         return counts;
     }, {});
 
     // Actualizar texto de cantidad
-    catalogCountText.textContent = totalFiltered === 1
-        ? 'Mostrando 1 producto'
-        : `Mostrando ${Math.min(totalFiltered, catalogVisibleLimit)} de ${totalFiltered} productos`;
+    catalogCountText.textContent = isCompactHomeCatalog
+        ? `Selección de ${visibleProducts.length} prendas · ${totalFiltered} disponibles`
+        : totalFiltered === 1
+            ? 'Mostrando 1 producto'
+            : `Mostrando ${visibleProducts.length} de ${totalFiltered} productos`;
 
-    catalogLoadMore.hidden = totalFiltered <= catalogVisibleLimit;
+    catalogLoadMore.hidden = isCompactHomeCatalog || totalFiltered <= catalogVisibleLimit;
+    catalogLoadMore.textContent = 'VER MÁS PRENDAS';
 
     if (filtered.length === 0) {
         const isEmptyTshirts = selectedCategory === 't-shirts';
@@ -1522,16 +1576,28 @@ function renderProducts() {
                     <span class="catalog-category-kicker">COLECCIÓN LYNX</span>
                     <h3>${categoryMeta.label}</h3>
                 </div>
-                <span class="catalog-category-count">${categoryCounts[product.category]} ${categoryCounts[product.category] === 1 ? 'PRENDA' : 'PRENDAS'}</span>
+                <span class="catalog-category-count">${isCompactHomeCatalog && visibleCategoryCounts[product.category] < categoryCounts[product.category]
+                    ? `${visibleCategoryCounts[product.category]} DE ${categoryCounts[product.category]}`
+                    : `${categoryCounts[product.category]} ${categoryCounts[product.category] === 1 ? 'PRENDA' : 'PRENDAS'}`}</span>
             </div>
         ` : '';
         lastRenderedCategory = product.category;
+
+        const isLastVisibleInCategory = visibleProducts[productIndex + 1]?.category !== product.category;
+        const categoryMoreButton = isCompactHomeCatalog
+            && isLastVisibleInCategory
+            && visibleCategoryCounts[product.category] < categoryCounts[product.category]
+            ? `<button class="catalog-category-more" type="button" data-category="${product.category}">
+                    VER M&Aacute;S ${categoryMeta.moreLabel || categoryMeta.label}
+                    <span aria-hidden="true">&rarr;</span>
+               </button>`
+            : '';
 
         return `${categoryHeading}
         <article class="product-card" id="product-${product.id}">
             <a class="product-card-img-wrapper product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}" aria-label="Ver detalles de ${escapeHtml(product.title)}">
                 <span class="product-card-badge ${product.badge.toLowerCase().includes('stock') || product.badge.toLowerCase().includes('limit') || product.badge.toLowerCase().includes('última') ? 'limited' : ''}">${product.badge}</span>
-                <img class="product-card-primary-img" src="${product.image}" alt="${product.title}" loading="lazy" decoding="async" fetchpriority="low" style="pointer-events:none;">
+                <img class="product-card-primary-img" src="${product.image}" alt="${product.title}" loading="eager" decoding="async" fetchpriority="${productIndex < 3 ? 'high' : 'low'}" width="1200" height="1600" style="pointer-events:none;">
                 ${supportsProductHover && product.images?.[1] ? `<img class="product-card-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="lazy" style="pointer-events:none;">` : ''}
             </a>
             <div class="product-card-content">
@@ -1545,7 +1611,7 @@ function renderProducts() {
                     <a class="btn btn-secondary btn-block product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}">VER DETALLES</a>
                 </div>
             </div>
-        </article>
+        </article>${categoryMoreButton}
     `;
     }).join('');
 
@@ -1723,8 +1789,6 @@ async function sendOutfitToWhatsApp() {
         alert('Elige al menos una prenda para armar tu outfit.');
         return;
     }
-
-    if (!await requireCustomerAccount('outfit')) return;
 
     const total = selectedProducts.reduce((sum, product) => sum + product.price, 0);
     const productsText = selectedProducts.map(product => `- ${product.title} — S/. ${product.price.toFixed(2)}`).join('\n');
@@ -2006,7 +2070,8 @@ function updateCheckoutTotals() {
     }
 }
 
-function setupCustomerAccountEvents() {
+/* Legacy password-account flow retained temporarily for reference only.
+function setupLegacyCustomerAccountEvents() {
     accountBtn?.addEventListener('click', () => openAccountDialog('login'));
     mobileAccountBtn?.addEventListener('click', () => {
         setMobileMenuOpen(false);
@@ -2188,6 +2253,65 @@ function setupCustomerAccountEvents() {
         closeAccountDialog();
     });
 }
+*/
+
+function setupCustomerAccountEvents() {
+    accountBtn?.addEventListener('click', () => openAccountDialog());
+    mobileAccountBtn?.addEventListener('click', () => {
+        setMobileMenuOpen(false);
+        openAccountDialog();
+    });
+    document.getElementById('account-close-btn')?.addEventListener('click', closeAccountDialog);
+    accountDialog?.addEventListener('click', event => {
+        if (event.target === accountDialog) closeAccountDialog();
+    });
+
+    document.getElementById('customer-email-form')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = event.submitter;
+        const email = document.getElementById('customer-email').value.trim();
+        const consent = document.getElementById('customer-email-consent').checked;
+        setAccountMessage('customer-email-message');
+        if (!consent) {
+            setAccountMessage('customer-email-message', 'Confirma que deseas recibir promociones, nuevo stock y avisos de live.');
+            return;
+        }
+        if (!customerSupabase) {
+            setAccountMessage('customer-email-message', 'El registro por correo no está disponible en este momento.');
+            return;
+        }
+        setCustomerButtonLoading(button, true, 'ENVIANDO...');
+        try {
+            const redirectBase = location.protocol === 'file:' ? 'https://www.lynx.pe/' : `${location.origin}/`;
+            const { error } = await customerSupabase.auth.signInWithOtp({
+                email,
+                options: {
+                    emailRedirectTo: redirectBase,
+                    shouldCreateUser: true,
+                    data: { marketing_opt_in: true, discount_requested: true }
+                }
+            });
+            if (error) throw error;
+            pendingVerificationEmail = email;
+            sessionStorage.setItem(DISCOUNT_POPUP_SESSION_KEY, '1');
+            showDiscountSent(email);
+        } catch (error) {
+            setAccountMessage('customer-email-message', customerErrorMessage(error));
+        } finally {
+            setCustomerButtonLoading(button, false);
+            lucide.createIcons();
+        }
+    });
+
+    document.getElementById('discount-use-another-email')?.addEventListener('click', async () => {
+        await customerSupabase?.auth.signOut();
+        customerUser = null;
+        customerProfile = null;
+        document.getElementById('customer-email-form')?.reset();
+        showDiscountForm();
+        updateAccountButton();
+    });
+}
 
 // 6. CONTROLADORES DE EVENTO
 function setupEventListeners() {
@@ -2238,6 +2362,21 @@ function setupEventListeners() {
     });
 
     productsGrid.addEventListener('click', event => {
+        const categoryMoreButton = event.target.closest('.catalog-category-more');
+        if (categoryMoreButton) {
+            const category = categoryMoreButton.dataset.category;
+            selectedCategory = category;
+            catalogExpanded = false;
+            catalogVisibleLimit = CATALOG_PAGE_SIZE;
+            setActiveCategoryTag(category);
+            syncNavLinks(category);
+            renderProducts();
+            requestAnimationFrame(() => {
+                document.getElementById(`catalog-group-${category}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+            return;
+        }
+
         const button = event.target.closest('.product-card-add');
         if (!button || button.disabled) return;
         const product = PRODUCTS.find(item => String(item.id) === button.dataset.productId);
@@ -2265,6 +2404,7 @@ function setupEventListeners() {
             tag.classList.add('active');
             selectedCategory = tag.getAttribute('data-category');
             catalogVisibleLimit = CATALOG_PAGE_SIZE;
+            catalogExpanded = false;
             
             // Sincronizar con desktop nav si aplica
             syncNavLinks(selectedCategory);
@@ -2287,6 +2427,7 @@ function setupEventListeners() {
 
             if (navCategory === 'all') {
                 selectedCategory = 'all';
+                catalogExpanded = false;
                 setActiveCategoryTag('all');
                 renderProducts();
                 document.getElementById('catalog').scrollIntoView({ behavior: 'smooth' });
@@ -2303,6 +2444,7 @@ function setupEventListeners() {
             }
 
             selectedCategory = navCategory;
+            catalogExpanded = false;
             setActiveCategoryTag(navCategory);
             catalogVisibleLimit = CATALOG_PAGE_SIZE;
             renderProducts();
@@ -2315,6 +2457,12 @@ function setupEventListeners() {
     mobileNavLinks.forEach(link => {
         link.addEventListener('click', event => {
             event.preventDefault();
+            const anchorTarget = link.getAttribute('href');
+            if (anchorTarget?.startsWith('#')) {
+                document.querySelector(anchorTarget)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setMobileMenuOpen(false);
+                return;
+            }
             navigateToCatalogCategory(link.dataset.category);
             setMobileMenuOpen(false);
         });
@@ -2331,11 +2479,17 @@ function setupEventListeners() {
     searchInput.addEventListener('input', (e) => {
         searchQuery = e.target.value;
         catalogVisibleLimit = CATALOG_PAGE_SIZE;
+        catalogExpanded = false;
         renderProducts();
     });
 
     catalogLoadMore?.addEventListener('click', () => {
-        catalogVisibleLimit += CATALOG_PAGE_SIZE;
+        if (selectedCategory === 'all' && !searchQuery.trim() && !catalogExpanded) {
+            catalogExpanded = true;
+            catalogVisibleLimit = PRODUCTS.length;
+        } else {
+            catalogVisibleLimit += CATALOG_PAGE_SIZE;
+        }
         renderProducts();
     });
 
@@ -2434,6 +2588,7 @@ function navigateToCatalogCategory(navCategory) {
 
     if (navCategory === 'all') {
         selectedCategory = 'all';
+        catalogExpanded = false;
         setActiveCategoryTag('all');
         renderProducts();
         document.getElementById('catalog').scrollIntoView({ behavior: 'smooth' });
@@ -2450,6 +2605,7 @@ function navigateToCatalogCategory(navCategory) {
     }
 
     selectedCategory = navCategory;
+    catalogExpanded = false;
     setActiveCategoryTag(navCategory);
     catalogVisibleLimit = CATALOG_PAGE_SIZE;
     renderProducts();
