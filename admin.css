@@ -569,3 +569,8 @@ input, select, textarea, .quick-edit input { background: #fff; color: var(--ink)
     .sale-product-preview { grid-template-columns: 70px minmax(0,1fr) auto; }
     .sale-product-preview > img { width: 70px; height: 92px; }
 }
+.conversion-funnel { display: grid; gap: 14px; }
+.conversion-funnel > div { position: relative; display: grid; grid-template-columns: minmax(120px, 1fr) 2fr auto; align-items: center; gap: 12px; color: #b9b9bf; font-size: .76rem; }
+.conversion-funnel i { display: block; min-width: 4px; height: 10px; border-radius: 999px; background: linear-gradient(90deg, #d4af37, #f0d87a); box-shadow: 0 0 15px rgba(212,175,55,.18); }
+.conversion-funnel strong { color: #fff; }
+@media (max-width: 600px) { .conversion-funnel > div { grid-template-columns: 1fr auto; } .conversion-funnel i { grid-column: 1 / -1; } }

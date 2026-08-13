@@ -58,7 +58,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
     <!-- Lucide Icons (CDN) -->
-    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
     <!-- Stylesheet -->
     <link rel="stylesheet" href="styles.css?v=20260812-email-otp-v7">
 </head>
@@ -131,14 +131,15 @@
     <section class="hero-section" id="home-hero">
         <div class="hero-overlay"></div>
         <div class="hero-content">
-            <span class="hero-tag">LYNX / COLECCIÓN 2026</span>
-            <h1 class="hero-title">STREETWEAR<br><span class="gradient-text">PREMIUM</span></h1>
-            <p class="hero-description">Una selección curada de streetwear Fashion Nova para destacar sin esfuerzo. Stock limitado y envíos seguros a todo el Perú.</p>
+            <span class="hero-tag">STREETWEAR PARA HOMBRE · STOCK EN PERÚ</span>
+            <h1 class="hero-title">PIEZAS QUE<br><span class="gradient-text">NO VES EN TODOS</span></h1>
+            <p class="hero-description">Hoodies oversized, jackets y jeans flare seleccionados de Fashion Nova. Pocas unidades, asesoría de talla y envíos seguros a todo el Perú.</p>
             <a href="#catalog" class="btn btn-primary" id="hero-cta-btn">
-                <span class="hero-cta-desktop">EXPLORAR COLECCIÓN</span>
-                <span class="hero-cta-mobile">COMPRAR AHORA</span>
+                <span class="hero-cta-desktop">VER PRENDAS DISPONIBLES</span>
+                <span class="hero-cta-mobile">VER PRENDAS</span>
                 <i data-lucide="arrow-right"></i>
             </a>
+            <span class="hero-proof"><i data-lucide="shield-check"></i> Confirmamos stock y talla antes de solicitar el pago</span>
         </div>
     </section>
 
@@ -245,8 +246,18 @@
                 <div class="filter-controls">
                     <div class="search-box">
                         <i data-lucide="search"></i>
-                        <input type="text" id="search-input" placeholder="Buscar prenda...">
+                        <input type="search" id="search-input" placeholder="Buscar hoodie, jean o conjunto..." aria-label="Buscar prendas">
                     </div>
+                    <label class="catalog-select-control">
+                        <span class="sr-only">Ordenar catálogo</span>
+                        <select id="catalog-sort" aria-label="Ordenar catálogo">
+                            <option value="featured">Recomendados</option>
+                            <option value="newest">Más nuevos</option>
+                            <option value="price-asc">Menor precio</option>
+                            <option value="price-desc">Mayor precio</option>
+                        </select>
+                    </label>
+                    <label class="catalog-stock-toggle"><input id="catalog-in-stock" type="checkbox"><span>Solo disponibles</span></label>
                 </div>
             </div>
 
@@ -366,7 +377,15 @@
                 </details>
                 <details class="faq-item">
                     <summary>¿Cómo confirmo mi talla?</summary>
-                    <p>Las tallas disponibles aparecen en cada producto. Si tienes dudas sobre el fit, escríbenos por WhatsApp antes de confirmar y te ayudaremos a elegir.</p>
+                    <p>En cada ficha encontrarás una guía por tipo de prenda y una recomendación de calce. Compara tus medidas con la tabla; si quedas entre dos tallas, envíanos cintura, pecho o una prenda que te quede bien y te asesoramos antes de pagar.</p>
+                </details>
+                <details class="faq-item" id="politica-cambios">
+                    <summary>¿Puedo solicitar un cambio?</summary>
+                    <p>Sí. Antes de pagar te informaremos las condiciones vigentes de cambio según la prenda y ciudad. La prenda debe conservar etiquetas, no presentar uso, lavado, manchas ni daños. Confirma el plazo exacto con nuestro equipo al realizar tu pedido.</p>
+                </details>
+                <details class="faq-item" id="colores-medidas">
+                    <summary>¿El color y las medidas pueden variar?</summary>
+                    <p>El tono puede cambiar ligeramente según la iluminación y tu pantalla. Las medidas son referencias y pueden variar entre modelos; por eso recomendamos revisar la guía específica y confirmar cualquier duda antes del pago.</p>
                 </details>
                 <details class="faq-item">
                     <summary>¿Qué medios de pago aceptan?</summary>
@@ -387,10 +406,11 @@
             <div class="footer-info">
                 <h4>CATEGORÍAS LYNX</h4>
                 <ul>
-                    <li><a href="/categoria/hoodies"><i data-lucide="arrow-right"></i> Hoodies</a></li>
-                    <li><a href="/categoria/jeans-y-pants"><i data-lucide="arrow-right"></i> Jeans & Pants</a></li>
-                    <li><a href="/categoria/conjuntos"><i data-lucide="arrow-right"></i> Conjuntos</a></li>
+                    <li><button class="footer-category-button" type="button" data-category="hoodies-jackets"><i data-lucide="arrow-right"></i> Hoodies</button></li>
+                    <li><button class="footer-category-button" type="button" data-category="jeans-pants"><i data-lucide="arrow-right"></i> Jeans & Pants</button></li>
+                    <li><button class="footer-category-button" type="button" data-category="conjuntos"><i data-lucide="arrow-right"></i> Conjuntos</button></li>
                     <li><a class="footer-whatsapp-link" href="https://wa.me/51962210278?text=Hola%20LYNX%2C%20quiero%20informaci%C3%B3n%20sobre%20sus%20prendas." target="_blank" rel="noopener noreferrer" aria-label="Escribir a LYNX por WhatsApp al 962 210 278"><i data-lucide="phone"></i><span>Soporte WhatsApp: +51 962 210 278</span></a></li>
+                    <li><a href="#preguntas-frecuentes"><i data-lucide="shield-check"></i> Envíos, pagos y cambios</a></li>
                 </ul>
             </div>
             <div class="footer-social">
@@ -398,15 +418,15 @@
                 <p>Stock, tallas y pedidos con atención directa.</p>
                 <div class="social-links">
                     <a href="https://www.instagram.com/boutique_lynx/" target="_blank" rel="me noopener noreferrer" aria-label="Instagram oficial de LYNX Boutique Perú">
-                        <img class="social-brand-icon" src="https://api.iconify.design/logos/instagram-icon.svg" alt="" width="20" height="20" loading="lazy">
+                        <img class="social-brand-icon" src="assets/social-instagram.svg" alt="" width="20" height="20" loading="lazy">
                         <span>Instagram oficial</span>
                     </a>
                     <a href="https://www.tiktok.com/@boutique_lynx" target="_blank" rel="me noopener noreferrer" aria-label="TikTok oficial de LYNX Boutique Perú">
-                        <img class="social-brand-icon" src="https://api.iconify.design/logos/tiktok-icon.svg" alt="" width="20" height="20" loading="lazy">
+                        <img class="social-brand-icon" src="assets/social-tiktok.svg" alt="" width="20" height="20" loading="lazy">
                         <span>TikTok oficial</span>
                     </a>
                     <a href="https://wa.me/51962210278" target="_blank" rel="noopener noreferrer" aria-label="Contactar a LYNX por WhatsApp">
-                        <img class="social-brand-icon" src="https://api.iconify.design/logos/whatsapp-icon.svg" alt="" width="20" height="20" loading="lazy">
+                        <img class="social-brand-icon" src="assets/social-whatsapp.svg" alt="" width="20" height="20" loading="lazy">
                         <span>WhatsApp</span>
                     </a>
                 </div>
@@ -419,15 +439,15 @@
 
     <nav class="social-fab-group" aria-label="Redes sociales de LYNX">
         <a class="social-fab social-fab-instagram" href="https://www.instagram.com/boutique_lynx/" target="_blank" rel="noopener noreferrer" aria-label="Seguir a LYNX en Instagram">
-            <img class="social-brand-icon" src="https://api.iconify.design/logos/instagram-icon.svg" alt="" width="22" height="22">
+            <img class="social-brand-icon" src="assets/social-instagram.svg" alt="" width="22" height="22">
             <span>Instagram</span>
         </a>
         <a class="social-fab social-fab-tiktok" href="https://www.tiktok.com/@boutique_lynx" target="_blank" rel="noopener noreferrer" aria-label="Seguir a LYNX en TikTok">
-            <img class="social-brand-icon" src="https://api.iconify.design/logos/tiktok-icon.svg" alt="" width="22" height="22">
+            <img class="social-brand-icon" src="assets/social-tiktok.svg" alt="" width="22" height="22">
             <span>TikTok</span>
         </a>
         <a class="social-fab social-fab-whatsapp" href="https://wa.me/51962210278" target="_blank" rel="noopener noreferrer" aria-label="Escribir a LYNX por WhatsApp">
-            <img class="social-brand-icon" src="https://api.iconify.design/logos/whatsapp-icon.svg" alt="" width="22" height="22">
+            <img class="social-brand-icon" src="assets/social-whatsapp.svg" alt="" width="22" height="22">
             <span>WhatsApp</span>
         </a>
     </nav>
@@ -454,8 +474,8 @@
                         <i data-lucide="ruler" aria-hidden="true"></i>
                         <div>
                             <strong>Recomendación de calce</strong>
-                            <p>Los jeans Fashion Nova suelen tener un fit ajustado. Para lograr un calce más cómodo, considera elegir 1 o 2 tallas por encima de tu talla habitual.</p>
-                            <p class="fit-example"><strong>Ejemplo:</strong> si normalmente usas talla 32, recomendamos elegir talla 36.</p>
+                            <p>El calce cambia según el modelo y la elasticidad del denim. Compara cintura y cadera con la guía; si quedas entre dos tallas, elige la mayor para un fit más cómodo.</p>
+                            <p class="fit-example"><strong>¿Sigues con dudas?</strong> Envíanos tus medidas por WhatsApp y confirmamos contigo antes del pago.</p>
                         </div>
                     </aside>
                     
@@ -535,27 +555,38 @@
                     <i data-lucide="x"></i>
                 </button>
             </div>
+            <div class="checkout-progress" aria-label="Proceso de pedido"><span class="is-complete">1 · Carrito</span><span class="is-active">2 · Entrega</span><span>3 · Confirmación</span></div>
             
             <div class="drawer-body">
                 <form id="checkout-form" class="checkout-form-container">
                     <div class="form-group">
                         <label for="checkout-name">Nombre y Apellido *</label>
-                        <input type="text" id="checkout-name" required placeholder="Ejemplo: Sebastian Torres">
+                        <input type="text" id="checkout-name" required minlength="3" autocomplete="name" placeholder="Ejemplo: Sebastián Torres">
+                        <small class="field-error" id="checkout-name-error"></small>
                     </div>
                     
                     <div class="form-group">
                         <label for="checkout-phone">Número de WhatsApp *</label>
-                        <input type="tel" id="checkout-phone" required placeholder="Ejemplo: 987654321">
+                        <input type="tel" id="checkout-phone" required inputmode="numeric" autocomplete="tel" pattern="[0-9 +()-]{9,15}" placeholder="Ejemplo: 987654321">
+                        <small class="field-error" id="checkout-phone-error"></small>
                     </div>
 
                     <div class="form-group">
                         <label for="checkout-city">Ciudad / Departamento *</label>
-                        <input type="text" id="checkout-city" required placeholder="Ejemplo: Lima Metropolitana, Cusco, Arequipa">
+                        <input type="text" id="checkout-city" required minlength="3" autocomplete="address-level1" placeholder="Ejemplo: Lima, Cusco o Arequipa">
+                        <small class="field-error" id="checkout-city-error"></small>
                     </div>
 
                     <div class="form-group">
                         <label for="checkout-address">Dirección de Entrega *</label>
-                        <input type="text" id="checkout-address" required placeholder="Ejemplo: Av. Larco 123 Dpto 402 / Referencia">
+                        <input type="text" id="checkout-address" required minlength="6" autocomplete="street-address" placeholder="Av., calle, número y referencia">
+                        <small class="field-error" id="checkout-address-error"></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="checkout-discount-code">Código de descuento <span>(opcional)</span></label>
+                        <input type="text" id="checkout-discount-code" autocomplete="off" maxlength="32" placeholder="Ejemplo: LYNX10-XXXXXXXX">
+                        <small>Lo validaremos al confirmar tu pedido por WhatsApp.</small>
                     </div>
 
                     <!-- Shipping Method Selection -->
@@ -625,9 +656,10 @@
             <!-- Checkout Footer CTA -->
             <div class="drawer-footer">
                 <button type="button" class="btn btn-whatsapp btn-block" id="submit-order-btn">
-                    <i data-lucide="message-square"></i> ENVIAR PEDIDO POR WHATSAPP
+                    <i data-lucide="message-square"></i> REVISAR PEDIDO EN WHATSAPP
                 </button>
-                <p class="whatsapp-security-notice">Al dar clic, te redirigiremos a WhatsApp para confirmar los datos y brindarte las cuentas de depósito.</p>
+                <div class="checkout-confidence"><span><i data-lucide="shield-check"></i> Sin cobros automáticos</span><span><i data-lucide="package-check"></i> Stock confirmado por una persona</span></div>
+                <p class="whatsapp-security-notice">Abriremos WhatsApp con tu resumen listo. Podrás revisarlo antes de enviarlo; todavía no se realiza ningún pago.</p>
             </div>
         </div>
     </div>
@@ -671,6 +703,7 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="supabase-config.js?v=20260716-admin-v1" defer></script>
+    <script src="commerce-tracking.js?v=20260813-cro-v1" defer></script>
     <script src="app.js?v=20260812-email-otp-v7" defer></script>
     <script src="tiktok-videos.js?v=20260812-preview-fix-v2" defer></script>
 </body>

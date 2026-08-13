@@ -37,10 +37,23 @@ create table if not exists public.products (
   badge text not null default 'NUEVO',
   status text not null default 'available' check (status in ('available', 'low_stock', 'sold_out', 'preorder', 'archived')),
   fit_recommendation boolean not null default true,
+  color text not null default '',
+  material text not null default '',
+  fit_type text not null default '',
+  care_instructions text not null default '',
+  weight_grams integer check (weight_grams is null or weight_grams >= 0),
+  measurements jsonb not null default '{}'::jsonb,
   sort_order integer not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.products add column if not exists color text not null default '';
+alter table public.products add column if not exists material text not null default '';
+alter table public.products add column if not exists fit_type text not null default '';
+alter table public.products add column if not exists care_instructions text not null default '';
+alter table public.products add column if not exists weight_grams integer;
+alter table public.products add column if not exists measurements jsonb not null default '{}'::jsonb;
 
 create table if not exists public.sales (
   id uuid primary key default gen_random_uuid(),

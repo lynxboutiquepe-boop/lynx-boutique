@@ -78,7 +78,9 @@
             otherFrame.innerHTML = `<button class="tiktok-player-launch" type="button" aria-label="Reproducir ${otherTitle}" style="--tiktok-cover:url('${otherCover}')"><span class="tiktok-player-play" aria-hidden="true"></span><small>TOCA PARA REPRODUCIR</small></button>`;
         });
         const playerUrl = `https://www.tiktok.com/player/v1/${id}?autoplay=1&controls=1&progress_bar=1&play_button=1&volume_control=1&fullscreen_button=1&timestamp=0&loop=1&music_info=0&description=0&rel=0&native_context_menu=0`;
-        frame.innerHTML = `<iframe src="${playerUrl}" title="${title}" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe><div class="tiktok-player-fallback"><span>¿No reproduce?</span><a href="https://www.tiktok.com/@boutique_lynx/video/${id}" target="_blank" rel="noopener noreferrer">ABRIR EN TIKTOK ↗</a></div>`;
+        // El enlace externo ya está en el pie de la tarjeta. Mantenerlo fuera
+        // del reproductor deja libres el volumen, la barra y pantalla completa.
+        frame.innerHTML = `<iframe src="${playerUrl}" title="${title}" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
     }
 
     rail.addEventListener('click', event => {

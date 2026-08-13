@@ -148,9 +148,9 @@ function categoryPage(category) {
             <img src="/assets/logo-transparent.png" alt="LYNX Boutique Perú" width="120" height="55">
         </a>
         <nav aria-label="Categorías principales">
-            <a href="/categoria/hoodies"${category.slug === 'hoodies' ? ' aria-current="page"' : ''}>Hoodies</a>
-            <a href="/categoria/jeans-y-pants"${category.slug === 'jeans-y-pants' ? ' aria-current="page"' : ''}>Jeans & Pants</a>
-            <a href="/categoria/conjuntos"${category.slug === 'conjuntos' ? ' aria-current="page"' : ''}>Conjuntos</a>
+            <a href="hoodies.html"${category.slug === 'hoodies' ? ' aria-current="page"' : ''}>Hoodies</a>
+            <a href="jeans-y-pants.html"${category.slug === 'jeans-y-pants' ? ' aria-current="page"' : ''}>Jeans & Pants</a>
+            <a href="conjuntos.html"${category.slug === 'conjuntos' ? ' aria-current="page"' : ''}>Conjuntos</a>
         </nav>
         <a class="category-catalog-link" href="/#catalog">Ver catálogo</a>
     </header>
@@ -161,6 +161,11 @@ function categoryPage(category) {
             <h1>${escapeHtml(category.h1)}</h1>
             <span>${escapeHtml(category.intro)}</span>
             <small>${categoryProducts.length} ${categoryProducts.length === 1 ? 'prenda disponible' : 'prendas disponibles'}</small>
+        </section>
+        <section class="category-toolbar" aria-label="Buscar y ordenar productos">
+            <label><span>BUSCAR</span><input id="category-search" type="search" placeholder="Buscar en ${escapeHtml(category.navLabel)}..."></label>
+            <label><span>ORDENAR</span><select id="category-sort"><option value="featured">Recomendados</option><option value="price-asc">Menor precio</option><option value="price-desc">Mayor precio</option></select></label>
+            <label class="category-stock-filter"><input id="category-in-stock" type="checkbox"><span>Solo disponibles</span></label>
         </section>
         <section class="category-grid" aria-label="Productos de ${escapeHtml(category.navLabel)}">
             ${catalogContent}
@@ -173,15 +178,19 @@ function categoryPage(category) {
             <p>Streetwear premium para hombre con envíos a todo el Perú.</p>
         </div>
         <nav aria-label="Categorías LYNX">
-            <a href="/categoria/hoodies">Hoodies</a>
-            <a href="/categoria/jeans-y-pants">Jeans & Pants</a>
-            <a href="/categoria/conjuntos">Conjuntos</a>
+            <a href="hoodies.html">Hoodies</a>
+            <a href="jeans-y-pants.html">Jeans & Pants</a>
+            <a href="conjuntos.html">Conjuntos</a>
         </nav>
         <nav aria-label="Redes oficiales de LYNX">
             <a href="https://www.instagram.com/boutique_lynx/" target="_blank" rel="noopener noreferrer">Instagram oficial</a>
             <a href="https://www.tiktok.com/@boutique_lynx" target="_blank" rel="noopener noreferrer">TikTok oficial</a>
         </nav>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="/supabase-config.js?v=20260716-admin-v1" defer></script>
+    <script src="/commerce-tracking.js?v=20260813-cro-v1" defer></script>
+    <script src="/category-catalog.js?v=20260813-cro-v2" defer></script>
 </body>
 </html>`;
 }

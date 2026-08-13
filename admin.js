@@ -1,3 +1,4 @@
+window.lucide = window.lucide || { createIcons() {} };
 const supabaseClient = window.getLynxSupabase?.() || null;
 const authFlowType = new URLSearchParams(location.hash.slice(1)).get('type')
     || new URLSearchParams(location.search).get('type');
@@ -16,7 +17,8 @@ const state = {
     sales: [],
     finances: [],
     customers: [],
-    reviews: []
+    reviews: [],
+    events: []
 };
 
 const $ = selector => document.querySelector(selector);
@@ -142,12 +144,14 @@ async function initialize() {
 }
 
 async function loadAll() {
-    const [{ data: products, error: productError }, { data: sales, error: salesError }, { data: finances, error: financeError }, { data: customers, error: customerError }, { data: reviews, error: reviewError }] = await Promise.all([
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const [{ data: products, error: productError }, { data: sales, error: salesError }, { data: finances, error: financeError }, { data: customers, error: customerError }, { data: reviews, error: reviewError }, { data: events, error: eventsError }] = await Promise.all([
         supabaseClient.rpc('get_admin_products'),
         supabaseClient.from('sales').select('*, products(title)').order('created_at', { ascending: false }).limit(1000),
         supabaseClient.from('finance_entries').select('*').order('entry_date', { ascending: false }).order('created_at', { ascending: false }).limit(500),
         supabaseClient.from('customer_profiles').select('*').order('created_at', { ascending: false }).limit(2000),
-        supabaseClient.from('customer_reviews').select('*').order('created_at', { ascending: false }).limit(500)
+        supabaseClient.from('customer_reviews').select('*').order('created_at', { ascending: false }).limit(500),
+        supabaseClient.from('commerce_events').select('event_name,session_id,device_type,payload,created_at').gte('created_at', since).order('created_at', { ascending: false }).limit(10000)
     ]);
 
     if (productError) throw productError;
@@ -155,12 +159,14 @@ async function loadAll() {
     if (financeError) throw financeError;
     if (customerError) throw customerError;
     if (reviewError) throw reviewError;
+    if (eventsError) console.warn('Métricas todavía no disponibles:', eventsError.message);
 
     state.products = products || [];
     state.sales = sales || [];
     state.finances = finances || [];
     state.customers = customers || [];
     state.reviews = reviews || [];
+    state.events = events || [];
     renderEverything();
 }
 
@@ -172,9 +178,35 @@ function renderEverything() {
     renderFinance();
     renderCustomers();
     renderReviews();
+    renderConversion();
     renderSaleProducts();
     renderAttention();
     lucide.createIcons();
+}
+
+function renderConversion() {
+    const count = name => state.events.filter(event => event.event_name === name).length;
+    const visits = count('page_view');
+    const steps = [
+        ['Visitas', visits],
+        ['Productos vistos', count('view_item')],
+        ['Agregados al carrito', count('add_to_cart')],
+        ['Checkout iniciado', count('begin_checkout')],
+        ['Pedidos a WhatsApp', count('generate_lead')]
+    ];
+    $('#metric-page-views').textContent = visits;
+    $('#metric-product-views').textContent = steps[1][1];
+    $('#metric-add-cart').textContent = steps[2][1];
+    $('#metric-checkout').textContent = steps[3][1];
+    $('#metric-leads').textContent = steps[4][1];
+    $('#metric-conversion').textContent = visits ? `${(steps[4][1] / visits * 100).toFixed(1)}%` : '0%';
+    const max = Math.max(1, ...steps.map(([, value]) => value));
+    $('#conversion-funnel').innerHTML = steps.map(([label, value]) => `<div><span>${escapeHtml(label)}</span><i style="width:${Math.max(4, value / max * 100)}%"></i><strong>${value}</strong></div>`).join('');
+    const deviceCounts = state.events.filter(event => event.event_name === 'page_view').reduce((result, event) => {
+        result[event.device_type || 'unknown'] = (result[event.device_type || 'unknown'] || 0) + 1;
+        return result;
+    }, {});
+    $('#conversion-devices').innerHTML = Object.entries(deviceCounts).length ? Object.entries(deviceCounts).map(([device, value]) => `<div class="mini-item"><div><strong>${escapeHtml(device)}</strong><span>Visitas</span></div><b>${value}</b></div>`).join('') : '<p class="empty-state">Aún no hay visitas registradas.</p>';
 }
 
 function currentMonthEntries() {
@@ -482,6 +514,12 @@ function openProductForm(product = null) {
     $('#product-status').value = product?.status || 'available';
     $('#product-sizes').value = (product?.sizes || []).join(', ');
     $('#product-badge').value = product?.badge || 'NUEVO';
+    $('#product-color').value = product?.color || '';
+    $('#product-material').value = product?.material || '';
+    $('#product-fit-type').value = product?.fit_type || '';
+    $('#product-weight').value = product?.weight_grams ?? '';
+    $('#product-care').value = product?.care_instructions || '';
+    $('#product-measurements').value = formatMeasurementsForForm(product?.measurements);
     $('#product-description').value = product?.description || '';
     $('#product-images').value = (product?.images || []).join('\n');
     $('#product-fit').checked = product?.fit_recommendation !== false;
@@ -513,6 +551,38 @@ function slugify(value) {
     return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
+function formatMeasurementsForForm(measurements) {
+    if (!measurements || typeof measurements !== 'object') return '';
+    return Object.entries(measurements).map(([size, values]) => {
+        const pairs = Object.entries(values || {}).map(([name, value]) => `${name.replaceAll('_', ' ')}=${value}`);
+        return `${size}: ${pairs.join(', ')}`;
+    }).join('\n');
+}
+
+function parseMeasurementsFromForm(value) {
+    const source = String(value || '').trim();
+    if (!source) return {};
+    if (source.startsWith('{')) {
+        try { return JSON.parse(source); } catch (_) { throw new Error('No pudimos leer las medidas. Usa una talla por línea como: M: pecho=108, largo=70'); }
+    }
+    const result = {};
+    source.split(/\r?\n/).map(line => line.trim()).filter(Boolean).forEach(line => {
+        const separator = line.indexOf(':');
+        if (separator < 1) throw new Error(`Revisa esta línea de medidas: “${line}”. Debe empezar con la talla y dos puntos.`);
+        const size = line.slice(0, separator).trim();
+        const values = {};
+        line.slice(separator + 1).split(',').map(part => part.trim()).filter(Boolean).forEach(part => {
+            const [rawName, rawValue] = part.split('=').map(item => item?.trim());
+            const numericValue = Number(String(rawValue || '').replace(',', '.'));
+            if (!rawName || !Number.isFinite(numericValue)) throw new Error(`Revisa “${part}” en la talla ${size}. Usa nombre=número.`);
+            values[rawName.toLowerCase().replace(/\s+/g, '_')] = numericValue;
+        });
+        if (!Object.keys(values).length) throw new Error(`Agrega al menos una medida para la talla ${size}.`);
+        result[size] = values;
+    });
+    return result;
+}
+
 async function saveProduct(event) {
     event.preventDefault();
     const button = event.submitter;
@@ -541,6 +611,7 @@ async function saveProduct(event) {
         const uploadedImages = files.length ? await uploadProductImages(files, slug) : [];
         const status = $('#product-status').value;
         const stock = status === 'sold_out' ? 0 : Number($('#product-stock').value || 0);
+        const measurements = parseMeasurementsFromForm($('#product-measurements').value);
         const payload = {
             title,
             slug,
@@ -551,6 +622,12 @@ async function saveProduct(event) {
             status,
             sizes: $('#product-sizes').value.split(',').map(value => value.trim()).filter(Boolean),
             badge: $('#product-badge').value.trim() || STATUS_META[status].badge,
+            color: $('#product-color').value.trim(),
+            material: $('#product-material').value.trim(),
+            fit_type: $('#product-fit-type').value.trim(),
+            weight_grams: $('#product-weight').value ? Number($('#product-weight').value) : null,
+            care_instructions: $('#product-care').value.trim(),
+            measurements,
             description: $('#product-description').value.trim(),
             images: [...existingImages, ...uploadedImages],
             fit_recommendation: $('#product-fit').checked

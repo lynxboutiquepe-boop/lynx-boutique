@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/categoria.css?v=20260731-live-stock-v1">
+    <link rel="stylesheet" href="/categoria.css?v=20260727-v1">
 </head>
 <body>
     <header class="category-header">
@@ -28,9 +28,9 @@
             <img src="/assets/logo-transparent.png" alt="LYNX Boutique Perú" width="120" height="55">
         </a>
         <nav aria-label="Categorías principales">
-            <a href="/categoria/hoodies" aria-current="page">Hoodies</a>
-            <a href="/categoria/jeans-y-pants">Jeans & Pants</a>
-            <a href="/categoria/conjuntos">Conjuntos</a>
+            <a href="hoodies.html" aria-current="page">Hoodies</a>
+            <a href="jeans-y-pants.html">Jeans & Pants</a>
+            <a href="conjuntos.html">Conjuntos</a>
         </nav>
         <a class="category-catalog-link" href="/#catalog">Ver catálogo</a>
     </header>
@@ -41,6 +41,11 @@
             <h1>Hoodies y jackets LYNX</h1>
             <span>Hoodies oversized, casacas y jackets elegidos para combinar comodidad, abrigo y una estética streetwear que destaque.</span>
             <small>33 prendas disponibles</small>
+        </section>
+        <section class="category-toolbar" aria-label="Buscar y ordenar productos">
+            <label><span>BUSCAR</span><input id="category-search" type="search" placeholder="Buscar en Hoodies..."></label>
+            <label><span>ORDENAR</span><select id="category-sort"><option value="featured">Recomendados</option><option value="price-asc">Menor precio</option><option value="price-desc">Mayor precio</option></select></label>
+            <label class="category-stock-filter"><input id="category-in-stock" type="checkbox"><span>Solo disponibles</span></label>
         </section>
         <section class="category-grid" aria-label="Productos de Hoodies">
             
@@ -350,9 +355,9 @@
             <p>Streetwear premium para hombre con envíos a todo el Perú.</p>
         </div>
         <nav aria-label="Categorías LYNX">
-            <a href="/categoria/hoodies">Hoodies</a>
-            <a href="/categoria/jeans-y-pants">Jeans & Pants</a>
-            <a href="/categoria/conjuntos">Conjuntos</a>
+            <a href="hoodies.html">Hoodies</a>
+            <a href="jeans-y-pants.html">Jeans & Pants</a>
+            <a href="conjuntos.html">Conjuntos</a>
         </nav>
         <nav aria-label="Redes oficiales de LYNX">
             <a href="https://www.instagram.com/boutique_lynx/" target="_blank" rel="noopener noreferrer">Instagram oficial</a>
@@ -361,6 +366,7 @@
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="/supabase-config.js?v=20260716-admin-v1" defer></script>
-    <script src="/category-catalog.js?v=20260731-live-stock-v1" defer></script>
+    <script src="/commerce-tracking.js?v=20260813-cro-v1" defer></script>
+    <script src="/category-catalog.js?v=20260813-cro-v2" defer></script>
 </body>
 </html>

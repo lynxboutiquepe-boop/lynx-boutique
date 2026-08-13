@@ -18,6 +18,12 @@ grant select (
   badge,
   status,
   fit_recommendation,
+  color,
+  material,
+  fit_type,
+  care_instructions,
+  weight_grams,
+  measurements,
   sort_order,
   created_at,
   updated_at

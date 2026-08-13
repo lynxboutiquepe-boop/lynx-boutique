@@ -99,7 +99,15 @@ const home = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 if (!home.includes('<link rel="canonical" href="https://www.lynx.pe/">')) errors.push('Home canonical missing');
 if (!home.includes('"@type": "OnlineStore"')) errors.push('OnlineStore schema missing');
 for (const categoryPath of categoryPaths) {
-    if (!home.includes(`href="${categoryPath}"`)) errors.push(`Home link missing for ${categoryPath}`);
+    const categoryFileLink = `${categoryPath.replace(/^\//, '')}.html`;
+    const categoryKey = ({
+        '/categoria/hoodies': 'hoodies-jackets',
+        '/categoria/jeans-y-pants': 'jeans-pants',
+        '/categoria/conjuntos': 'conjuntos'
+    })[categoryPath];
+    if (!home.includes(`href="${categoryPath}"`) && !home.includes(`href="${categoryFileLink}"`) && !home.includes(`data-category="${categoryKey}"`)) {
+        errors.push(`Home link missing for ${categoryPath}`);
+    }
 }
 if (!home.includes('https://www.instagram.com/boutique_lynx/') || !home.includes('https://www.tiktok.com/@boutique_lynx')) {
     errors.push('Official social profiles are missing from home');

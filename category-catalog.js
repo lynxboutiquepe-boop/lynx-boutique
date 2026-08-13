@@ -10,6 +10,26 @@
         'jeans-pants': 'Jeans & Pants',
         conjuntos: 'Conjuntos'
     };
+    let categoryProducts = [];
+
+    function renderCategory(products, category) {
+        const grid = document.querySelector('.category-grid');
+        if (!grid) return;
+        grid.innerHTML = products.length
+            ? products.map(product => productCard(product, category)).join('')
+            : '<div class="category-empty"><h2>Sin resultados</h2><p>Prueba otra búsqueda o desactiva el filtro de disponibilidad.</p></div>';
+        grid.querySelectorAll('img').forEach(image => image.addEventListener('error', () => { image.src = '/assets/logo-transparent.png'; }, { once: true }));
+    }
+
+    function applyCategoryFilters(category) {
+        const query = document.getElementById('category-search')?.value.trim().toLowerCase() || '';
+        const sort = document.getElementById('category-sort')?.value || 'featured';
+        const inStock = document.getElementById('category-in-stock')?.checked || false;
+        const products = categoryProducts.filter(product => (!query || `${product.title} ${product.description || ''}`.toLowerCase().includes(query)) && (!inStock || (product.status !== 'sold_out' && (product.status === 'preorder' || Number(product.stock || 0) > 0))));
+        if (sort === 'price-asc') products.sort((a, b) => Number(a.price) - Number(b.price));
+        if (sort === 'price-desc') products.sort((a, b) => Number(b.price) - Number(a.price));
+        renderCategory(products, category);
+    }
 
     function escapeHtml(value) {
         const node = document.createElement('span');
@@ -75,13 +95,14 @@
             return;
         }
 
-        const products = data || [];
-        grid.innerHTML = products.length
-            ? products.map(product => productCard(product, category)).join('')
+        categoryProducts = data || [];
+        grid.innerHTML = categoryProducts.length
+            ? categoryProducts.map(product => productCard(product, category)).join('')
             : '<div class="category-empty"><h2>Próximamente</h2><p>Estamos preparando nuevas prendas para esta colección.</p><div><a href="/#catalog">Ver catálogo</a></div></div>';
 
         const count = document.querySelector('.category-hero small');
-        if (count) count.textContent = `${products.length} ${products.length === 1 ? 'prenda' : 'prendas'} en catálogo`;
+        if (count) count.textContent = `${categoryProducts.length} ${categoryProducts.length === 1 ? 'prenda' : 'prendas'} en catálogo`;
+        ['category-search', 'category-sort', 'category-in-stock'].forEach(id => document.getElementById(id)?.addEventListener(id === 'category-search' ? 'input' : 'change', () => applyCategoryFilters(category)));
     }
 
     document.addEventListener('DOMContentLoaded', refreshCategory);

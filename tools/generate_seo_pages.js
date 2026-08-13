@@ -24,6 +24,20 @@ function absoluteUrl(value = '') {
     return `${origin}/${source.replace(/^\.?[\\/]+/, '')}`;
 }
 
+function localAssetUrl(value = '') {
+    const source = String(value).trim();
+    if (!source) return '/assets/logo-transparent.png';
+    if (/^https?:\/\//i.test(source)) {
+        try {
+            const parsed = new URL(source);
+            return parsed.hostname === 'www.lynx.pe' || parsed.hostname === 'lynx.pe'
+                ? `${parsed.pathname}${parsed.search}`
+                : source;
+        } catch (_) { return source; }
+    }
+    return `/${source.replace(/^\.?[\\/]+/, '')}`;
+}
+
 function optimizedStoreImage(value = '') {
     return String(value).replace(
         /(mockups-finales\/[^?#]+)\.png(?=([?#]|$))/i,
@@ -66,6 +80,14 @@ function categoryUrl(category) {
     })[category] || `${origin}/#catalog`;
 }
 
+function categoryFileUrl(category) {
+    return ({
+        'hoodies-jackets': '../categoria/hoodies.html',
+        'jeans-pants': '../categoria/jeans-y-pants.html',
+        'conjuntos': '../categoria/conjuntos.html'
+    })[category] || '/#catalog';
+}
+
 function descriptionFor(product) {
     const core = String(product.description || '').replace(/\s+/g, ' ').trim();
     const candidate = `${core} Envíos a todo el Perú.`.trim();
@@ -83,6 +105,26 @@ function titleFor(product) {
     return `${shortened}${suffix}`;
 }
 
+function inferProductSpecs(product) {
+    const content = `${product.title || ''} ${product.description || ''}`.toLowerCase();
+    const fit = /oversized|holgad|ampli/.test(content) ? 'Oversized' : /skinny/.test(content) ? 'Skinny' : /baggy/.test(content) ? 'Baggy' : /flare|acampanad/.test(content) ? 'Flare' : /cropped/.test(content) ? 'Cropped' : 'Regular';
+    const material = /cuero sint|faux leather/.test(content) ? 'Cuero sintético' : /denim|jean/.test(content) ? 'Denim' : /algod[oó]n/.test(content) ? 'Algodón mixto' : /poli[eé]ster/.test(content) ? 'Mezcla de poliéster' : 'Consultar composición';
+    const colorMatch = String(product.title || '').match(/\s-\s(.+)$/);
+    return {
+        fit: product.fit_type || fit,
+        material: product.material || material,
+        color: product.color || colorMatch?.[1] || 'Según imagen',
+        care: product.care_instructions || (material === 'Cuero sintético' ? 'Paño húmedo · no secadora' : 'Lavado frío · al revés')
+    };
+}
+
+function persuasiveBenefit(product, fit) {
+    if (product.category === 'jeans-pants') return `${fit === 'Flare' || fit === 'Skinny' ? 'Su silueta alarga visualmente las piernas y marca el outfit sin esfuerzo.' : 'Su volumen aporta una silueta streetwear relajada y actual.'} Úsalo con un hoodie o jacket LYNX para construir un look completo.`;
+    if (product.category === 'conjuntos') return 'Un look coordinado elimina las dudas al combinar: úsalo completo para máximo impacto o separa las piezas para multiplicar tus outfits.';
+    if (fit === 'Oversized') return 'El fit oversized aporta presencia y comodidad sin verse descuidado. Funciona solo o en capas y eleva un jean básico al instante.';
+    return 'Una pieza protagonista que convierte un outfit sencillo en un look con identidad. Combínala con denim oscuro o flare para equilibrar la silueta.';
+}
+
 function productPage(product) {
     const url = `${origin}/producto/${encodeURIComponent(product.slug)}`;
     const images = Array.isArray(product.images) && product.images.length
@@ -91,6 +133,8 @@ function productPage(product) {
     const imageUrls = images.map(absoluteUrl);
     const sizes = Array.isArray(product.sizes) && product.sizes.length ? product.sizes : ['ÚNICA'];
     const status = statusContent(product);
+    const specs = inferProductSpecs(product);
+    const benefit = persuasiveBenefit(product, specs.fit);
     const title = titleFor(product);
     const description = descriptionFor(product);
     const checkoutId = product.legacy_id ?? product.id;
@@ -131,7 +175,7 @@ function productPage(product) {
     const schemaJson = JSON.stringify(schema).replace(/</g, '\\u003c');
     const thumbnails = images.map((source, index) => `
                         <button type="button" class="${index === 0 ? 'active' : ''}" aria-label="Ver foto ${index + 1} de ${escapeHtml(product.title)}">
-                            <img src="${escapeHtml(absoluteUrl(source))}" alt="" loading="${index === 0 ? 'eager' : 'lazy'}" fetchpriority="${index === 0 ? 'high' : 'low'}">
+                            <img src="${escapeHtml(localAssetUrl(source))}" alt="" loading="${index === 0 ? 'eager' : 'lazy'}" fetchpriority="${index === 0 ? 'high' : 'low'}">
                         </button>`).join('');
     const sizeButtons = sizes.map((size, index) => `<button type="button" class="${index === 0 ? 'active' : ''}">${escapeHtml(size)}</button>`).join('');
 
@@ -184,37 +228,44 @@ function productPage(product) {
             <div class="product-gallery">
                 <div class="image-frame">
                     <span class="product-badge" id="product-badge">${escapeHtml(status.badge)}</span>
-                    <img id="product-main-image" src="${escapeHtml(imageUrls[0])}" alt="${escapeHtml(product.title)}" fetchpriority="high">
+                    <img id="product-main-image" src="${escapeHtml(localAssetUrl(images[0]))}" alt="${escapeHtml(product.title)}" fetchpriority="high">
                 </div>
                 <div class="thumbnail-list" id="thumbnail-list" aria-label="Fotos del producto">${thumbnails}
                 </div>
             </div>
 
             <div class="product-copy">
-                <a class="eyebrow" id="product-category" href="${escapeHtml(categoryUrl(product.category).replace(origin, ''))}">${escapeHtml(categoryLabel(product.category).toUpperCase())}</a>
+                <a class="eyebrow" id="product-category" href="${escapeHtml(categoryFileUrl(product.category))}">${escapeHtml(categoryLabel(product.category).toUpperCase())}</a>
                 <h1 id="product-title">${escapeHtml(product.title)}</h1>
                 <p class="product-price" id="product-price">S/. ${Number(product.price).toFixed(2)}</p>
                 <p class="stock-note ${status.sold ? 'sold' : ''}" id="stock-note">${escapeHtml(status.note)}</p>
+                <div class="product-proof-row" aria-label="Beneficios de compra"><span><i data-lucide="badge-check"></i> Prenda original</span><span><i data-lucide="truck"></i> Envíos a todo el Perú</span></div>
                 <p class="product-description" id="product-description">${escapeHtml(product.description)}</p>
+                <div class="product-benefit-copy"><strong>POR QUÉ TE VA A GUSTAR</strong><p id="product-benefit">${escapeHtml(benefit)}</p></div>
+                <div class="product-specs" id="product-specs" aria-label="Características de la prenda"><div><span>FIT</span><strong id="product-fit">${escapeHtml(specs.fit)}</strong></div><div><span>MATERIAL</span><strong id="product-material">${escapeHtml(specs.material)}</strong></div><div><span>COLOR</span><strong id="product-color">${escapeHtml(specs.color)}</strong></div><div><span>CUIDADO</span><strong id="product-care">${escapeHtml(specs.care)}</strong></div><div id="product-weight-row" ${Number(product.weight_grams) ? '' : 'hidden'}><span>PESO</span><strong id="product-weight">${Number(product.weight_grams) ? `${Number(product.weight_grams)} g aprox.` : ''}</strong></div></div>
                 <aside class="fit-note" id="fit-note" ${product.category === 'jeans-pants' && product.fit_recommendation !== false ? '' : 'hidden'}>
-                    <strong>Recomendación de calce</strong><span>Para un calce más cómodo en jeans Fashion Nova, considera elegir 1 o 2 tallas por encima de tu talla habitual.</span>
+                    <strong>Recomendación de calce</strong><span>El calce cambia según el modelo. Compara cintura y cadera con la guía; si quedas entre dos tallas, elige la mayor para mayor comodidad.</span>
                 </aside>
                 <div class="product-options" id="product-options">
-                    <div><span class="option-label">SELECCIONA TU TALLA</span><div class="size-list" id="size-list">${sizeButtons}</div></div>
+                    <div><div class="option-heading"><span class="option-label">SELECCIONA TU TALLA</span><button class="size-guide-trigger" id="size-guide-trigger" type="button">GUÍA DE TALLAS</button></div><div class="size-list" id="size-list">${sizeButtons}</div><p class="size-selection-note" id="size-selection-note">Selecciona una talla para continuar.</p></div>
                     <div class="quantity-option"><span class="option-label">CANTIDAD</span><div class="quantity-control">
                         <button type="button" id="quantity-minus" aria-label="Reducir cantidad">−</button><output id="quantity-value">1</output><button type="button" id="quantity-plus" aria-label="Aumentar cantidad">+</button>
                     </div></div>
                 </div>
                 <div class="purchase-actions">
                     <a class="primary-button" id="add-cart-button" href="${escapeHtml(addUrl)}" ${status.sold ? 'aria-disabled="true"' : ''}>${status.sold ? 'PRODUCTO AGOTADO' : 'AGREGAR AL CARRITO'}</a>
-                    <a class="secondary-button" id="buy-button" href="${escapeHtml(buyUrl)}" ${status.sold ? 'aria-disabled="true"' : ''}>${status.sold ? 'PRODUCTO AGOTADO' : 'INICIAR PEDIDO'}</a>
+                    <a class="secondary-button" id="buy-button" href="${escapeHtml(buyUrl)}" ${status.sold ? 'aria-disabled="true"' : ''}>${status.sold ? 'PRODUCTO AGOTADO' : 'COMPRAR · COMPLETAR ENTREGA'}</a>
                 </div>
-                <p class="purchase-note">Inicia sesión en LYNX para finalizar tu pedido de forma segura.</p>
+                <p class="purchase-note"><i data-lucide="shield-check"></i> No necesitas crear una cuenta. Confirmamos stock, talla y total por WhatsApp antes de cualquier pago.</p>
+                <div class="product-trust-accordion"><details open><summary>Envíos y tiempos</summary><p><strong>Lima:</strong> motorizado, normalmente en 24–48 horas. <strong>Provincias:</strong> Shalom, normalmente en 2–3 días hábiles; el flete se paga en agencia.</p></details><details><summary>Reserva y medios de pago</summary><p>En Lima puedes separar con S/ 50. Aceptamos Yape y transferencias BCP o BBVA; compartimos las cuentas oficiales durante la confirmación.</p></details><details><summary>Cambios y condición de la prenda</summary><p>Confirma las condiciones y el plazo de cambio con nuestro equipo antes de pagar. La prenda debe conservar etiquetas y no presentar uso, lavado, manchas ni daños.</p></details></div>
             </div>
         </article>
     </main>
+    <dialog class="size-guide-dialog" id="size-guide-dialog" aria-labelledby="size-guide-title"><div class="size-guide-card"><button class="size-guide-close" id="size-guide-close" type="button" aria-label="Cerrar guía">×</button><span class="eyebrow">ELIGE CON SEGURIDAD</span><h2 id="size-guide-title">GUÍA DE TALLAS</h2><p class="size-guide-intro" id="size-guide-intro">Mide una prenda similar sobre una superficie plana y compara los centímetros.</p><div class="size-howto"><span><b>1</b> Usa una cinta métrica</span><span><b>2</b> No estires la tela</span><span><b>3</b> Si dudas, escríbenos</span></div><div class="size-table-wrap"><table><thead id="size-guide-head"></thead><tbody id="size-guide-body"></tbody></table></div><p class="size-guide-disclaimer">Medidas corporales referenciales en centímetros. El corte puede variar entre modelos. Si estás entre dos tallas, confirma el fit por WhatsApp.</p><a class="size-guide-help" id="size-guide-help" href="https://wa.me/51962210278?text=Hola%20LYNX%2C%20necesito%20ayuda%20para%20elegir%20mi%20talla." target="_blank" rel="noopener noreferrer">NECESITO AYUDA CON MI TALLA</a></div></dialog>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="/supabase-config.js?v=20260716-admin-v1" defer></script>
+    <script src="/commerce-tracking.js?v=20260813-cro-v1" defer></script>
     <script src="/producto.js?v=20260729-private-costs-v1" defer></script>
 </body>
 </html>`;

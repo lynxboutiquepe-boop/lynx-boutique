@@ -1,4 +1,7 @@
 // LYNX STREETWEAR DEPT. - APP LOGIC
+// El CDN de iconos puede ser bloqueado por algunos navegadores o redes.
+// Este respaldo mantiene todos los flujos funcionales aunque los iconos no carguen.
+window.lucide = window.lucide || { createIcons() {} };
 
 const PRODUCT_MOCKUPS = {
     'stacked-skinny-sun-damage': 'mockups-finales/stacked-skinny-sun-damage-1-mockup.png',
@@ -822,6 +825,8 @@ let productModalReturnUrl = null;
 const CART_STORAGE_KEY = 'lynx_cart_v2';
 let selectedCategory = 'all';
 let searchQuery = '';
+let catalogSort = 'featured';
+let catalogInStockOnly = false;
 const CATALOG_PAGE_SIZE = 24;
 const HOME_PRODUCTS_PER_CATEGORY = 6;
 let catalogVisibleLimit = CATALOG_PAGE_SIZE;
@@ -867,6 +872,8 @@ const mobileNav = document.getElementById('mobile-nav');
 const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 const catalogCountText = document.getElementById('catalog-count-text');
 const catalogLoadMore = document.getElementById('catalog-load-more');
+const catalogSortSelect = document.getElementById('catalog-sort');
+const catalogInStockToggle = document.getElementById('catalog-in-stock');
 const trendingTrack = document.getElementById('trending-track');
 const trendingViewport = document.getElementById('trending-viewport');
 const trendingPrevBtn = document.getElementById('trending-prev');
@@ -1356,7 +1363,13 @@ function mapDatabaseProduct(row) {
         description: row.description || '',
         badge: statusBadge || row.badge || 'NUEVO',
         status: row.status || 'available',
-        fitRecommendation: row.fit_recommendation !== false
+        fitRecommendation: row.fit_recommendation !== false,
+        color: row.color || '',
+        material: row.material || '',
+        fitType: row.fit_type || '',
+        careInstructions: row.care_instructions || '',
+        weightGrams: row.weight_grams ?? null,
+        measurements: row.measurements || {}
     };
 }
 
@@ -1409,12 +1422,21 @@ async function loadDatabaseCatalog() {
     const client = window.getLynxSupabase?.();
     if (!client) return null;
 
-    const { data, error } = await client
+    const baseFields = 'id,legacy_id,title,slug,category,price,stock,sizes,images,description,badge,status,fit_recommendation,sort_order';
+    const extendedFields = `${baseFields},color,material,fit_type,care_instructions,weight_grams,measurements`;
+    const queryCatalog = fields => client
         .from('products')
-        .select('id,legacy_id,title,slug,category,price,stock,sizes,images,description,badge,status,fit_recommendation,sort_order')
+        .select(fields)
         .neq('status', 'archived')
         .order('sort_order', { ascending: true })
         .order('id', { ascending: true });
+    let { data, error } = await queryCatalog(extendedFields);
+
+    // Mantiene la tienda operativa mientras se ejecuta la migración de las
+    // nuevas especificaciones de producto en Supabase.
+    if (error && /column|schema cache|color|material|measurements/i.test(error.message || '')) {
+        ({ data, error } = await queryCatalog(baseFields));
+    }
 
     if (error) {
         console.warn('No se pudo cargar el catálogo conectado. Se usará el catálogo local.', error.message);
@@ -1521,10 +1543,14 @@ function renderProducts() {
         const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
         const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                               product.description.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesCategory && matchesSearch;
+        const matchesStock = !catalogInStockOnly || (product.status !== 'sold_out' && (product.status === 'preorder' || Number(product.stock || 0) > 0));
+        return matchesCategory && matchesSearch && matchesStock;
     });
 
     filtered.sort((a, b) => {
+        if (catalogSort === 'price-asc') return a.price - b.price;
+        if (catalogSort === 'price-desc') return b.price - a.price;
+        if (catalogSort === 'newest') return Number(b.databaseId || b.id) - Number(a.databaseId || a.id);
         const categoryDifference = CATALOG_CATEGORY_ORDER.indexOf(a.category) - CATALOG_CATEGORY_ORDER.indexOf(b.category);
         return categoryDifference || a.id - b.id;
     });
@@ -1603,7 +1629,7 @@ function renderProducts() {
                 ${supportsProductHover && product.images?.[1] ? `<img class="product-card-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="lazy" style="pointer-events:none;">` : ''}
             </a>
             <div class="product-card-content">
-                <span class="product-card-category">${product.category}</span>
+                <span class="product-card-category">${CATALOG_CATEGORY_META[product.category]?.label || product.category}</span>
                 <a class="product-card-title product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}">${product.title}</a>
                 <span class="product-card-price">S/. ${product.price.toFixed(2)}</span>
                 <div class="product-card-footer">
@@ -2296,6 +2322,7 @@ function setupCustomerAccountEvents() {
             if (error) throw error;
             pendingVerificationEmail = email;
             sessionStorage.setItem(DISCOUNT_POPUP_SESSION_KEY, '1');
+            window.LynxTracking?.track('discount_signup', { consent: true });
             showDiscountSent(email);
         } catch (error) {
             setAccountMessage('customer-email-message', customerErrorMessage(error));
@@ -2329,6 +2356,7 @@ function setupCustomerAccountEvents() {
             if (error) throw error;
             customerUser = data.user;
             setAccountMessage('discount-otp-message', 'Correo verificado. Estamos enviando tu descuento.', true);
+            window.LynxTracking?.track('discount_verified');
             await requestWelcomeDiscountEmail();
             showDiscountSent(email, true);
             updateAccountButton();
@@ -2361,6 +2389,7 @@ function setupEventListeners() {
         closeAllDrawers();
         cartDrawer.classList.add('active');
         renderCart();
+        window.LynxTracking?.track('view_cart', { items: cart.reduce((sum, item) => sum + item.qty, 0), value: cart.reduce((sum, item) => sum + item.product.price * item.qty, 0) });
     });
 
     closeCartBtn.addEventListener('click', () => cartDrawer.classList.remove('active'));
@@ -2496,6 +2525,12 @@ function setupEventListeners() {
         });
     });
 
+    document.querySelectorAll('.footer-category-button').forEach(button => {
+        button.addEventListener('click', () => {
+            navigateToCatalogCategory(button.dataset.category);
+        });
+    });
+
     window.addEventListener('scroll', handleCatalogScroll, { passive: true });
 
     // Búsqueda
@@ -2506,6 +2541,23 @@ function setupEventListeners() {
 
     searchInput.addEventListener('input', (e) => {
         searchQuery = e.target.value;
+        catalogVisibleLimit = CATALOG_PAGE_SIZE;
+        catalogExpanded = false;
+        renderProducts();
+    });
+    searchInput.addEventListener('change', () => {
+        window.LynxTracking?.track('search', { search_term: searchQuery });
+    });
+
+    catalogSortSelect?.addEventListener('change', event => {
+        catalogSort = event.target.value;
+        catalogVisibleLimit = CATALOG_PAGE_SIZE;
+        catalogExpanded = false;
+        renderProducts();
+    });
+
+    catalogInStockToggle?.addEventListener('change', event => {
+        catalogInStockOnly = event.target.checked;
         catalogVisibleLimit = CATALOG_PAGE_SIZE;
         catalogExpanded = false;
         renderProducts();
@@ -2567,6 +2619,7 @@ function setupEventListeners() {
     // Flujo de Checkout
     goToCheckoutBtn.addEventListener('click', async () => {
         openCheckoutDrawer();
+        window.LynxTracking?.track('begin_checkout', { items: cart.reduce((sum, item) => sum + item.qty, 0), value: cart.reduce((sum, item) => sum + item.product.price * item.qty, 0) });
     });
 
     backToCartBtn.addEventListener('click', () => {
@@ -2585,6 +2638,7 @@ function setupEventListeners() {
             });
             radio.closest('.shipping-option-card').classList.add('active');
             updateCheckoutTotals();
+            window.LynxTracking?.track('shipping_selected', { method: radio.value });
         });
     });
 
@@ -2849,6 +2903,7 @@ function addToCart(product, size, qty) {
 
     persistCart();
     renderCart();
+    window.LynxTracking?.track('add_to_cart', { product_id: product.id, product_name: product.title, category: product.category, size, quantity: qtyToAdd, value: product.price * qtyToAdd });
     return true;
 }
 
@@ -2886,13 +2941,28 @@ async function submitOrder() {
     const city = document.getElementById('checkout-city').value.trim();
     const address = document.getElementById('checkout-address').value.trim();
 
-    if (!name || !phone || !city || !address) {
-        alert('Por favor, rellena todos los campos obligatorios (*).');
+    const fields = [
+        { id: 'checkout-name', error: 'checkout-name-error', valid: name.length >= 3, message: 'Escribe tu nombre y apellido.' },
+        { id: 'checkout-phone', error: 'checkout-phone-error', valid: /^[0-9 +()-]{9,15}$/.test(phone), message: 'Escribe un WhatsApp válido de 9 a 15 dígitos.' },
+        { id: 'checkout-city', error: 'checkout-city-error', valid: city.length >= 3, message: 'Indica tu ciudad o departamento.' },
+        { id: 'checkout-address', error: 'checkout-address-error', valid: address.length >= 6, message: 'Completa la dirección y una referencia.' }
+    ];
+    fields.forEach(field => {
+        const input = document.getElementById(field.id);
+        const error = document.getElementById(field.error);
+        input.classList.toggle('is-invalid', !field.valid);
+        input.setAttribute('aria-invalid', String(!field.valid));
+        if (error) error.textContent = field.valid ? '' : field.message;
+    });
+    const firstInvalid = fields.find(field => !field.valid);
+    if (firstInvalid) {
+        document.getElementById(firstInvalid.id).focus();
         return;
     }
 
     const shippingMethod = document.querySelector('input[name="shipping-method"]:checked').value;
     const reserveLima = limaReserveCheckbox.checked;
+    const discountCode = document.getElementById('checkout-discount-code')?.value.trim().toUpperCase() || '';
 
     // Calcular montos
     const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.qty), 0);
@@ -2925,7 +2995,8 @@ async function submitOrder() {
                     `${customerUser?.email ? `- *Cuenta:* ${customerUser.email}\n` : ''}` +
                     `- *Celular:* ${phone}\n` +
                     `- *Ciudad:* ${city}\n` +
-                    `- *Dirección:* ${address}\n\n` +
+                    `- *Dirección:* ${address}\n` +
+                    `${discountCode ? `- *Código de descuento:* ${discountCode} (por validar)\n` : ''}\n` +
                     `🛒 *PRODUCTOS DEL PEDIDO:*\n${productsText}\n` +
                     `${paymentDetailText}\n\n` +
                     `💬 *Mensaje:* Hola, me gustaría confirmar mi pedido. Por favor, bríndame los datos de cuenta para realizar el depósito correspondiente.`;
@@ -2936,6 +3007,7 @@ async function submitOrder() {
     
     const whatsappUrl = `https://wa.me/${shopWhatsappNumber}?text=${encodedMessage}`;
 
-    // Abrir WhatsApp en pestaña nueva
-    window.open(whatsappUrl, '_blank');
+    window.LynxTracking?.track('generate_lead', { channel: 'whatsapp', shipping_method: shippingMethod, reserve_lima: reserveLima, discount_code_entered: Boolean(discountCode), items: cart.reduce((sum, item) => sum + item.qty, 0), value: total });
+    // Navegación directa: evita bloqueos de pestañas emergentes en celulares.
+    location.href = whatsappUrl;
 }
