@@ -1862,6 +1862,10 @@ function setupTrendingCarousel() {
     let dragStartX = 0;
     let dragStartScroll = 0;
     let dragDistance = 0;
+    let linkPointerId = null;
+    let linkStartX = 0;
+    let linkDistance = 0;
+    let pendingProductLink = null;
     let suppressClick = false;
     const speed = 0.085; // 85 px por segundo.
 
@@ -1944,7 +1948,12 @@ function setupTrendingCarousel() {
         if (event.pointerType === 'mouse' && event.button !== 0) return;
         // Los enlaces deben conservar siempre su clic nativo. El carrusel puede
         // arrastrarse desde el espacio libre de las tarjetas y con scroll táctil.
-        if (event.target.closest('.product-detail-link')) {
+        const pressedProductLink = event.target.closest('.product-detail-link');
+        if (pressedProductLink) {
+            linkPointerId = event.pointerId;
+            linkStartX = event.clientX;
+            linkDistance = 0;
+            pendingProductLink = pressedProductLink;
             pauseAutoScroll(2200);
             return;
         }
@@ -1965,13 +1974,33 @@ function setupTrendingCarousel() {
         trendingViewport.classList.add('is-dragging');
     });
     trendingViewport.addEventListener('pointermove', event => {
+        if (event.pointerId === linkPointerId) {
+            linkDistance = Math.max(linkDistance, Math.abs(event.clientX - linkStartX));
+            return;
+        }
         if (event.pointerId !== pointerId) return;
         const delta = event.clientX - dragStartX;
         dragDistance = Math.max(dragDistance, Math.abs(delta));
         if (dragDistance > 3 && event.cancelable) event.preventDefault();
         trendingViewport.scrollLeft = dragStartScroll - delta;
     }, { passive: false });
+    const openPressedProduct = event => {
+        if (event.pointerId === linkPointerId) {
+            const destination = pendingProductLink?.href;
+            const shouldOpen = linkDistance <= 8 && Boolean(destination);
+            linkPointerId = null;
+            pendingProductLink = null;
+            linkDistance = 0;
+            if (shouldOpen) {
+                event.preventDefault();
+                window.location.assign(destination);
+            }
+            return true;
+        }
+        return false;
+    };
     trendingViewport.addEventListener('pointerup', event => {
+        if (openPressedProduct(event)) return;
         if (event.pointerType !== 'mouse') {
             pauseAutoScroll(1600);
             window.setTimeout(normalizeScroll, 0);
@@ -1979,8 +2008,19 @@ function setupTrendingCarousel() {
         }
         endDragging(event);
     }, { passive: true });
-    trendingViewport.addEventListener('pointercancel', endDragging, { passive: true });
-    window.addEventListener('pointerup', endDragging, { passive: true });
+    window.addEventListener('pointerup', event => {
+        if (openPressedProduct(event)) return;
+        endDragging(event);
+    }, { passive: false });
+    trendingViewport.addEventListener('pointercancel', event => {
+        if (event.pointerId === linkPointerId) {
+            linkPointerId = null;
+            pendingProductLink = null;
+            linkDistance = 0;
+            return;
+        }
+        endDragging(event);
+    }, { passive: true });
     trendingViewport.addEventListener('click', event => {
         if (suppressClick) {
             event.preventDefault();
