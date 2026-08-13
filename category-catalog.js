@@ -18,7 +18,16 @@
         grid.innerHTML = products.length
             ? products.map(product => productCard(product, category)).join('')
             : '<div class="category-empty"><h2>Sin resultados</h2><p>Prueba otra búsqueda o desactiva el filtro de disponibilidad.</p></div>';
-        grid.querySelectorAll('img').forEach(image => image.addEventListener('error', () => { image.src = '/assets/logo-transparent.png'; }, { once: true }));
+        grid.querySelectorAll('img').forEach(bindImageFallback);
+    }
+
+    function bindImageFallback(image) {
+        if (image.dataset.fallbackBound) return;
+        image.dataset.fallbackBound = 'true';
+        image.addEventListener('error', () => {
+            if (image.src.endsWith('/assets/logo-transparent.png')) return;
+            image.src = '/assets/logo-transparent.png';
+        });
     }
 
     function applyCategoryFilters(category) {
@@ -67,7 +76,7 @@
             <a class="category-product${soldOut ? ' is-sold-out' : ''}" href="/producto/${slug}" ${soldOut ? 'aria-label="Agotado: ' + escapeHtml(product.title) + '"' : ''}>
                 <figure>
                     <span>${escapeHtml(productBadge(product))}</span>
-                    <img src="${escapeHtml(image)}" alt="${escapeHtml(product.title)}" loading="lazy" width="640" height="800">
+                    <img src="${escapeHtml(image)}" alt="${escapeHtml(product.title)}" loading="lazy" decoding="async" width="640" height="800">
                 </figure>
                 <p>${escapeHtml(CATEGORY_LABELS[category] || category)}</p>
                 <h2>${escapeHtml(product.title)}</h2>
@@ -99,6 +108,7 @@
         grid.innerHTML = categoryProducts.length
             ? categoryProducts.map(product => productCard(product, category)).join('')
             : '<div class="category-empty"><h2>Próximamente</h2><p>Estamos preparando nuevas prendas para esta colección.</p><div><a href="/#catalog">Ver catálogo</a></div></div>';
+        grid.querySelectorAll('img').forEach(bindImageFallback);
 
         const count = document.querySelector('.category-hero small');
         if (count) count.textContent = `${categoryProducts.length} ${categoryProducts.length === 1 ? 'prenda' : 'prendas'} en catálogo`;

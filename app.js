@@ -82,6 +82,16 @@ function productImages(slug, count = 8) {
     return mockup ? [optimizedStoreImage(mockup), ...photos] : photos;
 }
 
+const LOCAL_PRODUCT_IMAGE_OVERRIDES = {
+    '49ers-monster-oversized-zip-up-hoodie-red': [
+        'mockups-finales/11-11-25_S8_5_JZML095FSFFS_Red_AB_DJ_09-51-32_98672_PXF-mockup.webp',
+        'assets/49ers-monster-oversized-zip-up-hoodie-red/49ers-monster-oversized-zip-up-hoodie-red-1.jpg',
+        'assets/49ers-monster-oversized-zip-up-hoodie-red/49ers-monster-oversized-zip-up-hoodie-red-2.jpg',
+        'assets/49ers-monster-oversized-zip-up-hoodie-red/49ers-monster-oversized-zip-up-hoodie-red-3.jpg',
+        'assets/49ers-monster-oversized-zip-up-hoodie-red/49ers-monster-oversized-zip-up-hoodie-red-4.jpg'
+    ]
+};
+
 // 1. DATA DE PRODUCTOS POR DEFECTO
 const DEFAULT_PRODUCTS = [
     {
@@ -91,10 +101,10 @@ const DEFAULT_PRODUCTS = [
         price: 109.90,
         images: [
             'mockups-finales/11-11-25_S8_5_JZML095FSFFS_Red_AB_DJ_09-51-32_98672_PXF-mockup.png',
-            'https://cdn.shopify.com/s/files/1/0293/9277/files/11-11-25_S8_5_JZML095FSFFS_Red_AB_DJ_09-51-32_98672_PXF.jpg?v=1763143743',
-            'https://cdn.shopify.com/s/files/1/0293/9277/files/11-11-25_S8_5_JZML095FSFFS_Red_AB_DJ_09-50-54_98658_PXF.jpg?v=1763143743',
-            'https://cdn.shopify.com/s/files/1/0293/9277/files/11-11-25_S8_5_JZML095FSFFS_Red_AB_DJ_09-52-26_98681_PXF_SG.jpg?v=1763155567',
-            'https://cdn.shopify.com/s/files/1/0293/9277/files/11-11-25_S8_5_JZML095FSFFS_Red_AB_DJ_09-52-09_98678_PXF_SG.jpg?v=1763155567'
+            'assets/49ers-monster-oversized-zip-up-hoodie-red/49ers-monster-oversized-zip-up-hoodie-red-1.jpg',
+            'assets/49ers-monster-oversized-zip-up-hoodie-red/49ers-monster-oversized-zip-up-hoodie-red-2.jpg',
+            'assets/49ers-monster-oversized-zip-up-hoodie-red/49ers-monster-oversized-zip-up-hoodie-red-3.jpg',
+            'assets/49ers-monster-oversized-zip-up-hoodie-red/49ers-monster-oversized-zip-up-hoodie-red-4.jpg'
         ],
         get image() { return this.images[0]; },
         description: 'Hoodie oversized de los 49ers con cierre completo. Confeccionado en 60% Algodón y 40% Poliéster. Fit amplio y cómodo, perfecto para el día a día.',
@@ -1342,7 +1352,9 @@ function setupReviewEvents() {
 
 // 4. LÓGICA DE INICIALIZACIÓN
 function mapDatabaseProduct(row) {
-    const images = Array.isArray(row.images) ? row.images.filter(Boolean).map(optimizedStoreImage) : [];
+    const sourceImages = LOCAL_PRODUCT_IMAGE_OVERRIDES[row.slug]
+        || (Array.isArray(row.images) ? row.images : []);
+    const images = sourceImages.filter(Boolean).map(optimizedStoreImage);
     const statusBadge = {
         preorder: 'PREVENTA',
         sold_out: 'AGOTADO',
@@ -1529,10 +1541,25 @@ function productUrl(product) {
 function imageFallback(image) {
     if (image.dataset.imageFallbackBound) return;
     image.dataset.imageFallbackBound = 'true';
+    const isSecondary = image.classList.contains('product-card-secondary-img') || image.classList.contains('trending-secondary-img');
+    const card = image.closest('.product-card, .trending-card');
+    const markSecondaryReady = () => {
+        if (isSecondary && image.naturalWidth > 0) card?.classList.add('has-secondary-image');
+    };
+    image.addEventListener('load', markSecondaryReady, { once: true });
+    if (image.complete) markSecondaryReady();
     image.addEventListener('error', () => {
         const failedPath = new URL(image.currentSrc || image.src, location.href).pathname.replace(/\\/g, '/');
+        const primary = image.closest('.product-card-img-wrapper, .trending-card-image')
+            ?.querySelector('.product-card-primary-img, .trending-primary-img');
+        if (isSecondary) {
+            card?.classList.remove('has-secondary-image');
+            image.remove();
+            if (primary) primary.style.opacity = '1';
+            return;
+        }
         if (failedPath.endsWith('/assets/logo-transparent.png')) return;
-        image.src = 'assets/logo-transparent.png';
+        image.src = '/assets/logo-transparent.png';
     });
 }
 
@@ -1626,7 +1653,7 @@ function renderProducts() {
             <a class="product-card-img-wrapper product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}" aria-label="Ver detalles de ${escapeHtml(product.title)}">
                 <span class="product-card-badge ${product.badge.toLowerCase().includes('stock') || product.badge.toLowerCase().includes('limit') || product.badge.toLowerCase().includes('última') ? 'limited' : ''}">${product.badge}</span>
                 <img class="product-card-primary-img" src="${product.image}" alt="${product.title}" loading="eager" decoding="async" fetchpriority="${productIndex < 3 ? 'high' : 'low'}" width="1200" height="1600" style="pointer-events:none;">
-                ${supportsProductHover && product.images?.[1] ? `<img class="product-card-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="lazy" style="pointer-events:none;">` : ''}
+                ${supportsProductHover && product.images?.[1] ? `<img class="product-card-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="eager" decoding="async" style="pointer-events:none;">` : ''}
             </a>
             <div class="product-card-content">
                 <span class="product-card-category">${CATALOG_CATEGORY_META[product.category]?.label || product.category}</span>
@@ -1663,7 +1690,7 @@ function renderTrendingProducts() {
             <a class="trending-card-image product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}" aria-label="Ver detalles de ${escapeHtml(product.title)}" ${isDuplicate ? 'tabindex="-1"' : ''}>
                 <span class="trending-card-badge">${product.badge}</span>
                 <img class="trending-primary-img" src="${product.image}" alt="${isDuplicate ? '' : product.title}" loading="${!isDuplicate && productIndex < 2 ? 'eager' : 'lazy'}" decoding="async" ${!isDuplicate && productIndex < 2 ? 'fetchpriority="high"' : 'fetchpriority="low"'}>
-                ${supportsProductHover && product.images?.[1] ? `<img class="trending-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="lazy">` : ''}
+                ${supportsProductHover && product.images?.[1] ? `<img class="trending-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="eager" decoding="async">` : ''}
             </a>
             <a class="trending-card-title product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}" ${isDuplicate ? 'tabindex="-1"' : ''}>${product.title}</a>
             <span class="trending-card-price">S/. ${product.price.toFixed(2)}</span>
@@ -1905,9 +1932,6 @@ function setupTrendingCarousel() {
     const endDragging = event => {
         if (pointerId === null || (event?.pointerId != null && event.pointerId !== pointerId)) return;
         suppressClick = dragDistance > 6;
-        if (event?.pointerId != null && trendingViewport.hasPointerCapture?.(event.pointerId)) {
-            trendingViewport.releasePointerCapture(event.pointerId);
-        }
         pointerId = null;
         trendingViewport.classList.remove('is-dragging');
         normalizeScroll();
@@ -1918,6 +1942,12 @@ function setupTrendingCarousel() {
 
     trendingViewport.addEventListener('pointerdown', event => {
         if (event.pointerType === 'mouse' && event.button !== 0) return;
+        // Los enlaces deben conservar siempre su clic nativo. El carrusel puede
+        // arrastrarse desde el espacio libre de las tarjetas y con scroll táctil.
+        if (event.target.closest('.product-detail-link')) {
+            pauseAutoScroll(2200);
+            return;
+        }
         // En iPhone/iPad el desplazamiento horizontal nativo es mucho más
         // fiable que capturar el dedo con Pointer Events. Solo arrastramos
         // manualmente con mouse; en pantallas táctiles el viewport conserva
@@ -1933,7 +1963,6 @@ function setupTrendingCarousel() {
         dragDistance = 0;
         pauseAutoScroll(2000);
         trendingViewport.classList.add('is-dragging');
-        trendingViewport.setPointerCapture?.(event.pointerId);
     });
     trendingViewport.addEventListener('pointermove', event => {
         if (event.pointerId !== pointerId) return;
@@ -1953,9 +1982,19 @@ function setupTrendingCarousel() {
     trendingViewport.addEventListener('pointercancel', endDragging, { passive: true });
     window.addEventListener('pointerup', endDragging, { passive: true });
     trendingViewport.addEventListener('click', event => {
-        if (!suppressClick) return;
+        if (suppressClick) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+
+        const productLink = event.target.closest('.product-detail-link');
+        if (!productLink || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+
+        // El arrastre del carrusel puede cancelar la navegación nativa en algunos
+        // navegadores. Forzamos la ficha solo cuando fue un clic limpio.
         event.preventDefault();
-        event.stopPropagation();
+        window.location.assign(productLink.href);
     }, true);
     trendingViewport.addEventListener('wheel', () => {
         pauseAutoScroll(1200);
@@ -2444,15 +2483,16 @@ function setupEventListeners() {
         cartDrawer.classList.add('active');
     });
 
-    const openFloatingProduct = event => {
+    const openCatalogProduct = event => {
         const link = event.target.closest('.product-detail-link');
         if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
         event.preventDefault();
         const productId = Number(link.dataset.productId);
         if (productId) openProductDetails(productId);
     };
-    productsGrid.addEventListener('click', openFloatingProduct);
-    trendingTrack?.addEventListener('click', openFloatingProduct);
+    // El catálogo conserva la ficha rápida. El carrusel usa sus enlaces reales:
+    // así cada artículo navega siempre a su ficha aunque el carrusel se mueva.
+    productsGrid.addEventListener('click', openCatalogProduct);
 
     // Navegar y Filtrar por Categoria
     categoryTags.forEach(tag => {

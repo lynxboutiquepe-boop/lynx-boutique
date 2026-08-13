@@ -101,7 +101,7 @@ function categoryPage(category) {
             <a class="category-product" href="/producto/${escapeHtml(product.slug)}">
                 <figure>
                     <span>${escapeHtml(badge)}</span>
-                    <img src="${escapeHtml(image)}" alt="${escapeHtml(product.title)}" loading="lazy" width="640" height="800">
+                    <img src="${escapeHtml(image)}" alt="${escapeHtml(product.title)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/assets/logo-transparent.png'" width="640" height="800">
                 </figure>
                 <p>${escapeHtml(category.navLabel)}</p>
                 <h2>${escapeHtml(product.title)}</h2>
@@ -190,7 +190,7 @@ function categoryPage(category) {
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="/supabase-config.js?v=20260716-admin-v1" defer></script>
     <script src="/commerce-tracking.js?v=20260813-cro-v1" defer></script>
-    <script src="/category-catalog.js?v=20260813-cro-v2" defer></script>
+    <script src="/category-catalog.js?v=20260813-images-fix-v3" defer></script>
 </body>
 </html>`;
 }
