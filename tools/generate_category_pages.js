@@ -190,7 +190,7 @@ function categoryPage(category) {
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="/supabase-config.js?v=20260716-admin-v1" defer></script>
     <script src="/commerce-tracking.js?v=20260813-cro-v1" defer></script>
-    <script src="/category-catalog.js?v=20260813-images-fix-v3" defer></script>
+    <script src="/category-catalog.js?v=20260814-photo-fix-v4" defer></script>
 </body>
 </html>`;
 }

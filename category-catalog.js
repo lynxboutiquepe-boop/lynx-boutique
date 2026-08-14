@@ -1,4 +1,5 @@
 (function () {
+    const PRODUCT_IMAGE_CACHE_VERSION = '20260814-photo-fix-v1';
     const CATEGORY_BY_PATH = {
         '/categoria/hoodies': 'hoodies-jackets',
         '/categoria/jeans-y-pants': 'jeans-pants',
@@ -24,10 +25,18 @@
     function bindImageFallback(image) {
         if (image.dataset.fallbackBound) return;
         image.dataset.fallbackBound = 'true';
-        image.addEventListener('error', () => {
-            if (image.src.endsWith('/assets/logo-transparent.png')) return;
-            image.src = '/assets/logo-transparent.png';
-        });
+        const handleError = () => {
+            const failedPath = new URL(image.currentSrc || image.src, location.href).pathname;
+            if (/\/mockups-finales\/.*\.webp$/i.test(failedPath) && image.dataset.pngFallbackTried !== 'true') {
+                image.dataset.pngFallbackTried = 'true';
+                image.src = `${failedPath.replace(/\.webp$/i, '.png')}?lynx_img=${PRODUCT_IMAGE_CACHE_VERSION}`;
+                return;
+            }
+            if (failedPath.endsWith('/assets/logo-transparent.png')) return;
+            image.src = `/assets/logo-transparent.png?lynx_img=${PRODUCT_IMAGE_CACHE_VERSION}`;
+        };
+        image.addEventListener('error', handleError);
+        if (image.complete && image.naturalWidth === 0) handleError();
     }
 
     function applyCategoryFilters(category) {
@@ -60,10 +69,12 @@
 
     function normalizeImageUrl(value) {
         let image = String(value || '').trim();
-        if (!image) return '/assets/logo-transparent.png';
+        if (!image) return `/assets/logo-transparent.png?lynx_img=${PRODUCT_IMAGE_CACHE_VERSION}`;
         image = image.replace(/(mockups-finales\/[^?#]+)\.png(?=([?#]|$))/i, '$1.webp');
-        if (/^(https?:\/\/|data:image\/|\/)/i.test(image)) return image;
-        return `/${image.replace(/^\.\//, '')}`;
+        if (/^(https?:\/\/|data:image\/)/i.test(image)) return image;
+        image = image.startsWith('/') ? image : `/${image.replace(/^\.\//, '')}`;
+        if (!/[?&]lynx_img=/.test(image)) image += `${image.includes('?') ? '&' : '?'}lynx_img=${PRODUCT_IMAGE_CACHE_VERSION}`;
+        return image;
     }
 
     function productCard(product, category) {

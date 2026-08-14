@@ -2,6 +2,7 @@
 // El CDN de iconos puede ser bloqueado por algunos navegadores o redes.
 // Este respaldo mantiene todos los flujos funcionales aunque los iconos no carguen.
 window.lucide = window.lucide || { createIcons() {} };
+const PRODUCT_IMAGE_CACHE_VERSION = '20260814-photo-fix-v1';
 
 const PRODUCT_MOCKUPS = {
     'stacked-skinny-sun-damage': 'mockups-finales/stacked-skinny-sun-damage-1-mockup.png',
@@ -70,7 +71,12 @@ function optimizedStoreImage(source = '') {
         /(mockups-finales\/[^?#]+)\.png(?=([?#]|$))/i,
         '$1.webp'
     );
-    if (!optimized || /^(?:https?:|data:|blob:|\/)/i.test(optimized)) return optimized;
+    if (!optimized || /^(?:https?:|data:|blob:)/i.test(optimized)) return optimized;
+    if (!/[?&]lynx_img=/.test(optimized)) {
+        const [path, hash = ''] = optimized.split('#', 2);
+        const separator = path.includes('?') ? '&' : '?';
+        return `${path}${separator}lynx_img=${PRODUCT_IMAGE_CACHE_VERSION}${hash ? `#${hash}` : ''}`;
+    }
     // Keep store assets relative so they work on localhost and when index.html
     // is opened directly from its folder (file://).
     return optimized.replace(/^\.\//, '');
@@ -1548,7 +1554,7 @@ function imageFallback(image) {
     };
     image.addEventListener('load', markSecondaryReady, { once: true });
     if (image.complete) markSecondaryReady();
-    image.addEventListener('error', () => {
+    const handleImageError = () => {
         const failedPath = new URL(image.currentSrc || image.src, location.href).pathname.replace(/\\/g, '/');
         const primary = image.closest('.product-card-img-wrapper, .trending-card-image')
             ?.querySelector('.product-card-primary-img, .trending-primary-img');
@@ -1558,9 +1564,18 @@ function imageFallback(image) {
             if (primary) primary.style.opacity = '1';
             return;
         }
+        if (/\/mockups-finales\/.*\.webp$/i.test(failedPath) && image.dataset.pngFallbackTried !== 'true') {
+            image.dataset.pngFallbackTried = 'true';
+            image.src = `${failedPath.replace(/\.webp$/i, '.png')}?lynx_img=${PRODUCT_IMAGE_CACHE_VERSION}`;
+            return;
+        }
         if (failedPath.endsWith('/assets/logo-transparent.png')) return;
-        image.src = '/assets/logo-transparent.png';
-    });
+        image.src = `/assets/logo-transparent.png?lynx_img=${PRODUCT_IMAGE_CACHE_VERSION}`;
+    };
+    image.addEventListener('error', handleImageError);
+    // Un error guardado en caché puede ocurrir antes de enlazar el listener.
+    // En ese caso activamos el respaldo inmediatamente.
+    if (image.complete && image.naturalWidth === 0) handleImageError();
 }
 
 function renderProducts() {

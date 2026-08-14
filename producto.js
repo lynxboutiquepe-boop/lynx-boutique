@@ -15,6 +15,7 @@ const sizeGuideDialog = document.getElementById('size-guide-dialog');
 const sizeGuideTrigger = document.getElementById('size-guide-trigger');
 const sizeGuideClose = document.getElementById('size-guide-close');
 const sizeSelectionNote = document.getElementById('size-selection-note');
+const PRODUCT_IMAGE_CACHE_VERSION = '20260814-photo-fix-v1';
 
 const SIZE_GUIDES = {
     tops: {
@@ -49,7 +50,7 @@ function productImageUrl(source) {
         /(mockups-finales\/[^?#]+)\.png(?=([?#]|$))/i,
         '$1.webp'
     );
-    if (!value) return '/assets/logo-transparent.png';
+    if (!value) return `/assets/logo-transparent.png?lynx_img=${PRODUCT_IMAGE_CACHE_VERSION}`;
     if (/^https?:\/\//i.test(value)) {
         try {
             const parsed = new URL(value);
@@ -57,8 +58,23 @@ function productImageUrl(source) {
         } catch (_) { /* conservar la dirección original */ }
     }
     // Las fotos locales deben resolverse desde la raíz, no desde la URL de la ficha.
-    if (/^(?:https?:|data:|\/)/i.test(value)) return value;
-    return `/${value.replace(/^\.?(?:\/|\\)/, '')}`;
+    if (/^(?:https?:|data:)/i.test(value)) return value;
+    const localPath = value.startsWith('/') ? value : `/${value.replace(/^\.?(?:\/|\\)/, '')}`;
+    if (/[?&]lynx_img=/.test(localPath)) return localPath;
+    return `${localPath}${localPath.includes('?') ? '&' : '?'}lynx_img=${PRODUCT_IMAGE_CACHE_VERSION}`;
+}
+
+function setProductImageFallback(image) {
+    image.onerror = () => {
+        const failedPath = new URL(image.currentSrc || image.src, location.href).pathname;
+        if (/\/mockups-finales\/.*\.webp$/i.test(failedPath) && image.dataset.pngFallbackTried !== 'true') {
+            image.dataset.pngFallbackTried = 'true';
+            image.src = `${failedPath.replace(/\.webp$/i, '.png')}?lynx_img=${PRODUCT_IMAGE_CACHE_VERSION}`;
+            return;
+        }
+        image.onerror = null;
+        image.src = `/assets/logo-transparent.png?lynx_img=${PRODUCT_IMAGE_CACHE_VERSION}`;
+    };
 }
 
 function statusCopy(product) {
@@ -86,10 +102,7 @@ function productCategoryUrl(category) {
 
 function setImage(images, index) {
     const image = images[index];
-    productMainImage.onerror = () => {
-        productMainImage.onerror = null;
-        productMainImage.src = '/assets/logo-transparent.png';
-    };
+    setProductImageFallback(productMainImage);
     productMainImage.src = productImageUrl(image);
     productMainImage.alt = currentProduct.title;
     thumbnailList.querySelectorAll('button').forEach((button, buttonIndex) => button.classList.toggle('active', buttonIndex === index));
@@ -197,10 +210,7 @@ function renderProduct(product) {
         button.className = index === 0 ? 'active' : '';
         button.setAttribute('aria-label', `Ver foto ${index + 1} de ${product.title}`);
         const image = document.createElement('img');
-        image.onerror = () => {
-            image.onerror = null;
-            image.src = '/assets/logo-transparent.png';
-        };
+        setProductImageFallback(image);
         image.src = productImageUrl(source);
         image.alt = '';
         image.loading = index === 0 ? 'eager' : 'lazy';
