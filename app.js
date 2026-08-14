@@ -2607,11 +2607,10 @@ function setupEventListeners() {
         const link = event.target.closest('.product-detail-link');
         if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
         event.preventDefault();
-        const productId = Number(link.dataset.productId);
-        if (productId) openProductDetails(productId);
+        window.location.assign(link.href);
     };
-    // El catálogo conserva la ficha rápida. El carrusel usa sus enlaces reales:
-    // así cada artículo navega siempre a su ficha aunque el carrusel se mueva.
+    // Tanto el catálogo como el carrusel abren la ficha individual completa.
+    // Esto evita mantener dos diseños distintos para el mismo producto.
     productsGrid.addEventListener('click', openCatalogProduct);
 
     // Navegar y Filtrar por Categoria
