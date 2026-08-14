@@ -36,7 +36,6 @@
             image.src = `/assets/logo-transparent.png?lynx_img=${PRODUCT_IMAGE_CACHE_VERSION}`;
         };
         image.addEventListener('error', handleError);
-        if (image.complete && image.naturalWidth === 0) handleError();
     }
 
     function applyCategoryFilters(category) {

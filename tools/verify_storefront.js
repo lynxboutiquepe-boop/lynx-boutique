@@ -29,7 +29,7 @@ const home = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 for (const required of [
     'id="trending-track"',
     'class="trending-card-image product-detail-link"',
-    'app.js?v=20260814-photo-fix-v11',
+    'app.js?v=20260814-gallery-fix-v12',
     'tiktok-videos.js?v=20260813-controls-fix-v3'
 ]) {
     if (!home.includes(required) && !fs.readFileSync(path.join(root, 'app.js'), 'utf8').includes(required)) {

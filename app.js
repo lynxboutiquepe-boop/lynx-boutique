@@ -1548,6 +1548,7 @@ function imageFallback(image) {
     if (image.dataset.imageFallbackBound) return;
     image.dataset.imageFallbackBound = 'true';
     const isSecondary = image.classList.contains('product-card-secondary-img') || image.classList.contains('trending-secondary-img');
+    const isModalThumb = image.classList.contains('modal-thumb');
     const card = image.closest('.product-card, .trending-card');
     const markSecondaryReady = () => {
         if (isSecondary && image.naturalWidth > 0) card?.classList.add('has-secondary-image');
@@ -1558,6 +1559,20 @@ function imageFallback(image) {
         const failedPath = new URL(image.currentSrc || image.src, location.href).pathname.replace(/\\/g, '/');
         const primary = image.closest('.product-card-img-wrapper, .trending-card-image')
             ?.querySelector('.product-card-primary-img, .trending-primary-img');
+        if (isModalThumb) {
+            const wasMainImage = new URL(modalProductImg.currentSrc || modalProductImg.src, location.href).pathname === failedPath;
+            const thumbList = image.parentElement;
+            image.remove();
+            if (wasMainImage) {
+                const replacement = thumbList?.querySelector('.modal-thumb');
+                if (replacement) {
+                    modalProductImg.src = replacement.src;
+                    replacement.style.border = '2px solid var(--accent)';
+                    replacement.style.opacity = '1';
+                }
+            }
+            return;
+        }
         if (isSecondary) {
             card?.classList.remove('has-secondary-image');
             image.remove();
@@ -1573,9 +1588,6 @@ function imageFallback(image) {
         image.src = `/assets/logo-transparent.png?lynx_img=${PRODUCT_IMAGE_CACHE_VERSION}`;
     };
     image.addEventListener('error', handleImageError);
-    // Un error guardado en caché puede ocurrir antes de enlazar el listener.
-    // En ese caso activamos el respaldo inmediatamente.
-    if (image.complete && image.naturalWidth === 0) handleImageError();
 }
 
 function renderProducts() {
