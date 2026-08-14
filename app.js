@@ -1544,6 +1544,61 @@ function productUrl(product) {
     return `/producto/${encodeURIComponent(String(identifier))}`;
 }
 
+let modalMainImageRequestId = 0;
+
+function highlightModalThumbnail(selectedThumb) {
+    const thumbList = document.getElementById('modal-thumbs');
+    thumbList?.querySelectorAll('.modal-thumb').forEach(thumb => {
+        const isSelected = thumb === selectedThumb;
+        thumb.style.border = `2px solid ${isSelected ? 'var(--accent)' : 'transparent'}`;
+        thumb.style.opacity = isSelected ? '1' : '0.6';
+    });
+}
+
+function setModalMainImage(source, selectedThumb = null) {
+    if (!source) return;
+
+    const requestId = ++modalMainImageRequestId;
+    const requestedSource = String(source);
+    modalProductImg.onload = null;
+    modalProductImg.onerror = null;
+    modalProductImg.classList.add('is-loading');
+
+    if (selectedThumb) highlightModalThumbnail(selectedThumb);
+
+    modalProductImg.onload = () => {
+        if (requestId !== modalMainImageRequestId) return;
+        modalProductImg.classList.remove('is-loading');
+    };
+
+    modalProductImg.onerror = () => {
+        if (requestId !== modalMainImageRequestId) return;
+
+        const failedPath = new URL(requestedSource, location.href).pathname.replace(/\\/g, '/');
+        if (/\/mockups-finales\/.*\.webp$/i.test(failedPath)) {
+            const pngSource = `${failedPath.replace(/\.webp$/i, '.png')}?lynx_img=${PRODUCT_IMAGE_CACHE_VERSION}`;
+            setModalMainImage(pngSource, selectedThumb);
+            return;
+        }
+
+        const thumbList = document.getElementById('modal-thumbs');
+        const replacement = [...(thumbList?.querySelectorAll('.modal-thumb') || [])]
+            .find(thumb => thumb.complete && thumb.naturalWidth > 0 && thumb.src !== requestedSource);
+
+        if (replacement) {
+            setModalMainImage(replacement.src, replacement);
+            return;
+        }
+
+        modalProductImg.onload = null;
+        modalProductImg.onerror = null;
+        modalProductImg.classList.remove('is-loading');
+        modalProductImg.src = `/assets/logo-transparent.png?lynx_img=${PRODUCT_IMAGE_CACHE_VERSION}`;
+    };
+
+    modalProductImg.src = requestedSource;
+}
+
 function imageFallback(image) {
     if (image.dataset.imageFallbackBound) return;
     image.dataset.imageFallbackBound = 'true';
@@ -1566,9 +1621,7 @@ function imageFallback(image) {
             if (wasMainImage) {
                 const replacement = thumbList?.querySelector('.modal-thumb');
                 if (replacement) {
-                    modalProductImg.src = replacement.src;
-                    replacement.style.border = '2px solid var(--accent)';
-                    replacement.style.opacity = '1';
+                    setModalMainImage(replacement.src, replacement);
                 }
             }
             return;
@@ -2880,8 +2933,6 @@ function openProductDetails(id, { syncUrl = true } = {}) {
     const images = product.images || [product.image];
     
     // Imagen principal
-    imageFallback(modalProductImg);
-    modalProductImg.src = images[0];
     modalProductImg.alt = product.title;
     modalProductTitle.textContent = product.title;
     modalProductPrice.textContent = `S/. ${product.price.toFixed(2)}`;
@@ -2905,20 +2956,21 @@ function openProductDetails(id, { syncUrl = true } = {}) {
         modalProductImg.parentNode.insertBefore(thumbsContainer, modalProductImg.nextSibling);
     }
     thumbsContainer.innerHTML = images.map((src, i) => `
-        <img src="${src}" data-idx="${i}" style="width:64px;height:80px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid ${i===0?'var(--accent)':'transparent'};opacity:${i===0?'1':'0.6'};transition:all 0.2s;" class="modal-thumb">
+        <img src="${src}" data-idx="${i}" loading="eager" decoding="async" style="width:64px;height:80px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid ${i===0?'var(--accent)':'transparent'};opacity:${i===0?'1':'0.6'};transition:all 0.2s;" class="modal-thumb">
     `).join('');
     thumbsContainer.querySelectorAll('img').forEach(imageFallback);
     thumbsContainer.querySelectorAll('.modal-thumb').forEach(thumb => {
+        thumb.addEventListener('load', () => {
+            const mainPath = new URL(modalProductImg.currentSrc || modalProductImg.src, location.href).pathname;
+            if (mainPath.endsWith('/assets/logo-transparent.png')) {
+                setModalMainImage(thumb.src, thumb);
+            }
+        }, { once: true });
         thumb.addEventListener('click', () => {
-            modalProductImg.src = thumb.src;
-            thumbsContainer.querySelectorAll('.modal-thumb').forEach(t => {
-                t.style.border = '2px solid transparent';
-                t.style.opacity = '0.6';
-            });
-            thumb.style.border = '2px solid var(--accent)';
-            thumb.style.opacity = '1';
+            setModalMainImage(thumb.src, thumb);
         });
     });
+    setModalMainImage(images[0], thumbsContainer.querySelector('.modal-thumb'));
     
     // Resetear valores de talla y cantidad
     modalQtyInput.value = 1;
