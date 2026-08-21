@@ -60,7 +60,7 @@
     <!-- Lucide Icons (CDN) -->
     <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260813-storefront-fix-v9">
+    <link rel="stylesheet" href="styles.css?v=20260821-customer-account-v10">
 </head>
 <body>
     <div class="page-scroll-progress" id="page-scroll-progress" aria-hidden="true"></div>
@@ -88,10 +88,10 @@
                 <button class="header-search-btn" id="header-search-btn" aria-label="Buscar productos">
                     <i data-lucide="search"></i>
                 </button>
-                <button class="account-btn" id="account-btn" aria-label="Obtener 10% de descuento">
-                    <i data-lucide="mail"></i>
-                    <span id="account-btn-label">10% OFF</span>
-                </button>
+                <a class="account-btn" id="account-btn" href="/cuenta" aria-label="Ingresar a mi cuenta LYNX">
+                    <i data-lucide="user-round"></i>
+                    <span id="account-btn-label">Ingresar</span>
+                </a>
                 <button class="cart-btn" id="open-cart-btn" aria-label="Abrir carrito">
                     <i data-lucide="shopping-bag"></i>
                     <span class="cart-count" id="cart-badge">0</span>
@@ -104,7 +104,7 @@
                 <button class="mobile-nav-link" type="button" data-category="jeans-pants">Jeans & Pants</button>
                 <button class="mobile-nav-link" type="button" data-category="conjuntos">Conjuntos</button>
                 <a class="mobile-nav-link mobile-nav-anchor" href="#lynx-tiktok">Videos</a>
-                <button class="mobile-nav-link mobile-account-link" id="mobile-account-btn" type="button"><i data-lucide="mail"></i><span id="mobile-account-btn-label">Obtener 10% OFF</span></button>
+                <a class="mobile-nav-link mobile-account-link" id="mobile-account-btn" href="/cuenta"><i data-lucide="user-round"></i><span id="mobile-account-btn-label">Ingresar a mi cuenta</span></a>
             </nav>
         </div>
     </header>
@@ -704,7 +704,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="supabase-config.js?v=20260716-admin-v1" defer></script>
     <script src="commerce-tracking.js?v=20260813-cro-v1" defer></script>
-    <script src="app.js?v=20260814-product-page-v14" defer></script>
+    <script src="app.js?v=20260821-customer-account-v15" defer></script>
     <script src="tiktok-videos.js?v=20260813-controls-fix-v3" defer></script>
 </body>
 </html>

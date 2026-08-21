@@ -26,10 +26,14 @@ for (const product of products) {
 }
 
 const home = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+for (const accountFile of ['cuenta.html', 'cuenta.css', 'cuenta.js']) {
+    if (!fs.existsSync(path.join(root, accountFile))) errors.push(`Falta archivo de cuenta: ${accountFile}`);
+}
 for (const required of [
     'id="trending-track"',
     'class="trending-card-image product-detail-link"',
-    'app.js?v=20260814-product-page-v14',
+    'href="/cuenta"',
+    'app.js?v=20260821-customer-account-v15',
     'tiktok-videos.js?v=20260813-controls-fix-v3'
 ]) {
     if (!home.includes(required) && !fs.readFileSync(path.join(root, 'app.js'), 'utf8').includes(required)) {

@@ -29,6 +29,14 @@ body {
 }
 .product-logo { display: inline-flex; align-items: center; }
 .product-logo img { display: block; width: 70px; height: auto; filter: brightness(0) invert(1); }
+.product-header-actions { display: flex; align-items: center; gap: 22px; }
+.account-link {
+    color: var(--violet-dark);
+    text-decoration: none;
+    font: 800 .7rem/1 Outfit, sans-serif;
+    letter-spacing: .1em;
+}
+.account-link:hover { color: var(--ink); }
 .back-link {
     color: var(--ink);
     text-decoration: none;
@@ -124,6 +132,8 @@ body {
 .size-guide-help { display: flex; align-items: center; justify-content: center; min-height: 50px; margin-top: 20px; border-radius: 10px; background: var(--violet); color: #080808; text-decoration: none; font: 800 .72rem Outfit, sans-serif; letter-spacing: .07em; }
 
 @media (max-width: 760px) {
+    .product-header-actions { gap: 13px; }
+    .account-link { font-size: .62rem; }
     .product-header { min-height: 64px; padding: 0 20px; }
     .product-logo img { width: 52px; }
     .back-link { font-size: .62rem; }

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es-PE">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#070707">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/png" href="/assets/favicon-lynx.png?v=20260716-v1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <title>Mi cuenta | LYNX Boutique</title>
+    <link rel="stylesheet" href="/cuenta.css?v=20260821-v1">
+</head>
+<body>
+    <header class="account-header">
+        <a class="account-brand" href="/" aria-label="Ir a LYNX">
+            <img src="/assets/logo-transparent.png" alt="LYNX">
+        </a>
+        <a class="store-return" href="/#catalog"><span>SEGUIR COMPRANDO</span><i data-lucide="arrow-up-right"></i></a>
+    </header>
+
+    <main class="account-main">
+        <section class="auth-shell" id="auth-shell" aria-labelledby="auth-title">
+            <div class="auth-visual" aria-hidden="true">
+                <div class="auth-visual-copy">
+                    <span>LYNX MEMBERS</span>
+                    <strong>TODO TU<br>DROP, EN<br>UN SOLO LUGAR.</strong>
+                    <small>Acceso privado · Sin contraseñas</small>
+                </div>
+                <div class="auth-ring auth-ring-one"></div>
+                <div class="auth-ring auth-ring-two"></div>
+            </div>
+
+            <div class="auth-panel">
+                <div class="auth-view" id="email-view">
+                    <span class="account-kicker">MI CUENTA LYNX</span>
+                    <h1 id="auth-title">INICIA SESIÓN<br><em>O CREA TU CUENTA</em></h1>
+                    <p>Escribe tu correo y te enviaremos un código de acceso. No necesitas recordar una contraseña.</p>
+
+                    <form class="lynx-form" id="login-email-form">
+                        <label>
+                            <span>CORREO ELECTRÓNICO</span>
+                            <input id="login-email" type="email" autocomplete="email" inputmode="email" required placeholder="tu@correo.com">
+                        </label>
+                        <label class="check-row">
+                            <input id="login-marketing" type="checkbox">
+                            <span>Quiero recibir promociones, avisos de nuevo stock y alertas de los live de LYNX.</span>
+                        </label>
+                        <p class="form-message" id="login-message" aria-live="polite"></p>
+                        <button class="primary-action" type="submit">CONTINUAR <i data-lucide="arrow-right"></i></button>
+                    </form>
+
+                    <div class="auth-benefits">
+                        <span><i data-lucide="shield-check"></i> Correo verificado</span>
+                        <span><i data-lucide="zap"></i> Acceso rápido</span>
+                    </div>
+                    <p class="privacy-copy">Al continuar aceptas que LYNX use tu correo para darte acceso a tu cuenta. Las promociones solo se envían si marcas la casilla.</p>
+                </div>
+
+                <div class="auth-view" id="otp-view" hidden>
+                    <button class="text-back" id="change-email-btn" type="button"><i data-lucide="arrow-left"></i> CAMBIAR CORREO</button>
+                    <span class="otp-icon"><i data-lucide="mail-check"></i></span>
+                    <span class="account-kicker">REVISA TU CORREO</span>
+                    <h1>INGRESA TU<br><em>CÓDIGO</em></h1>
+                    <p id="otp-copy">Enviamos un código de acceso a tu correo.</p>
+                    <form class="lynx-form" id="login-otp-form">
+                        <label>
+                            <span>CÓDIGO DE ACCESO</span>
+                            <input class="otp-input" id="login-otp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required placeholder="00000000">
+                        </label>
+                        <p class="form-message" id="otp-message" aria-live="polite"></p>
+                        <button class="primary-action" type="submit">ENTRAR A MI CUENTA <i data-lucide="log-in"></i></button>
+                    </form>
+                    <button class="secondary-action" id="resend-code-btn" type="button">REENVIAR CÓDIGO</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-shell" id="dashboard-shell" hidden aria-labelledby="dashboard-title">
+            <aside class="account-sidebar">
+                <div class="sidebar-identity">
+                    <span class="identity-mark" id="identity-mark">L</span>
+                    <div><small>MI CUENTA</small><strong id="sidebar-name">Cliente LYNX</strong></div>
+                </div>
+                <nav class="account-navigation" aria-label="Secciones de mi cuenta">
+                    <button class="account-nav-link active" type="button" data-panel="overview"><i data-lucide="layout-dashboard"></i> Panel</button>
+                    <button class="account-nav-link" type="button" data-panel="orders"><i data-lucide="package"></i> Mis pedidos</button>
+                    <button class="account-nav-link" type="button" data-panel="profile"><i data-lucide="user-round"></i> Mi información</button>
+                    <button class="account-nav-link" type="button" data-panel="notifications"><i data-lucide="bell"></i> Notificaciones</button>
+                </nav>
+                <button class="logout-button" id="logout-btn" type="button"><i data-lucide="log-out"></i> Cerrar sesión</button>
+            </aside>
+
+            <div class="dashboard-content">
+                <section class="dashboard-panel active" data-account-panel="overview">
+                    <div class="dashboard-heading">
+                        <span class="account-kicker">LYNX MEMBERS</span>
+                        <h1 id="dashboard-title">HOLA, <span id="welcome-name">LYNX</span></h1>
+                        <p>Desde aquí puedes revisar tu acceso, actualizar tus datos y gestionar los avisos que quieres recibir.</p>
+                    </div>
+                    <div class="account-status-grid">
+                        <article class="status-card status-card-dark">
+                            <span>CORREO</span>
+                            <i data-lucide="badge-check"></i>
+                            <strong>Verificado</strong>
+                            <small id="overview-email"></small>
+                        </article>
+                        <article class="status-card">
+                            <span>BENEFICIO DE BIENVENIDA</span>
+                            <i data-lucide="ticket-percent"></i>
+                            <strong>10% OFF</strong>
+                            <small id="discount-status">Enviado a tu correo al verificarlo</small>
+                        </article>
+                        <article class="status-card">
+                            <span>PEDIDOS</span>
+                            <i data-lucide="message-circle"></i>
+                            <strong>Atención personal</strong>
+                            <small>Confirmación y seguimiento por WhatsApp</small>
+                        </article>
+                    </div>
+                    <div class="account-callout">
+                        <div><span>NUEVO DROP</span><h2>Encuentra tu próximo fit.</h2><p>El stock de LYNX es limitado. Revisa las prendas nuevas antes de que se agoten.</p></div>
+                        <a href="/#catalog">VER CATÁLOGO <i data-lucide="arrow-up-right"></i></a>
+                    </div>
+                </section>
+
+                <section class="dashboard-panel" data-account-panel="orders" hidden>
+                    <div class="dashboard-heading"><span class="account-kicker">SEGUIMIENTO</span><h1>MIS PEDIDOS</h1><p>LYNX confirma cada compra personalmente para evitar errores de talla y stock.</p></div>
+                    <div class="empty-orders">
+                        <span><i data-lucide="package-search"></i></span>
+                        <h2>TUS PEDIDOS SE GESTIONAN POR WHATSAPP</h2>
+                        <p>Por ahora, la confirmación, el pago y el seguimiento se realizan directamente con el equipo LYNX. Escríbenos si necesitas revisar un pedido.</p>
+                        <div class="empty-order-actions">
+                            <a class="primary-action" href="https://wa.me/51962210278?text=Hola%20LYNX%2C%20quiero%20consultar%20el%20estado%20de%20mi%20pedido." target="_blank" rel="noopener noreferrer">CONSULTAR PEDIDO <i data-lucide="message-circle"></i></a>
+                            <a class="secondary-action" href="/#catalog">SEGUIR COMPRANDO</a>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="dashboard-panel" data-account-panel="profile" hidden>
+                    <div class="dashboard-heading"><span class="account-kicker">DATOS PERSONALES</span><h1>MI INFORMACIÓN</h1><p>Estos datos ayudan a completar tu pedido más rápido.</p></div>
+                    <form class="profile-form" id="profile-form">
+                        <div class="profile-grid">
+                            <label><span>NOMBRE COMPLETO</span><input id="profile-name" type="text" autocomplete="name" maxlength="80" placeholder="Tu nombre"></label>
+                            <label><span>WHATSAPP</span><input id="profile-phone" type="tel" autocomplete="tel" maxlength="20" placeholder="999 999 999"></label>
+                            <label class="full-field"><span>CORREO VERIFICADO</span><input id="profile-email" type="email" disabled></label>
+                        </div>
+                        <p class="form-message" id="profile-message" aria-live="polite"></p>
+                        <button class="primary-action fit-button" type="submit">GUARDAR CAMBIOS <i data-lucide="check"></i></button>
+                    </form>
+                </section>
+
+                <section class="dashboard-panel" data-account-panel="notifications" hidden>
+                    <div class="dashboard-heading"><span class="account-kicker">PREFERENCIAS</span><h1>NOTIFICACIONES</h1><p>Tú decides qué novedades quieres recibir de LYNX.</p></div>
+                    <form class="notification-form" id="notification-form">
+                        <label class="notification-option">
+                            <span class="notification-icon"><i data-lucide="sparkles"></i></span>
+                            <span class="notification-copy"><strong>DROPS, RESTOCK Y PROMOCIONES</strong><small>Recibe prendas nuevas, regreso de tallas, descuentos y avisos cuando estemos en live.</small></span>
+                            <input id="notification-marketing" type="checkbox" aria-label="Recibir novedades de LYNX">
+                        </label>
+                        <p class="form-message" id="notification-message" aria-live="polite"></p>
+                        <button class="primary-action fit-button" type="submit">GUARDAR PREFERENCIAS <i data-lucide="check"></i></button>
+                    </form>
+                </section>
+            </div>
+        </section>
+    </main>
+
+    <footer class="account-footer"><span>© 2026 LYNX BOUTIQUE PERÚ</span><a href="https://wa.me/51962210278" target="_blank" rel="noopener noreferrer">AYUDA POR WHATSAPP</a></footer>
+
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="/supabase-config.js?v=20260716-admin-v1" defer></script>
+    <script src="/cuenta.js?v=20260821-v1" defer></script>
+</body>
+</html>

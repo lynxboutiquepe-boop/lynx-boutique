@@ -992,9 +992,9 @@ function setCustomerButtonLoading(button, loading, label = 'Procesando...') {
 function updateAccountButton() {
     const isVerified = Boolean(customerUser?.email_confirmed_at);
     accountBtn?.classList.toggle('is-authenticated', isVerified);
-    accountBtn?.setAttribute('aria-label', isVerified ? 'Correo verificado' : 'Obtener 10% de descuento');
-    if (accountBtnLabel) accountBtnLabel.textContent = isVerified ? 'Verificado' : '10% OFF';
-    if (mobileAccountBtnLabel) mobileAccountBtnLabel.textContent = isVerified ? 'Correo verificado' : 'Obtener 10% OFF';
+    accountBtn?.setAttribute('aria-label', isVerified ? 'Abrir mi cuenta LYNX' : 'Ingresar a mi cuenta LYNX');
+    if (accountBtnLabel) accountBtnLabel.textContent = isVerified ? 'Mi cuenta' : 'Ingresar';
+    if (mobileAccountBtnLabel) mobileAccountBtnLabel.textContent = isVerified ? 'Mi cuenta LYNX' : 'Ingresar a mi cuenta';
 }
 
 async function loadCustomerProfile() {
@@ -1289,7 +1289,7 @@ async function loadPublishedReviews() {
 
 function setupReviewEvents() {
     document.getElementById('review-login-btn')?.addEventListener('click', () => {
-        alert('Las reseñas verificadas estarán disponibles nuevamente muy pronto.');
+        window.location.href = '/cuenta?return=%2F%23reviews';
     });
 
     reviewImagesInput?.addEventListener('change', () => {
@@ -2454,11 +2454,7 @@ function setupLegacyCustomerAccountEvents() {
 */
 
 function setupCustomerAccountEvents() {
-    accountBtn?.addEventListener('click', () => openAccountDialog());
-    mobileAccountBtn?.addEventListener('click', () => {
-        setMobileMenuOpen(false);
-        openAccountDialog();
-    });
+    mobileAccountBtn?.addEventListener('click', () => setMobileMenuOpen(false));
     document.getElementById('account-close-btn')?.addEventListener('click', closeAccountDialog);
     accountDialog?.addEventListener('click', event => {
         if (event.target === accountDialog) closeAccountDialog();
