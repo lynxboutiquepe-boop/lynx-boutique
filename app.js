@@ -905,7 +905,9 @@ const builderMannequin = document.querySelector('.builder-mannequin');
 const builderUnderwear = document.getElementById('builder-layer-underwear');
 const builderTotal = document.getElementById('builder-total');
 const builderBuyBtn = document.getElementById('builder-buy-btn');
-const TRENDING_PRODUCT_IDS = [14, 15, 16, 17, 13, 8, 6, 3, 21];
+// Selección del drop más reciente. El orden mezcla categorías para que el
+// carrusel se sienta curado y no como una repetición del catálogo.
+const TRENDING_PRODUCT_IDS = [93, 90, 73, 89, 92, 64, 97, 94, 80];
 const CATALOG_CATEGORY_ORDER = ['hoodies-jackets', 't-shirts', 'jeans-pants', 'conjuntos'];
 const CATALOG_CATEGORY_META = {
     'hoodies-jackets': { label: 'HOODIES & JACKETS', moreLabel: 'HOODIES', navId: 'nav-hoodies' },
@@ -1666,7 +1668,10 @@ function renderProducts() {
     const isCompactHomeCatalog = selectedCategory === 'all' && !searchQuery.trim() && !catalogExpanded;
     const visibleProducts = isCompactHomeCatalog
         ? CATALOG_CATEGORY_ORDER.flatMap(category =>
-            filtered.filter(product => product.category === category).slice(0, HOME_PRODUCTS_PER_CATEGORY)
+            filtered
+                .filter(product => product.category === category)
+                .sort((a, b) => Number(b.id) - Number(a.id))
+                .slice(0, HOME_PRODUCTS_PER_CATEGORY)
         )
         : filtered.slice(0, catalogVisibleLimit);
     const categoryCounts = filtered.reduce((counts, product) => {
@@ -1761,9 +1766,15 @@ function renderTrendingProducts() {
     if (!trendingTrack) return;
     const supportsProductHover = window.innerWidth > 768 && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-    const featuredProducts = TRENDING_PRODUCT_IDS
+    const preferredProducts = TRENDING_PRODUCT_IDS
         .map(id => PRODUCTS.find(product => product.id === id))
         .filter(Boolean);
+    const preferredIds = new Set(preferredProducts.map(product => product.id));
+    const newestFallbackProducts = [...PRODUCTS]
+        .sort((a, b) => Number(b.id) - Number(a.id))
+        .filter(product => !preferredIds.has(product.id));
+    const featuredProducts = [...preferredProducts, ...newestFallbackProducts]
+        .slice(0, TRENDING_PRODUCT_IDS.length);
 
     const renderGroup = isDuplicate => featuredProducts.map((product, productIndex) => `
         <article class="trending-card" ${isDuplicate ? 'aria-hidden="true"' : ''}>
