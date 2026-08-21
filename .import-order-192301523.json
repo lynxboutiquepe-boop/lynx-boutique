@@ -1,0 +1,323 @@
+[
+  {
+    "position": 1,
+    "title": "Harvy Straight Pants - Camouflage",
+    "slug": "harvy-straight-pants-camouflage",
+    "category": "jeans-pants",
+    "sourceCategory": "Mens Pants",
+    "price": 0.0,
+    "sizes": [
+      "36"
+    ],
+    "stock": 1,
+    "images": [
+      "assets/harvy-straight-pants-camouflage/harvy-straight-pants-camouflage-1.webp",
+      "assets/harvy-straight-pants-camouflage/harvy-straight-pants-camouflage-2.webp",
+      "assets/harvy-straight-pants-camouflage/harvy-straight-pants-camouflage-3.webp",
+      "assets/harvy-straight-pants-camouflage/harvy-straight-pants-camouflage-4.webp"
+    ],
+    "sourceUrl": "https://www.fashionnova.com/es-pe/products/harvy-straight-pants-fncolorname-camouflage?variant=39272748580988",
+    "canonicalUrl": "https://www.fashionnova.com/es-pe/products/harvy-straight-pants?variant=39272748580988&color=camouflage"
+  },
+  {
+    "position": 2,
+    "title": "Saint Embroidered Short Sleeve Button Up - Off White",
+    "slug": "saint-embroidered-short-sleeve-button-up-off-white",
+    "category": "t-shirts",
+    "sourceCategory": "Mens Shirts",
+    "price": 0.0,
+    "sizes": [
+      "M"
+    ],
+    "stock": 2,
+    "images": [
+      "assets/saint-embroidered-short-sleeve-button-up-off-white/saint-embroidered-short-sleeve-button-up-off-white-1.webp",
+      "assets/saint-embroidered-short-sleeve-button-up-off-white/saint-embroidered-short-sleeve-button-up-off-white-2.webp",
+      "assets/saint-embroidered-short-sleeve-button-up-off-white/saint-embroidered-short-sleeve-button-up-off-white-3.webp",
+      "assets/saint-embroidered-short-sleeve-button-up-off-white/saint-embroidered-short-sleeve-button-up-off-white-4.webp"
+    ],
+    "sourceUrl": "https://www.fashionnova.com/es-pe/products/saint-embroidered-short-sleeve-button-up-fncolorname-off-white?variant=39285937602684",
+    "canonicalUrl": "https://www.fashionnova.com/es-pe/products/saint-embroidered-short-sleeve-button-up?variant=39285937602684&color=off-white"
+  },
+  {
+    "position": 3,
+    "title": "Oversized Desert Vibe Polo Shirt - Gris",
+    "slug": "oversized-desert-vibe-polo-shirt-grey",
+    "category": "t-shirts",
+    "sourceCategory": "Mens Knit Tops",
+    "price": 0.0,
+    "sizes": [
+      "M"
+    ],
+    "stock": 1,
+    "images": [
+      "assets/oversized-desert-vibe-polo-shirt-grey/oversized-desert-vibe-polo-shirt-grey-1.webp",
+      "assets/oversized-desert-vibe-polo-shirt-grey/oversized-desert-vibe-polo-shirt-grey-2.webp",
+      "assets/oversized-desert-vibe-polo-shirt-grey/oversized-desert-vibe-polo-shirt-grey-3.webp",
+      "assets/oversized-desert-vibe-polo-shirt-grey/oversized-desert-vibe-polo-shirt-grey-4.webp"
+    ],
+    "sourceUrl": "https://www.fashionnova.com/es-pe/products/oversized-desert-vibe-polo-shirt-fncolorname-grey?variant=39305891545212",
+    "canonicalUrl": "https://www.fashionnova.com/es-pe/products/oversized-desert-vibe-polo-shirt?variant=39305891545212&color=grey"
+  },
+  {
+    "position": 4,
+    "title": "Tayson Curated Oversized Hoodie - Black Wash",
+    "slug": "tayson-curated-oversized-hoodie-black-wash",
+    "category": "hoodies-jackets",
+    "sourceCategory": "Mens Fleece Tops",
+    "price": 0.0,
+    "sizes": [
+      "M"
+    ],
+    "stock": 1,
+    "images": [
+      "assets/tayson-curated-oversized-hoodie-black-wash/tayson-curated-oversized-hoodie-black-wash-1.webp",
+      "assets/tayson-curated-oversized-hoodie-black-wash/tayson-curated-oversized-hoodie-black-wash-2.webp",
+      "assets/tayson-curated-oversized-hoodie-black-wash/tayson-curated-oversized-hoodie-black-wash-3.webp",
+      "assets/tayson-curated-oversized-hoodie-black-wash/tayson-curated-oversized-hoodie-black-wash-4.webp"
+    ],
+    "sourceUrl": "https://www.fashionnova.com/es-pe/products/tayson-curated-oversized-hoodie-fncolorname-black-wash?variant=39284054425724",
+    "canonicalUrl": "https://www.fashionnova.com/es-pe/products/tayson-curated-oversized-hoodie?variant=39284054425724&color=black-wash"
+  },
+  {
+    "position": 5,
+    "title": "Ryan Interlock Bomber Jacket - Taupe",
+    "slug": "ryan-interlock-bomber-jacket-taupe",
+    "category": "hoodies-jackets",
+    "sourceCategory": "Mens Fleece Tops",
+    "price": 0.0,
+    "sizes": [
+      "M"
+    ],
+    "stock": 1,
+    "images": [
+      "assets/ryan-interlock-bomber-jacket-taupe/ryan-interlock-bomber-jacket-taupe-1.webp",
+      "assets/ryan-interlock-bomber-jacket-taupe/ryan-interlock-bomber-jacket-taupe-2.webp",
+      "assets/ryan-interlock-bomber-jacket-taupe/ryan-interlock-bomber-jacket-taupe-3.webp",
+      "assets/ryan-interlock-bomber-jacket-taupe/ryan-interlock-bomber-jacket-taupe-4.webp"
+    ],
+    "sourceUrl": "https://www.fashionnova.com/es-pe/products/ryan-interlock-bomber-jacket-fncolorname-taupe?variant=39282802131068",
+    "canonicalUrl": "https://www.fashionnova.com/es-pe/products/ryan-interlock-bomber-jacket?variant=39282802131068&color=taupe"
+  },
+  {
+    "position": 6,
+    "title": "Paneled Utility Bomber Jacket - Taupe",
+    "slug": "paneled-utility-bomber-jacket-taupe",
+    "category": "hoodies-jackets",
+    "sourceCategory": "Mens Casual Jackets",
+    "price": 0.0,
+    "sizes": [
+      "L"
+    ],
+    "stock": 1,
+    "images": [
+      "assets/paneled-utility-bomber-jacket-taupe/paneled-utility-bomber-jacket-taupe-1.webp",
+      "assets/paneled-utility-bomber-jacket-taupe/paneled-utility-bomber-jacket-taupe-2.webp",
+      "assets/paneled-utility-bomber-jacket-taupe/paneled-utility-bomber-jacket-taupe-3.webp",
+      "assets/paneled-utility-bomber-jacket-taupe/paneled-utility-bomber-jacket-taupe-4.webp"
+    ],
+    "sourceUrl": "https://www.fashionnova.com/es-pe/products/paneled-utility-bomber-jacket-fncolorname-taupe?variant=39296142016636",
+    "canonicalUrl": "https://www.fashionnova.com/es-pe/products/paneled-utility-bomber-jacket?variant=39296142016636&color=taupe"
+  },
+  {
+    "position": 7,
+    "title": "Dope Dreams Varsity Jacket - Navy Combo",
+    "slug": "dope-dreams-varsity-jacket-navy-combo",
+    "category": "hoodies-jackets",
+    "sourceCategory": "Mens Jackets",
+    "price": 0.0,
+    "sizes": [
+      "L"
+    ],
+    "stock": 1,
+    "images": [
+      "assets/dope-dreams-varsity-jacket-navy-combo/dope-dreams-varsity-jacket-navy-combo-1.webp",
+      "assets/dope-dreams-varsity-jacket-navy-combo/dope-dreams-varsity-jacket-navy-combo-2.webp",
+      "assets/dope-dreams-varsity-jacket-navy-combo/dope-dreams-varsity-jacket-navy-combo-3.webp",
+      "assets/dope-dreams-varsity-jacket-navy-combo/dope-dreams-varsity-jacket-navy-combo-4.webp"
+    ],
+    "sourceUrl": "https://www.fashionnova.com/es-pe/products/dope-dreams-varsity-jacket-fncolorname-navy-combo?variant=39284427915388",
+    "canonicalUrl": "https://www.fashionnova.com/es-pe/products/dope-dreams-varsity-jacket?variant=39284427915388&color=navy-combo"
+  },
+  {
+    "position": 8,
+    "title": "Lido Isle Crochet Button Up Shirt - Crema",
+    "slug": "lido-isle-crochet-button-up-shirt-cream",
+    "category": "t-shirts",
+    "sourceCategory": "Mens Knit Tops",
+    "price": 0.0,
+    "sizes": [
+      "M"
+    ],
+    "stock": 1,
+    "images": [
+      "assets/lido-isle-crochet-button-up-shirt-cream/lido-isle-crochet-button-up-shirt-cream-1.webp",
+      "assets/lido-isle-crochet-button-up-shirt-cream/lido-isle-crochet-button-up-shirt-cream-2.webp",
+      "assets/lido-isle-crochet-button-up-shirt-cream/lido-isle-crochet-button-up-shirt-cream-3.webp",
+      "assets/lido-isle-crochet-button-up-shirt-cream/lido-isle-crochet-button-up-shirt-cream-4.webp"
+    ],
+    "sourceUrl": "https://www.fashionnova.com/es-pe/products/lido-isle-crochet-button-up-shirt-fncolorname-cream?variant=39302668583036",
+    "canonicalUrl": "https://www.fashionnova.com/es-pe/products/lido-isle-crochet-button-up-shirt?variant=39302668583036&color=cream"
+  },
+  {
+    "position": 9,
+    "title": "Lions Monster Oversized Zip Up Hoodie - Light Blue",
+    "slug": "lions-monster-oversized-zip-up-hoodie-light-blue",
+    "category": "hoodies-jackets",
+    "sourceCategory": "Mens Fleece Tops",
+    "price": 0.0,
+    "sizes": [
+      "M"
+    ],
+    "stock": 1,
+    "images": [
+      "assets/lions-monster-oversized-zip-up-hoodie-light-blue/lions-monster-oversized-zip-up-hoodie-light-blue-1.webp",
+      "assets/lions-monster-oversized-zip-up-hoodie-light-blue/lions-monster-oversized-zip-up-hoodie-light-blue-2.webp",
+      "assets/lions-monster-oversized-zip-up-hoodie-light-blue/lions-monster-oversized-zip-up-hoodie-light-blue-3.webp",
+      "assets/lions-monster-oversized-zip-up-hoodie-light-blue/lions-monster-oversized-zip-up-hoodie-light-blue-4.webp"
+    ],
+    "sourceUrl": "https://www.fashionnova.com/es-pe/products/lions-monster-oversized-zip-up-hoodie-fncolorname-light-blue?variant=39298905407612",
+    "canonicalUrl": "https://www.fashionnova.com/es-pe/products/lions-monster-oversized-zip-up-hoodie?variant=39298905407612&color=light-blue"
+  },
+  {
+    "position": 10,
+    "title": "Stacked Skinny Flare With Camo Hit Jean - Gris",
+    "slug": "stacked-skinny-flare-with-camo-hit-jean-grey",
+    "category": "jeans-pants",
+    "sourceCategory": "Mens Pants",
+    "price": 0.0,
+    "sizes": [
+      "38"
+    ],
+    "stock": 1,
+    "images": [
+      "assets/stacked-skinny-flare-with-camo-hit-jean-grey/stacked-skinny-flare-with-camo-hit-jean-grey-1.webp",
+      "assets/stacked-skinny-flare-with-camo-hit-jean-grey/stacked-skinny-flare-with-camo-hit-jean-grey-2.webp",
+      "assets/stacked-skinny-flare-with-camo-hit-jean-grey/stacked-skinny-flare-with-camo-hit-jean-grey-3.webp",
+      "assets/stacked-skinny-flare-with-camo-hit-jean-grey/stacked-skinny-flare-with-camo-hit-jean-grey-4.webp"
+    ],
+    "sourceUrl": "https://www.fashionnova.com/es-pe/products/stacked-skinny-flare-with-camo-hit-jean-fncolorname-grey?variant=39297929183356",
+    "canonicalUrl": "https://www.fashionnova.com/es-pe/products/stacked-skinny-flare-with-camo-hit-jean?variant=39297929183356&color=grey"
+  },
+  {
+    "position": 11,
+    "title": "Tayson Stars Skinny Flared Sweatpants - Heather Grey",
+    "slug": "tayson-stars-skinny-flared-sweatpants-heather-grey",
+    "category": "jeans-pants",
+    "sourceCategory": "Mens Fleece Bottoms",
+    "price": 0.0,
+    "sizes": [
+      "L"
+    ],
+    "stock": 1,
+    "images": [
+      "assets/tayson-stars-skinny-flared-sweatpants-heather-grey/tayson-stars-skinny-flared-sweatpants-heather-grey-1.webp",
+      "assets/tayson-stars-skinny-flared-sweatpants-heather-grey/tayson-stars-skinny-flared-sweatpants-heather-grey-2.webp",
+      "assets/tayson-stars-skinny-flared-sweatpants-heather-grey/tayson-stars-skinny-flared-sweatpants-heather-grey-3.webp",
+      "assets/tayson-stars-skinny-flared-sweatpants-heather-grey/tayson-stars-skinny-flared-sweatpants-heather-grey-4.webp"
+    ],
+    "sourceUrl": "https://www.fashionnova.com/es-pe/products/tayson-stars-skinny-flared-sweatpants-fncolorname-heather-grey?variant=39276285067388",
+    "canonicalUrl": "https://www.fashionnova.com/es-pe/products/tayson-stars-skinny-flared-sweatpants?variant=39276285067388&color=heather-grey"
+  },
+  {
+    "position": 12,
+    "title": "Tayson Number 3 Skinny Flare Sweatpants - Black Combo",
+    "slug": "tayson-number-3-skinny-flare-sweatpants-black-combo",
+    "category": "jeans-pants",
+    "sourceCategory": "Mens Fleece Bottoms",
+    "price": 0.0,
+    "sizes": [
+      "XL"
+    ],
+    "stock": 1,
+    "images": [
+      "assets/tayson-number-3-skinny-flare-sweatpants-black-combo/tayson-number-3-skinny-flare-sweatpants-black-combo-1.webp",
+      "assets/tayson-number-3-skinny-flare-sweatpants-black-combo/tayson-number-3-skinny-flare-sweatpants-black-combo-2.webp",
+      "assets/tayson-number-3-skinny-flare-sweatpants-black-combo/tayson-number-3-skinny-flare-sweatpants-black-combo-3.webp",
+      "assets/tayson-number-3-skinny-flare-sweatpants-black-combo/tayson-number-3-skinny-flare-sweatpants-black-combo-4.webp"
+    ],
+    "sourceUrl": "https://www.fashionnova.com/es-pe/products/tayson-number-3-skinny-flare-sweatpants-fncolorname-black-combo?variant=39282983993468",
+    "canonicalUrl": "https://www.fashionnova.com/es-pe/products/tayson-number-3-skinny-flare-sweatpants?variant=39282983993468&color=black-combo"
+  },
+  {
+    "position": 13,
+    "title": "Cornell Slim Flare Jeans - Light Wash",
+    "slug": "cornell-slim-flare-jeans-light-wash",
+    "category": "jeans-pants",
+    "sourceCategory": "Mens Jeans",
+    "price": 0.0,
+    "sizes": [
+      "36"
+    ],
+    "stock": 1,
+    "images": [
+      "assets/cornell-slim-flare-jeans-light-wash/cornell-slim-flare-jeans-light-wash-1.webp",
+      "assets/cornell-slim-flare-jeans-light-wash/cornell-slim-flare-jeans-light-wash-2.webp",
+      "assets/cornell-slim-flare-jeans-light-wash/cornell-slim-flare-jeans-light-wash-3.webp",
+      "assets/cornell-slim-flare-jeans-light-wash/cornell-slim-flare-jeans-light-wash-4.webp"
+    ],
+    "sourceUrl": "https://www.fashionnova.com/es-pe/products/cornell-slim-flare-jeans-fncolorname-light-wash?variant=39281950097532",
+    "canonicalUrl": "https://www.fashionnova.com/es-pe/products/cornell-slim-flare-jeans?variant=39281950097532&color=light-wash"
+  },
+  {
+    "position": 14,
+    "title": "Stacked Skinny Flare With Tapestry Hit Jean - Deslavado Vintage",
+    "slug": "stacked-skinny-flare-with-tapestry-hit-jean-vintage-wash",
+    "category": "jeans-pants",
+    "sourceCategory": "Mens Pants",
+    "price": 0.0,
+    "sizes": [
+      "34",
+      "36"
+    ],
+    "stock": 2,
+    "images": [
+      "assets/stacked-skinny-flare-with-tapestry-hit-jean-vintage-wash/stacked-skinny-flare-with-tapestry-hit-jean-vintage-wash-1.webp",
+      "assets/stacked-skinny-flare-with-tapestry-hit-jean-vintage-wash/stacked-skinny-flare-with-tapestry-hit-jean-vintage-wash-2.webp",
+      "assets/stacked-skinny-flare-with-tapestry-hit-jean-vintage-wash/stacked-skinny-flare-with-tapestry-hit-jean-vintage-wash-3.webp",
+      "assets/stacked-skinny-flare-with-tapestry-hit-jean-vintage-wash/stacked-skinny-flare-with-tapestry-hit-jean-vintage-wash-4.webp"
+    ],
+    "sourceUrl": "https://www.fashionnova.com/es-pe/products/stacked-skinny-flare-with-tapestry-hit-jean-fncolorname-vintage-wash?variant=39297927315580",
+    "canonicalUrl": "https://www.fashionnova.com/es-pe/products/stacked-skinny-flare-with-tapestry-hit-jean?variant=39297927315580&color=vintage-wash"
+  },
+  {
+    "position": 15,
+    "title": "Simi Fray Cargo Stacked Skinny Flare Jeans - Negro",
+    "slug": "simi-fray-cargo-stacked-skinny-flare-jeans-black",
+    "category": "jeans-pants",
+    "sourceCategory": "Mens Jeans",
+    "price": 0.0,
+    "sizes": [
+      "38"
+    ],
+    "stock": 1,
+    "images": [
+      "assets/simi-fray-cargo-stacked-skinny-flare-jeans-black/simi-fray-cargo-stacked-skinny-flare-jeans-black-1.webp",
+      "assets/simi-fray-cargo-stacked-skinny-flare-jeans-black/simi-fray-cargo-stacked-skinny-flare-jeans-black-2.webp",
+      "assets/simi-fray-cargo-stacked-skinny-flare-jeans-black/simi-fray-cargo-stacked-skinny-flare-jeans-black-3.webp",
+      "assets/simi-fray-cargo-stacked-skinny-flare-jeans-black/simi-fray-cargo-stacked-skinny-flare-jeans-black-4.webp"
+    ],
+    "sourceUrl": "https://www.fashionnova.com/es-pe/products/simi-fray-cargo-stacked-skinny-flare-jeans-fncolorname-black?variant=39273101852796",
+    "canonicalUrl": "https://www.fashionnova.com/es-pe/products/simi-fray-cargo-stacked-skinny-flare-jeans?variant=39273101852796&color=black"
+  },
+  {
+    "position": 16,
+    "title": "Cornell Slim Flare Jeans - Vintage Blue Wash",
+    "slug": "cornell-slim-flare-jeans-vintage-blue-wash",
+    "category": "jeans-pants",
+    "sourceCategory": "Mens Jeans",
+    "price": 0.0,
+    "sizes": [
+      "36"
+    ],
+    "stock": 1,
+    "images": [
+      "assets/cornell-slim-flare-jeans-vintage-blue-wash/cornell-slim-flare-jeans-vintage-blue-wash-1.webp",
+      "assets/cornell-slim-flare-jeans-vintage-blue-wash/cornell-slim-flare-jeans-vintage-blue-wash-2.webp",
+      "assets/cornell-slim-flare-jeans-vintage-blue-wash/cornell-slim-flare-jeans-vintage-blue-wash-3.webp",
+      "assets/cornell-slim-flare-jeans-vintage-blue-wash/cornell-slim-flare-jeans-vintage-blue-wash-4.webp"
+    ],
+    "sourceUrl": "https://www.fashionnova.com/es-pe/products/cornell-slim-flare-jeans-fncolorname-vintage-blue-wash?variant=39281949507708",
+    "canonicalUrl": "https://www.fashionnova.com/es-pe/products/cornell-slim-flare-jeans?variant=39281949507708&color=vintage-blue-wash"
+  }
+]

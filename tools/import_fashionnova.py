@@ -71,15 +71,17 @@ def find_product_group(page_html: str) -> dict:
     raise RuntimeError("La página no contiene datos ProductGroup")
 
 
-def canonical_slug(final_url: str, product: dict) -> str:
-    product_slug = product.get("productGroupID") or Path(urlparse(final_url).path).name
+def canonical_slug(source_url: str, final_url: str, product: dict) -> str:
+    source_slug = Path(urlparse(source_url).path).name
+    product_slug = source_slug or product.get("productGroupID") or Path(urlparse(final_url).path).name
     base, marker, color = product_slug.partition("-fncolorname-")
     slug = f"{base}-{color}" if marker and color else base
     return re.sub(r"[^a-z0-9]+", "-", slug.lower()).strip("-")
 
 
-def display_title(final_url: str, product: dict) -> str:
-    page_slug = product.get("productGroupID") or Path(urlparse(final_url).path).name
+def display_title(source_url: str, final_url: str, product: dict) -> str:
+    source_slug = Path(urlparse(source_url).path).name
+    page_slug = source_slug or product.get("productGroupID") or Path(urlparse(final_url).path).name
     base, marker, color_slug = page_slug.partition("-fncolorname-")
     title = base.replace("-", " ").title()
     if marker and color_slug:
@@ -101,9 +103,9 @@ def category_for(slug: str, source_category: str) -> str:
 
 
 def parse_size_field(raw_size: str) -> tuple[list[str], int | None]:
-    stock_match = re.search(r"(\d+)\s+unidades?", raw_size, flags=re.IGNORECASE)
+    stock_match = re.search(r"(\d+)\s+unidad(?:es)?", raw_size, flags=re.IGNORECASE)
     stock = int(stock_match.group(1)) if stock_match else None
-    clean = re.sub(r"\s*\d+\s+unidades?.*$", "", raw_size, flags=re.IGNORECASE).strip()
+    clean = re.sub(r"\s*\d+\s+unidad(?:es)?.*$", "", raw_size, flags=re.IGNORECASE).strip()
     clean = clean.replace("(", " ").replace(")", " ")
     sizes = [part.strip() for part in re.split(r"\s*-\s*|\s*/\s*|\s*,\s*", clean) if part.strip()]
     return list(dict.fromkeys(sizes)), stock
@@ -145,8 +147,8 @@ def main() -> None:
     for position, record in enumerate(records, start=1):
         page_bytes, final_url = fetch(record["sourceUrl"])
         product = find_product_group(page_bytes.decode("utf-8", errors="replace"))
-        slug = canonical_slug(final_url, product)
-        title = display_title(final_url, product)
+        slug = canonical_slug(record["sourceUrl"], final_url, product)
+        title = display_title(record["sourceUrl"], final_url, product)
         sizes, stock = parse_size_field(record["sizeField"])
         image_urls = product.get("image") or []
         if isinstance(image_urls, str):

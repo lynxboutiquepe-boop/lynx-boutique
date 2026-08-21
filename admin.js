@@ -703,10 +703,31 @@ async function importCatalog(button) {
         const response = await fetch('catalog-seed.json', { cache: 'no-store' });
         if (!response.ok) throw new Error('No se pudo leer catalog-seed.json');
         const seed = await response.json();
-        const publicSeed = seed.map(({ cost, ...product }) => product);
+        const currentByLegacyId = new Map(
+            state.products.map(product => [String(product.legacy_id), product])
+        );
+        const publicSeed = seed.map(({ cost, ...product }) => {
+            const current = currentByLegacyId.get(String(product.legacy_id));
+            if (!current) return product;
+
+            // El panel es la fuente de verdad del inventario. Al importar una
+            // versión nueva del catálogo actualizamos contenido y fotos, pero
+            // nunca sobrescribimos decisiones operativas hechas por la tienda.
+            return {
+                ...product,
+                slug: current.slug || product.slug,
+                price: current.price,
+                stock: current.stock,
+                sizes: current.sizes,
+                badge: current.badge,
+                status: current.status,
+                sort_order: current.sort_order
+            };
+        });
         const { error } = await supabaseClient.from('products').upsert(publicSeed, { onConflict: 'legacy_id' });
         if (error) throw error;
-        showToast(`${seed.length} productos importados correctamente.`);
+        const newCount = publicSeed.filter(product => !currentByLegacyId.has(String(product.legacy_id))).length;
+        showToast(`${newCount} productos nuevos agregados. El inventario existente se conservó.`);
         await loadAll();
     } catch (error) {
         showToast(error.message, 'error');
