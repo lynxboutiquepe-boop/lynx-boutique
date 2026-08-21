@@ -633,10 +633,20 @@ async function saveProduct(event) {
             fit_recommendation: $('#product-fit').checked
         };
 
-        const query = id
-            ? supabaseClient.from('products').update(payload).eq('id', id)
-            : supabaseClient.from('products').insert({ ...payload, sort_order: state.products.length + 1 });
-        const { error } = await query;
+        const persistProduct = values => id
+            ? supabaseClient.from('products').update(values).eq('id', id)
+            : supabaseClient.from('products').insert({ ...values, sort_order: state.products.length + 1 });
+        let { error } = await persistProduct(payload);
+
+        // Algunas instalaciones antiguas de LYNX todavía no tienen las
+        // columnas técnicas de la ficha extendida. Guardamos igualmente los
+        // datos esenciales para que inventario, tallas y precios nunca fallen.
+        if (error && /schema cache|column/i.test(error.message || '')) {
+            const compatiblePayload = { ...payload };
+            ['color', 'material', 'fit_type', 'weight_grams', 'care_instructions', 'measurements']
+                .forEach(field => delete compatiblePayload[field]);
+            ({ error } = await persistProduct(compatiblePayload));
+        }
         if (error) throw error;
 
         closeProductForm();
