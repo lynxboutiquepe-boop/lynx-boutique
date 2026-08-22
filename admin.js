@@ -32,8 +32,13 @@ function escapeHtml(value = '') {
 
 function safeImageUrl(value) {
     const url = String(value || '').trim();
-    if (/^(https?:\/\/|assets\/|mockups-finales\/|data:image\/)/i.test(url)) return url;
+    if (/^(https?:\/\/|assets\/|mockups(?:-[a-z0-9-]+)?\/|data:image\/)/i.test(url)) return url;
     return 'assets/logo-transparent.png';
+}
+
+function productPreviewImages(product) {
+    const images = Array.isArray(product?.images) ? product.images : [];
+    return window.LynxProductImages?.withMockup(product?.slug, images) || images;
 }
 
 function money(value) {
@@ -335,7 +340,7 @@ function filteredProducts() {
 function renderProducts() {
     const products = filteredProducts();
     const rows = products.map(product => {
-        const image = safeImageUrl(product.images?.[0]);
+        const image = safeImageUrl(productPreviewImages(product)[0]);
         return `
             <tr>
                 <td><div class="product-cell"><img src="${escapeHtml(image)}" alt=""><div><strong>${escapeHtml(product.title)}</strong><span>${escapeHtml(product.category)}</span></div></div></td>
@@ -350,7 +355,7 @@ function renderProducts() {
     $('#products-tbody').innerHTML = rows || '<tr><td class="empty-state" colspan="6">No se encontraron productos.</td></tr>';
     $('#mobile-product-list').innerHTML = products.length ? products.map(product => `
         <article class="mobile-product-card">
-            <div class="mobile-product-head"><img src="${escapeHtml(safeImageUrl(product.images?.[0]))}" alt=""><div class="mobile-product-copy"><strong>${escapeHtml(product.title)}</strong><span>${money(product.price)} · Stock ${product.stock}</span><span>${escapeHtml((product.sizes || []).join(', ') || 'Sin tallas')}</span></div></div>
+            <div class="mobile-product-head"><img src="${escapeHtml(safeImageUrl(productPreviewImages(product)[0]))}" alt=""><div class="mobile-product-copy"><strong>${escapeHtml(product.title)}</strong><span>${money(product.price)} · Stock ${product.stock}</span><span>${escapeHtml((product.sizes || []).join(', ') || 'Sin tallas')}</span></div></div>
             <div class="mobile-product-actions"><select class="status-select product-status-control" data-id="${product.id}">${productStatusOptions(product.status)}</select><button class="row-action edit-product" data-id="${product.id}" aria-label="Editar"><i data-lucide="pencil"></i></button><button class="row-action delete delete-product" data-id="${product.id}" aria-label="Eliminar"><i data-lucide="trash-2"></i></button></div>
         </article>
     `).join('') : '<p class="empty-state">No se encontraron productos.</p>';
@@ -375,14 +380,14 @@ function renderSaleProductResults(query = '') {
         .filter(product => !normalized || saleProductHaystack(product).includes(normalized)).slice(0, 8);
     $('#sale-product-results').innerHTML = products.length ? products.map(product => `
         <button class="sale-product-option" type="button" role="option" data-id="${product.id}">
-            <img src="${escapeHtml(safeImageUrl(product.images?.[0]))}" alt=""><span><strong>${escapeHtml(product.title)}</strong><small>${escapeHtml(product.color || product.category)} · ${money(product.price)} · Stock ${product.stock}</small></span>
+            <img src="${escapeHtml(safeImageUrl(productPreviewImages(product)[0]))}" alt=""><span><strong>${escapeHtml(product.title)}</strong><small>${escapeHtml(product.color || product.category)} · ${money(product.price)} · Stock ${product.stock}</small></span>
         </button>`).join('') : '<p class="sale-product-no-results">No encontramos prendas con esa búsqueda.</p>';
 }
 
 function renderSaleProductPreview(product) {
     const meta = STATUS_META[product.status] || STATUS_META.available;
     $('#sale-product-preview').innerHTML = `
-        <img src="${escapeHtml(safeImageUrl(product.images?.[0]))}" alt="Previsualización de ${escapeHtml(product.title)}">
+        <img src="${escapeHtml(safeImageUrl(productPreviewImages(product)[0]))}" alt="Previsualización de ${escapeHtml(product.title)}">
         <div><span class="sale-preview-kicker">PRENDA SELECCIONADA</span><strong>${escapeHtml(product.title)}</strong><p>${escapeHtml(product.color || 'Sin color')} · ${escapeHtml((product.sizes || []).join(', ') || 'Sin tallas')}</p><div class="sale-preview-meta"><b>${money(product.price)}</b><span>${product.stock} ${Number(product.stock) === 1 ? 'unidad' : 'unidades'}</span><span>${escapeHtml(meta.label)}</span></div></div>
         <button class="sale-product-clear" type="button" aria-label="Quitar selección"><i data-lucide="x"></i></button>`;
     lucide.createIcons();
@@ -521,7 +526,7 @@ function openProductForm(product = null) {
     $('#product-care').value = product?.care_instructions || '';
     $('#product-measurements').value = formatMeasurementsForForm(product?.measurements);
     $('#product-description').value = product?.description || '';
-    $('#product-images').value = (product?.images || []).join('\n');
+    $('#product-images').value = productPreviewImages(product).join('\n');
     $('#product-fit').checked = product?.fit_recommendation !== false;
     $('#product-form-message').textContent = '';
     $('#product-dialog').showModal();

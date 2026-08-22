@@ -169,7 +169,9 @@ function persuasiveBenefit(product, fit) {
 
 function renderProduct(product) {
     currentProduct = product;
-    const images = Array.isArray(product.images) && product.images.length ? product.images.filter(Boolean) : ['/assets/logo-transparent.png'];
+    const sourceImages = Array.isArray(product.images) && product.images.length ? product.images.filter(Boolean) : [];
+    const images = window.LynxProductImages?.withMockup(product.slug, sourceImages) || sourceImages;
+    if (!images.length) images.push('/assets/logo-transparent.png');
     const sizes = Array.isArray(product.sizes) && product.sizes.length ? product.sizes : ['ÚNICA'];
     const status = statusCopy(product);
     selectedSize = sizes[0];

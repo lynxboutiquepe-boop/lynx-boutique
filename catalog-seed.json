@@ -1608,10 +1608,21 @@
     "price": 109,
     "cost": 48.3,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/zdf01v430050/zdf01v430050-1.webp", "assets/zdf01v430050/zdf01v430050-2.webp", "assets/zdf01v430050/zdf01v430050-3.webp", "assets/zdf01v430050/zdf01v430050-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/cassiel-tapestry-cropped-button-up-shirt-multi-color-mockup.webp",
+      "assets/zdf01v430050/zdf01v430050-1.webp",
+      "assets/zdf01v430050/zdf01v430050-2.webp",
+      "assets/zdf01v430050/zdf01v430050-3.webp",
+      "assets/zdf01v430050/zdf01v430050-4.webp"
+    ],
     "description": "Camisa cropped multicolor con tejido tipo tapestry y cierre de botones. Una pieza protagonista para elevar un look streetwear. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 64
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 64
   },
   {
     "legacy_id": 65,
@@ -1621,10 +1632,21 @@
     "price": 109,
     "cost": 38.5,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/d2606y4253/d2606y4253-1.webp", "assets/d2606y4253/d2606y4253-2.webp", "assets/d2606y4253/d2606y4253-3.webp", "assets/d2606y4253/d2606y4253-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/paisley-flock-hoodie-black-mockup.webp",
+      "assets/d2606y4253/d2606y4253-1.webp",
+      "assets/d2606y4253/d2606y4253-2.webp",
+      "assets/d2606y4253/d2606y4253-3.webp",
+      "assets/d2606y4253/d2606y4253-4.webp"
+    ],
     "description": "Hoodie negro con gráfico paisley de acabado flock y fit relajado. Textura premium para destacar sin perder comodidad. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 65
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 65
   },
   {
     "legacy_id": 66,
@@ -1634,10 +1656,21 @@
     "price": 109,
     "cost": 24.5,
     "stock": 2,
-    "sizes": ["L"],
-    "images": ["assets/zdf01v330017/zdf01v330017-1.webp", "assets/zdf01v330017/zdf01v330017-2.webp", "assets/zdf01v330017/zdf01v330017-3.webp", "assets/zdf01v330017/zdf01v330017-4.webp"],
+    "sizes": [
+      "L"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/cropped-high-stepper-faux-leather-button-up-shirt-dark-grey-mockup.webp",
+      "assets/zdf01v330017/zdf01v330017-1.webp",
+      "assets/zdf01v330017/zdf01v330017-2.webp",
+      "assets/zdf01v330017/zdf01v330017-3.webp",
+      "assets/zdf01v330017/zdf01v330017-4.webp"
+    ],
     "description": "Camisa cropped gris oscuro de cuero sintético, con botones frontales y estructura limpia. Stock: 2 unidades en talla L.",
-    "badge": "TALLA L", "status": "low_stock", "fit_recommendation": true, "sort_order": 66
+    "badge": "TALLA L",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 66
   },
   {
     "legacy_id": 67,
@@ -1647,10 +1680,21 @@
     "price": 109,
     "cost": 21.7,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/gumi789fllfs/gumi789fllfs-1.webp", "assets/gumi789fllfs/gumi789fllfs-2.webp", "assets/gumi789fllfs/gumi789fllfs-3.webp", "assets/gumi789fllfs/gumi789fllfs-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/lakers-loud-crewneck-sweatshirt-purple-mockup.webp",
+      "assets/gumi789fllfs/gumi789fllfs-1.webp",
+      "assets/gumi789fllfs/gumi789fllfs-2.webp",
+      "assets/gumi789fllfs/gumi789fllfs-3.webp",
+      "assets/gumi789fllfs/gumi789fllfs-4.webp"
+    ],
     "description": "Sweatshirt morado Lakers de cuello redondo, gráficos llamativos y fit cómodo para un look deportivo urbano. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 67
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 67
   },
   {
     "legacy_id": 68,
@@ -1660,10 +1704,21 @@
     "price": 109,
     "cost": 24.5,
     "stock": 2,
-    "sizes": ["M"],
-    "images": ["assets/p525mkt1201/p525mkt1201-1.webp", "assets/p525mkt1201/p525mkt1201-2.webp", "assets/p525mkt1201/p525mkt1201-3.webp", "assets/p525mkt1201/p525mkt1201-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/relaxed-sunset-fever-faux-leather-polo-black-mockup.webp",
+      "assets/p525mkt1201/p525mkt1201-1.webp",
+      "assets/p525mkt1201/p525mkt1201-2.webp",
+      "assets/p525mkt1201/p525mkt1201-3.webp",
+      "assets/p525mkt1201/p525mkt1201-4.webp"
+    ],
     "description": "Polo negro relajado de cuero sintético con acabado suave y silueta moderna. Stock: 2 unidades en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 68
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 68
   },
   {
     "legacy_id": 69,
@@ -1673,10 +1728,21 @@
     "price": 179.9,
     "cost": 31.5,
     "stock": 1,
-    "sizes": ["36"],
-    "images": ["assets/fnmdd54065/fnmdd54065-1.webp", "assets/fnmdd54065/fnmdd54065-2.webp", "assets/fnmdd54065/fnmdd54065-3.webp", "assets/fnmdd54065/fnmdd54065-4.webp"],
+    "sizes": [
+      "36"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/stacked-skinny-flare-frayed-along-panel-jean-black-wash-mockup.webp",
+      "assets/fnmdd54065/fnmdd54065-1.webp",
+      "assets/fnmdd54065/fnmdd54065-2.webp",
+      "assets/fnmdd54065/fnmdd54065-3.webp",
+      "assets/fnmdd54065/fnmdd54065-4.webp"
+    ],
     "description": "Jean negro deslavado con corte skinny apilado, pierna flare y paneles deshilachados. Disponible en talla 36.",
-    "badge": "TALLA 36", "status": "low_stock", "fit_recommendation": true, "sort_order": 69
+    "badge": "TALLA 36",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 69
   },
   {
     "legacy_id": 70,
@@ -1686,10 +1752,21 @@
     "price": 109,
     "cost": 38.5,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/rr5039/rr5039-1.webp", "assets/rr5039/rr5039-2.webp", "assets/rr5039/rr5039-3.webp", "assets/rr5039/rr5039-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/rebellion-cross-applique-zip-up-hoodie-light-blue-mockup.webp",
+      "assets/rr5039/rr5039-1.webp",
+      "assets/rr5039/rr5039-2.webp",
+      "assets/rr5039/rr5039-3.webp",
+      "assets/rr5039/rr5039-4.webp"
+    ],
     "description": "Hoodie celeste con cierre completo y aplicaciones de cruces Rebellion. Fit urbano y detalles de alto impacto. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 70
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 70
   },
   {
     "legacy_id": 71,
@@ -1699,10 +1776,21 @@
     "price": 109,
     "cost": 36.4,
     "stock": 1,
-    "sizes": ["36"],
-    "images": ["assets/zdf01h410012/zdf01h410012-1.webp", "assets/zdf01h410012/zdf01h410012-2.webp", "assets/zdf01h410012/zdf01h410012-3.webp", "assets/zdf01h410012/zdf01h410012-4.webp"],
+    "sizes": [
+      "36"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/rush-home-denim-cargo-shorts-light-blue-wash-mockup.webp",
+      "assets/zdf01h410012/zdf01h410012-1.webp",
+      "assets/zdf01h410012/zdf01h410012-2.webp",
+      "assets/zdf01h410012/zdf01h410012-3.webp",
+      "assets/zdf01h410012/zdf01h410012-4.webp"
+    ],
     "description": "Short cargo de denim azul claro con bolsillos utilitarios y lavado vintage. Disponible en talla 36.",
-    "badge": "TALLA 36", "status": "low_stock", "fit_recommendation": true, "sort_order": 71
+    "badge": "TALLA 36",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 71
   },
   {
     "legacy_id": 72,
@@ -1712,10 +1800,21 @@
     "price": 109,
     "cost": 28,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/zdf01f440034/zdf01f440034-1.webp", "assets/zdf01f440034/zdf01f440034-2.webp", "assets/zdf01f440034/zdf01f440034-3.webp", "assets/zdf01f440034/zdf01f440034-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/tyson-chaos-oversized-zip-hoodie-black-mockup.webp",
+      "assets/zdf01f440034/zdf01f440034-1.webp",
+      "assets/zdf01f440034/zdf01f440034-2.webp",
+      "assets/zdf01f440034/zdf01f440034-3.webp",
+      "assets/zdf01f440034/zdf01f440034-4.webp"
+    ],
     "description": "Hoodie negro Tyson Chaos con cierre completo, gráficos intensos y silueta oversized. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 72
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 72
   },
   {
     "legacy_id": 73,
@@ -1725,10 +1824,21 @@
     "price": 139.9,
     "cost": 58.1,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/buy1910ja/buy1910ja-1.webp", "assets/buy1910ja/buy1910ja-2.webp", "assets/buy1910ja/buy1910ja-3.webp", "assets/buy1910ja/buy1910ja-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/pablo-picasso-colorblock-varsity-jacket-pink-combo-mockup.webp",
+      "assets/buy1910ja/buy1910ja-1.webp",
+      "assets/buy1910ja/buy1910ja-2.webp",
+      "assets/buy1910ja/buy1910ja-3.webp",
+      "assets/buy1910ja/buy1910ja-4.webp"
+    ],
     "description": "Chaqueta varsity colorblock rosa con arte inspirado en Pablo Picasso y acabado statement. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 73
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 73
   },
   {
     "legacy_id": 74,
@@ -1738,10 +1848,21 @@
     "price": 139.9,
     "cost": 29.4,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/b7915001fm/b7915001fm-1.webp", "assets/b7915001fm/b7915001fm-2.webp", "assets/b7915001fm/b7915001fm-3.webp", "assets/b7915001fm/b7915001fm-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/city-of-dreams-all-over-printed-bomber-jacket-black-white-mockup.webp",
+      "assets/b7915001fm/b7915001fm-1.webp",
+      "assets/b7915001fm/b7915001fm-2.webp",
+      "assets/b7915001fm/b7915001fm-3.webp",
+      "assets/b7915001fm/b7915001fm-4.webp"
+    ],
     "description": "Bomber negra y blanca con estampado City Of Dreams en toda la prenda y fit urbano. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 74
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 74
   },
   {
     "legacy_id": 75,
@@ -1751,10 +1872,21 @@
     "price": 139.9,
     "cost": 38.5,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/fnmtf61003/fnmtf61003-1.webp", "assets/fnmtf61003/fnmtf61003-2.webp", "assets/fnmtf61003/fnmtf61003-3.webp", "assets/fnmtf61003/fnmtf61003-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/embroidery-fleur-oversized-cropped-fleece-jacket-cream-mockup.webp",
+      "assets/fnmtf61003/fnmtf61003-1.webp",
+      "assets/fnmtf61003/fnmtf61003-2.webp",
+      "assets/fnmtf61003/fnmtf61003-3.webp",
+      "assets/fnmtf61003/fnmtf61003-4.webp"
+    ],
     "description": "Chaqueta fleece crema con bordado floral, volumen oversized y corte cropped. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 75
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 75
   },
   {
     "legacy_id": 76,
@@ -1764,10 +1896,21 @@
     "price": 139.9,
     "cost": 67.2,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/fnmn365/fnmn365-1.webp", "assets/fnmn365/fnmn365-2.webp", "assets/fnmn365/fnmn365-3.webp", "assets/fnmn365/fnmn365-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/la-patchwork-varsity-jacket-royal-combo-mockup.webp",
+      "assets/fnmn365/fnmn365-1.webp",
+      "assets/fnmn365/fnmn365-2.webp",
+      "assets/fnmn365/fnmn365-3.webp",
+      "assets/fnmn365/fnmn365-4.webp"
+    ],
     "description": "Chaqueta varsity azul royal con construcción patchwork y aplicaciones LA. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 76
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 76
   },
   {
     "legacy_id": 77,
@@ -1777,10 +1920,21 @@
     "price": 139.9,
     "cost": 31.5,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/fnmkc54096/fnmkc54096-1.webp", "assets/fnmkc54096/fnmkc54096-2.webp", "assets/fnmkc54096/fnmkc54096-3.webp", "assets/fnmkc54096/fnmkc54096-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/in-bloom-printed-bomber-jacket-black-mockup.webp",
+      "assets/fnmkc54096/fnmkc54096-1.webp",
+      "assets/fnmkc54096/fnmkc54096-2.webp",
+      "assets/fnmkc54096/fnmkc54096-3.webp",
+      "assets/fnmkc54096/fnmkc54096-4.webp"
+    ],
     "description": "Bomber negra con estampado floral In Bloom y silueta relajada para combinar con denim. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 77
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 77
   },
   {
     "legacy_id": 78,
@@ -1790,10 +1944,21 @@
     "price": 139.9,
     "cost": 48.3,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/zdf01c440079/zdf01c440079-1.webp", "assets/zdf01c440079/zdf01c440079-2.webp", "assets/zdf01c440079/zdf01c440079-3.webp", "assets/zdf01c440079/zdf01c440079-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/ditson-tapestry-varsity-jacket-red-combo-mockup.webp",
+      "assets/zdf01c440079/zdf01c440079-1.webp",
+      "assets/zdf01c440079/zdf01c440079-2.webp",
+      "assets/zdf01c440079/zdf01c440079-3.webp",
+      "assets/zdf01c440079/zdf01c440079-4.webp"
+    ],
     "description": "Chaqueta varsity roja combinada con paneles tipo tapestry y acabados premium. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 78
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 78
   },
   {
     "legacy_id": 79,
@@ -1803,10 +1968,21 @@
     "price": 139.9,
     "cost": 43.4,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/zdf01c330046/zdf01c330046-1.webp", "assets/zdf01c330046/zdf01c330046-2.webp", "assets/zdf01c330046/zdf01c330046-3.webp", "assets/zdf01c330046/zdf01c330046-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/kings-canyon-padded-trucker-jacket-multi-color-mockup.webp",
+      "assets/zdf01c330046/zdf01c330046-1.webp",
+      "assets/zdf01c330046/zdf01c330046-2.webp",
+      "assets/zdf01c330046/zdf01c330046-3.webp",
+      "assets/zdf01c330046/zdf01c330046-4.webp"
+    ],
     "description": "Chaqueta trucker acolchada multicolor Kings Canyon, diseñada para destacar y abrigar. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 79
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 79
   },
   {
     "legacy_id": 80,
@@ -1816,10 +1992,21 @@
     "price": 179.9,
     "cost": 84.7,
     "stock": 1,
-    "sizes": ["36"],
-    "images": ["assets/gl453/gl453-1.webp", "assets/gl453/gl453-2.webp", "assets/gl453/gl453-3.webp", "assets/gl453/gl453-4.webp"],
+    "sizes": [
+      "36"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/lets-go-fray-cargo-skinny-flare-jeans-light-wash-mockup.webp",
+      "assets/gl453/gl453-1.webp",
+      "assets/gl453/gl453-2.webp",
+      "assets/gl453/gl453-3.webp",
+      "assets/gl453/gl453-4.webp"
+    ],
     "description": "Jean cargo de lavado claro con corte skinny apilado, pierna flare y detalles frayed. Disponible en talla 36.",
-    "badge": "TALLA 36", "status": "low_stock", "fit_recommendation": true, "sort_order": 80
+    "badge": "TALLA 36",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 80
   },
   {
     "legacy_id": 81,
@@ -1829,10 +2016,21 @@
     "price": 179.9,
     "cost": 84.7,
     "stock": 1,
-    "sizes": ["36"],
-    "images": ["assets/fnmk302/fnmk302-1.webp", "assets/fnmk302/fnmk302-2.webp", "assets/fnmk302/fnmk302-3.webp", "assets/fnmk302/fnmk302-4.webp"],
+    "sizes": [
+      "36"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/zip-it-faux-leather-slim-cargo-pants-black-mockup.webp",
+      "assets/fnmk302/fnmk302-1.webp",
+      "assets/fnmk302/fnmk302-2.webp",
+      "assets/fnmk302/fnmk302-3.webp",
+      "assets/fnmk302/fnmk302-4.webp"
+    ],
     "description": "Pantalón cargo negro de cuero sintético con corte slim y detalles de cierres. Disponible en talla 36.",
-    "badge": "TALLA 36", "status": "low_stock", "fit_recommendation": true, "sort_order": 81
+    "badge": "TALLA 36",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 81
   },
   {
     "legacy_id": 82,
@@ -1842,10 +2040,21 @@
     "price": 179.9,
     "cost": 84.7,
     "stock": 1,
-    "sizes": ["36"],
-    "images": ["assets/bg25/bg25-1.webp", "assets/bg25/bg25-2.webp", "assets/bg25/bg25-3.webp", "assets/bg25/bg25-4.webp"],
+    "sizes": [
+      "36"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/fray-all-ways-stacked-skinny-flare-jeans-light-blue-mockup.webp",
+      "assets/bg25/bg25-1.webp",
+      "assets/bg25/bg25-2.webp",
+      "assets/bg25/bg25-3.webp",
+      "assets/bg25/bg25-4.webp"
+    ],
     "description": "Jean celeste con corte skinny apilado, pierna flare y acabados deshilachados Fray All Ways. Disponible en talla 36.",
-    "badge": "TALLA 36", "status": "low_stock", "fit_recommendation": true, "sort_order": 82
+    "badge": "TALLA 36",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 82
   },
   {
     "legacy_id": 83,
@@ -1855,10 +2064,21 @@
     "price": 179.9,
     "cost": 72.1,
     "stock": 1,
-    "sizes": ["36"],
-    "images": ["assets/bg6/bg6-1.webp", "assets/bg6/bg6-2.webp", "assets/bg6/bg6-3.webp", "assets/bg6/bg6-4.webp"],
+    "sizes": [
+      "36"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/ruthless-embroidered-stacked-skinny-cargo-flare-jeans-medium-wash-mockup.webp",
+      "assets/bg6/bg6-1.webp",
+      "assets/bg6/bg6-2.webp",
+      "assets/bg6/bg6-3.webp",
+      "assets/bg6/bg6-4.webp"
+    ],
     "description": "Jean cargo de lavado medio con bordados Ruthless, corte skinny apilado y pierna flare. Disponible en talla 36.",
-    "badge": "TALLA 36", "status": "low_stock", "fit_recommendation": true, "sort_order": 83
+    "badge": "TALLA 36",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 83
   },
   {
     "legacy_id": 84,
@@ -1868,10 +2088,21 @@
     "price": 179.9,
     "cost": 67.9,
     "stock": 1,
-    "sizes": ["34"],
-    "images": ["assets/zdf01d440006/zdf01d440006-1.webp", "assets/zdf01d440006/zdf01d440006-2.webp", "assets/zdf01d440006/zdf01d440006-3.webp", "assets/zdf01d440006/zdf01d440006-4.webp"],
+    "sizes": [
+      "34"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/kaine-stacked-slim-flare-jeans-black-wash-mockup.webp",
+      "assets/zdf01d440006/zdf01d440006-1.webp",
+      "assets/zdf01d440006/zdf01d440006-2.webp",
+      "assets/zdf01d440006/zdf01d440006-3.webp",
+      "assets/zdf01d440006/zdf01d440006-4.webp"
+    ],
     "description": "Jean negro deslavado Kaine con fit slim apilado y pierna flare. Disponible en talla 34.",
-    "badge": "TALLA 34", "status": "low_stock", "fit_recommendation": true, "sort_order": 84
+    "badge": "TALLA 34",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 84
   },
   {
     "legacy_id": 85,
@@ -1881,10 +2112,21 @@
     "price": 179.9,
     "cost": 43.4,
     "stock": 1,
-    "sizes": ["36"],
-    "images": ["assets/fnmdd61056/fnmdd61056-1.webp", "assets/fnmdd61056/fnmdd61056-2.webp", "assets/fnmdd61056/fnmdd61056-3.webp", "assets/fnmdd61056/fnmdd61056-4.webp"],
+    "sizes": [
+      "36"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/stacked-skinny-flare-jeweled-sky-rays-jean-light-blue-wash-mockup.webp",
+      "assets/fnmdd61056/fnmdd61056-1.webp",
+      "assets/fnmdd61056/fnmdd61056-2.webp",
+      "assets/fnmdd61056/fnmdd61056-3.webp",
+      "assets/fnmdd61056/fnmdd61056-4.webp"
+    ],
     "description": "Jean azul claro con corte skinny apilado, pierna flare y aplicaciones brillantes Sky Rays. Disponible en talla 36.",
-    "badge": "TALLA 36", "status": "low_stock", "fit_recommendation": true, "sort_order": 85
+    "badge": "TALLA 36",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 85
   },
   {
     "legacy_id": 86,
@@ -1894,10 +2136,21 @@
     "price": 179.9,
     "cost": 60.2,
     "stock": 1,
-    "sizes": ["36"],
-    "images": ["assets/harvy-straight-pants-camouflage/harvy-straight-pants-camouflage-1.webp", "assets/harvy-straight-pants-camouflage/harvy-straight-pants-camouflage-2.webp", "assets/harvy-straight-pants-camouflage/harvy-straight-pants-camouflage-3.webp", "assets/harvy-straight-pants-camouflage/harvy-straight-pants-camouflage-4.webp"],
+    "sizes": [
+      "36"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/harvy-straight-pants-camouflage-mockup.webp",
+      "assets/harvy-straight-pants-camouflage/harvy-straight-pants-camouflage-1.webp",
+      "assets/harvy-straight-pants-camouflage/harvy-straight-pants-camouflage-2.webp",
+      "assets/harvy-straight-pants-camouflage/harvy-straight-pants-camouflage-3.webp",
+      "assets/harvy-straight-pants-camouflage/harvy-straight-pants-camouflage-4.webp"
+    ],
     "description": "Pantalón recto Harvy con estampado camuflado y fit relajado para un look urbano. Disponible en talla 36.",
-    "badge": "TALLA 36", "status": "low_stock", "fit_recommendation": true, "sort_order": 86
+    "badge": "TALLA 36",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 86
   },
   {
     "legacy_id": 87,
@@ -1907,10 +2160,21 @@
     "price": 109,
     "cost": 58.8,
     "stock": 2,
-    "sizes": ["M"],
-    "images": ["assets/saint-embroidered-short-sleeve-button-up-off-white/saint-embroidered-short-sleeve-button-up-off-white-1.webp", "assets/saint-embroidered-short-sleeve-button-up-off-white/saint-embroidered-short-sleeve-button-up-off-white-2.webp", "assets/saint-embroidered-short-sleeve-button-up-off-white/saint-embroidered-short-sleeve-button-up-off-white-3.webp", "assets/saint-embroidered-short-sleeve-button-up-off-white/saint-embroidered-short-sleeve-button-up-off-white-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/saint-embroidered-short-sleeve-button-up-off-white-mockup.webp",
+      "assets/saint-embroidered-short-sleeve-button-up-off-white/saint-embroidered-short-sleeve-button-up-off-white-1.webp",
+      "assets/saint-embroidered-short-sleeve-button-up-off-white/saint-embroidered-short-sleeve-button-up-off-white-2.webp",
+      "assets/saint-embroidered-short-sleeve-button-up-off-white/saint-embroidered-short-sleeve-button-up-off-white-3.webp",
+      "assets/saint-embroidered-short-sleeve-button-up-off-white/saint-embroidered-short-sleeve-button-up-off-white-4.webp"
+    ],
     "description": "Camisa de manga corta en blanco hueso con bordado Saint y cierre frontal de botones. Stock: 2 unidades en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 87
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 87
   },
   {
     "legacy_id": 88,
@@ -1920,10 +2184,21 @@
     "price": 109,
     "cost": 26.6,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/oversized-desert-vibe-polo-shirt-grey/oversized-desert-vibe-polo-shirt-grey-1.webp", "assets/oversized-desert-vibe-polo-shirt-grey/oversized-desert-vibe-polo-shirt-grey-2.webp", "assets/oversized-desert-vibe-polo-shirt-grey/oversized-desert-vibe-polo-shirt-grey-3.webp", "assets/oversized-desert-vibe-polo-shirt-grey/oversized-desert-vibe-polo-shirt-grey-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/oversized-desert-vibe-polo-shirt-grey-mockup.webp",
+      "assets/oversized-desert-vibe-polo-shirt-grey/oversized-desert-vibe-polo-shirt-grey-1.webp",
+      "assets/oversized-desert-vibe-polo-shirt-grey/oversized-desert-vibe-polo-shirt-grey-2.webp",
+      "assets/oversized-desert-vibe-polo-shirt-grey/oversized-desert-vibe-polo-shirt-grey-3.webp",
+      "assets/oversized-desert-vibe-polo-shirt-grey/oversized-desert-vibe-polo-shirt-grey-4.webp"
+    ],
     "description": "Polo gris Desert Vibe con silueta oversized y textura visual para un outfit relajado. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 88
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 88
   },
   {
     "legacy_id": 89,
@@ -1933,10 +2208,21 @@
     "price": 109,
     "cost": 24.5,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/tayson-curated-oversized-hoodie-black-wash/tayson-curated-oversized-hoodie-black-wash-1.webp", "assets/tayson-curated-oversized-hoodie-black-wash/tayson-curated-oversized-hoodie-black-wash-2.webp", "assets/tayson-curated-oversized-hoodie-black-wash/tayson-curated-oversized-hoodie-black-wash-3.webp", "assets/tayson-curated-oversized-hoodie-black-wash/tayson-curated-oversized-hoodie-black-wash-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/tyson-curated-oversized-hoodie-black-wash-mockup.webp",
+      "assets/tayson-curated-oversized-hoodie-black-wash/tayson-curated-oversized-hoodie-black-wash-1.webp",
+      "assets/tayson-curated-oversized-hoodie-black-wash/tayson-curated-oversized-hoodie-black-wash-2.webp",
+      "assets/tayson-curated-oversized-hoodie-black-wash/tayson-curated-oversized-hoodie-black-wash-3.webp",
+      "assets/tayson-curated-oversized-hoodie-black-wash/tayson-curated-oversized-hoodie-black-wash-4.webp"
+    ],
     "description": "Hoodie Tyson negro deslavado con selección de gráficos Curated y fit oversized. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 89
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 89
   },
   {
     "legacy_id": 90,
@@ -1946,10 +2232,21 @@
     "price": 139.9,
     "cost": 26.6,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/ryan-interlock-bomber-jacket-taupe/ryan-interlock-bomber-jacket-taupe-1.webp", "assets/ryan-interlock-bomber-jacket-taupe/ryan-interlock-bomber-jacket-taupe-2.webp", "assets/ryan-interlock-bomber-jacket-taupe/ryan-interlock-bomber-jacket-taupe-3.webp", "assets/ryan-interlock-bomber-jacket-taupe/ryan-interlock-bomber-jacket-taupe-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/ryan-interlock-bomber-jacket-taupe-mockup.webp",
+      "assets/ryan-interlock-bomber-jacket-taupe/ryan-interlock-bomber-jacket-taupe-1.webp",
+      "assets/ryan-interlock-bomber-jacket-taupe/ryan-interlock-bomber-jacket-taupe-2.webp",
+      "assets/ryan-interlock-bomber-jacket-taupe/ryan-interlock-bomber-jacket-taupe-3.webp",
+      "assets/ryan-interlock-bomber-jacket-taupe/ryan-interlock-bomber-jacket-taupe-4.webp"
+    ],
     "description": "Bomber Ryan en tono taupe con paneles interlock y estructura limpia para combinar a diario. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 90
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 90
   },
   {
     "legacy_id": 91,
@@ -1959,10 +2256,21 @@
     "price": 139.9,
     "cost": 36.4,
     "stock": 1,
-    "sizes": ["L"],
-    "images": ["assets/paneled-utility-bomber-jacket-taupe/paneled-utility-bomber-jacket-taupe-1.webp", "assets/paneled-utility-bomber-jacket-taupe/paneled-utility-bomber-jacket-taupe-2.webp", "assets/paneled-utility-bomber-jacket-taupe/paneled-utility-bomber-jacket-taupe-3.webp", "assets/paneled-utility-bomber-jacket-taupe/paneled-utility-bomber-jacket-taupe-4.webp"],
+    "sizes": [
+      "L"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/paneled-utility-bomber-jacket-taupe-mockup.webp",
+      "assets/paneled-utility-bomber-jacket-taupe/paneled-utility-bomber-jacket-taupe-1.webp",
+      "assets/paneled-utility-bomber-jacket-taupe/paneled-utility-bomber-jacket-taupe-2.webp",
+      "assets/paneled-utility-bomber-jacket-taupe/paneled-utility-bomber-jacket-taupe-3.webp",
+      "assets/paneled-utility-bomber-jacket-taupe/paneled-utility-bomber-jacket-taupe-4.webp"
+    ],
     "description": "Bomber utility taupe con construcción por paneles y bolsillos funcionales. Disponible en talla L.",
-    "badge": "TALLA L", "status": "low_stock", "fit_recommendation": true, "sort_order": 91
+    "badge": "TALLA L",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 91
   },
   {
     "legacy_id": 92,
@@ -1972,10 +2280,21 @@
     "price": 109,
     "cost": 29.4,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/lido-isle-crochet-button-up-shirt-cream/lido-isle-crochet-button-up-shirt-cream-1.webp", "assets/lido-isle-crochet-button-up-shirt-cream/lido-isle-crochet-button-up-shirt-cream-2.webp", "assets/lido-isle-crochet-button-up-shirt-cream/lido-isle-crochet-button-up-shirt-cream-3.webp", "assets/lido-isle-crochet-button-up-shirt-cream/lido-isle-crochet-button-up-shirt-cream-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/lido-isle-crochet-button-up-shirt-cream-mockup.webp",
+      "assets/lido-isle-crochet-button-up-shirt-cream/lido-isle-crochet-button-up-shirt-cream-1.webp",
+      "assets/lido-isle-crochet-button-up-shirt-cream/lido-isle-crochet-button-up-shirt-cream-2.webp",
+      "assets/lido-isle-crochet-button-up-shirt-cream/lido-isle-crochet-button-up-shirt-cream-3.webp",
+      "assets/lido-isle-crochet-button-up-shirt-cream/lido-isle-crochet-button-up-shirt-cream-4.webp"
+    ],
     "description": "Camisa crema Lido Isle con tejido crochet y botones frontales, ideal para un look fresco con textura. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 92
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 92
   },
   {
     "legacy_id": 93,
@@ -1985,10 +2304,21 @@
     "price": 109,
     "cost": 33.6,
     "stock": 1,
-    "sizes": ["M"],
-    "images": ["assets/lions-monster-oversized-zip-up-hoodie-light-blue/lions-monster-oversized-zip-up-hoodie-light-blue-1.webp", "assets/lions-monster-oversized-zip-up-hoodie-light-blue/lions-monster-oversized-zip-up-hoodie-light-blue-2.webp", "assets/lions-monster-oversized-zip-up-hoodie-light-blue/lions-monster-oversized-zip-up-hoodie-light-blue-3.webp", "assets/lions-monster-oversized-zip-up-hoodie-light-blue/lions-monster-oversized-zip-up-hoodie-light-blue-4.webp"],
+    "sizes": [
+      "M"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/lions-monster-oversized-zip-up-hoodie-light-blue-mockup.webp",
+      "assets/lions-monster-oversized-zip-up-hoodie-light-blue/lions-monster-oversized-zip-up-hoodie-light-blue-1.webp",
+      "assets/lions-monster-oversized-zip-up-hoodie-light-blue/lions-monster-oversized-zip-up-hoodie-light-blue-2.webp",
+      "assets/lions-monster-oversized-zip-up-hoodie-light-blue/lions-monster-oversized-zip-up-hoodie-light-blue-3.webp",
+      "assets/lions-monster-oversized-zip-up-hoodie-light-blue/lions-monster-oversized-zip-up-hoodie-light-blue-4.webp"
+    ],
     "description": "Hoodie celeste Lions Monster con cierre completo, gráficos deportivos y fit oversized. Disponible en talla M.",
-    "badge": "TALLA M", "status": "low_stock", "fit_recommendation": true, "sort_order": 93
+    "badge": "TALLA M",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 93
   },
   {
     "legacy_id": 94,
@@ -1998,10 +2328,21 @@
     "price": 179.9,
     "cost": 38.5,
     "stock": 1,
-    "sizes": ["38"],
-    "images": ["assets/stacked-skinny-flare-with-camo-hit-jean-grey/stacked-skinny-flare-with-camo-hit-jean-grey-1.webp", "assets/stacked-skinny-flare-with-camo-hit-jean-grey/stacked-skinny-flare-with-camo-hit-jean-grey-2.webp", "assets/stacked-skinny-flare-with-camo-hit-jean-grey/stacked-skinny-flare-with-camo-hit-jean-grey-3.webp", "assets/stacked-skinny-flare-with-camo-hit-jean-grey/stacked-skinny-flare-with-camo-hit-jean-grey-4.webp"],
+    "sizes": [
+      "38"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/stacked-skinny-flare-with-camo-hit-jean-grey-mockup.webp",
+      "assets/stacked-skinny-flare-with-camo-hit-jean-grey/stacked-skinny-flare-with-camo-hit-jean-grey-1.webp",
+      "assets/stacked-skinny-flare-with-camo-hit-jean-grey/stacked-skinny-flare-with-camo-hit-jean-grey-2.webp",
+      "assets/stacked-skinny-flare-with-camo-hit-jean-grey/stacked-skinny-flare-with-camo-hit-jean-grey-3.webp",
+      "assets/stacked-skinny-flare-with-camo-hit-jean-grey/stacked-skinny-flare-with-camo-hit-jean-grey-4.webp"
+    ],
     "description": "Jean gris con corte skinny apilado, pierna flare y paneles camuflados en contraste. Disponible en talla 38.",
-    "badge": "TALLA 38", "status": "low_stock", "fit_recommendation": true, "sort_order": 94
+    "badge": "TALLA 38",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 94
   },
   {
     "legacy_id": 95,
@@ -2011,10 +2352,21 @@
     "price": 109,
     "cost": 21,
     "stock": 1,
-    "sizes": ["L"],
-    "images": ["assets/tayson-stars-skinny-flared-sweatpants-heather-grey/tayson-stars-skinny-flared-sweatpants-heather-grey-1.webp", "assets/tayson-stars-skinny-flared-sweatpants-heather-grey/tayson-stars-skinny-flared-sweatpants-heather-grey-2.webp", "assets/tayson-stars-skinny-flared-sweatpants-heather-grey/tayson-stars-skinny-flared-sweatpants-heather-grey-3.webp", "assets/tayson-stars-skinny-flared-sweatpants-heather-grey/tayson-stars-skinny-flared-sweatpants-heather-grey-4.webp"],
+    "sizes": [
+      "L"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/tyson-stars-skinny-flared-sweatpants-heather-grey-mockup.webp",
+      "assets/tayson-stars-skinny-flared-sweatpants-heather-grey/tayson-stars-skinny-flared-sweatpants-heather-grey-1.webp",
+      "assets/tayson-stars-skinny-flared-sweatpants-heather-grey/tayson-stars-skinny-flared-sweatpants-heather-grey-2.webp",
+      "assets/tayson-stars-skinny-flared-sweatpants-heather-grey/tayson-stars-skinny-flared-sweatpants-heather-grey-3.webp",
+      "assets/tayson-stars-skinny-flared-sweatpants-heather-grey/tayson-stars-skinny-flared-sweatpants-heather-grey-4.webp"
+    ],
     "description": "Sweatpant Tyson gris jaspeado con aplicaciones de estrellas, corte skinny y pierna flare. Disponible en talla L.",
-    "badge": "TALLA L", "status": "low_stock", "fit_recommendation": false, "sort_order": 95
+    "badge": "TALLA L",
+    "status": "low_stock",
+    "fit_recommendation": false,
+    "sort_order": 95
   },
   {
     "legacy_id": 96,
@@ -2024,10 +2376,21 @@
     "price": 109,
     "cost": 25.2,
     "stock": 1,
-    "sizes": ["XL"],
-    "images": ["assets/tayson-number-3-skinny-flare-sweatpants-black-combo/tayson-number-3-skinny-flare-sweatpants-black-combo-1.webp", "assets/tayson-number-3-skinny-flare-sweatpants-black-combo/tayson-number-3-skinny-flare-sweatpants-black-combo-2.webp", "assets/tayson-number-3-skinny-flare-sweatpants-black-combo/tayson-number-3-skinny-flare-sweatpants-black-combo-3.webp", "assets/tayson-number-3-skinny-flare-sweatpants-black-combo/tayson-number-3-skinny-flare-sweatpants-black-combo-4.webp"],
+    "sizes": [
+      "XL"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/tyson-number-3-skinny-flare-sweatpants-black-combo-mockup.webp",
+      "assets/tayson-number-3-skinny-flare-sweatpants-black-combo/tayson-number-3-skinny-flare-sweatpants-black-combo-1.webp",
+      "assets/tayson-number-3-skinny-flare-sweatpants-black-combo/tayson-number-3-skinny-flare-sweatpants-black-combo-2.webp",
+      "assets/tayson-number-3-skinny-flare-sweatpants-black-combo/tayson-number-3-skinny-flare-sweatpants-black-combo-3.webp",
+      "assets/tayson-number-3-skinny-flare-sweatpants-black-combo/tayson-number-3-skinny-flare-sweatpants-black-combo-4.webp"
+    ],
     "description": "Sweatpant negro Tyson Number 3 con paneles combinados, corte skinny y pierna flare. Disponible en talla XL.",
-    "badge": "TALLA XL", "status": "low_stock", "fit_recommendation": false, "sort_order": 96
+    "badge": "TALLA XL",
+    "status": "low_stock",
+    "fit_recommendation": false,
+    "sort_order": 96
   },
   {
     "legacy_id": 97,
@@ -2037,9 +2400,20 @@
     "price": 179.9,
     "cost": 48.3,
     "stock": 1,
-    "sizes": ["36"],
-    "images": ["assets/cornell-slim-flare-jeans-light-wash/cornell-slim-flare-jeans-light-wash-1.webp", "assets/cornell-slim-flare-jeans-light-wash/cornell-slim-flare-jeans-light-wash-2.webp", "assets/cornell-slim-flare-jeans-light-wash/cornell-slim-flare-jeans-light-wash-3.webp", "assets/cornell-slim-flare-jeans-light-wash/cornell-slim-flare-jeans-light-wash-4.webp"],
+    "sizes": [
+      "36"
+    ],
+    "images": [
+      "mockups-agosto-22-finales/cornell-slim-flare-jeans-light-wash-mockup.webp",
+      "assets/cornell-slim-flare-jeans-light-wash/cornell-slim-flare-jeans-light-wash-1.webp",
+      "assets/cornell-slim-flare-jeans-light-wash/cornell-slim-flare-jeans-light-wash-2.webp",
+      "assets/cornell-slim-flare-jeans-light-wash/cornell-slim-flare-jeans-light-wash-3.webp",
+      "assets/cornell-slim-flare-jeans-light-wash/cornell-slim-flare-jeans-light-wash-4.webp"
+    ],
     "description": "Jean Cornell de lavado claro con corte slim y pierna flare para una silueta limpia. Disponible en talla 36.",
-    "badge": "TALLA 36", "status": "low_stock", "fit_recommendation": true, "sort_order": 97
+    "badge": "TALLA 36",
+    "status": "low_stock",
+    "fit_recommendation": true,
+    "sort_order": 97
   }
 ]

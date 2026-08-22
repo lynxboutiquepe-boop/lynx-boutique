@@ -1362,7 +1362,9 @@ function setupReviewEvents() {
 function mapDatabaseProduct(row) {
     const sourceImages = LOCAL_PRODUCT_IMAGE_OVERRIDES[row.slug]
         || (Array.isArray(row.images) ? row.images : []);
-    const images = sourceImages.filter(Boolean).map(optimizedStoreImage);
+    const images = (window.LynxProductImages?.withMockup(row.slug, sourceImages) || sourceImages)
+        .filter(Boolean)
+        .map(optimizedStoreImage);
     const statusBadge = {
         preorder: 'PREVENTA',
         sold_out: 'AGOTADO',
