@@ -5810,7 +5810,7 @@ body {
     .trending-viewport {
         cursor: auto;
         touch-action: pan-x pan-y;
-        scroll-snap-type: x proximity;
+        scroll-snap-type: none;
     }
 
     .trending-card {

@@ -1780,7 +1780,7 @@ function renderTrendingProducts() {
         <article class="trending-card" ${isDuplicate ? 'aria-hidden="true"' : ''}>
             <a class="trending-card-image product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}" aria-label="Ver detalles de ${escapeHtml(product.title)}" ${isDuplicate ? 'tabindex="-1"' : ''}>
                 <span class="trending-card-badge">${product.badge}</span>
-                <img class="trending-primary-img" src="${product.image}" alt="${isDuplicate ? '' : product.title}" loading="${isDuplicate ? 'lazy' : 'eager'}" decoding="async" ${!isDuplicate && productIndex < 2 ? 'fetchpriority="high"' : 'fetchpriority="auto"'}>
+                <img class="trending-primary-img" src="${product.image}" alt="${isDuplicate ? '' : product.title}" loading="eager" decoding="async" ${!isDuplicate && productIndex < 2 ? 'fetchpriority="high"' : 'fetchpriority="auto"'}>
                 ${supportsProductHover && product.images?.[1] ? `<img class="trending-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="eager" decoding="async">` : ''}
             </a>
             <a class="trending-card-title product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}" ${isDuplicate ? 'tabindex="-1"' : ''}>${product.title}</a>
@@ -1948,7 +1948,8 @@ function setupTrendingCarousel() {
     let groupWidth = 0;
     let animationFrame = 0;
     let lastFrameTime = 0;
-    let resumeAt = 0;
+    let isPressed = false;
+    let touchActive = false;
     let pointerId = null;
     let dragStartX = 0;
     let dragStartScroll = 0;
@@ -1962,11 +1963,10 @@ function setupTrendingCarousel() {
     let pressedLinkStartX = 0;
     let pressedLinkStartY = 0;
     let pressedLinkDistance = 0;
-    const speed = 0.085; // 85 px por segundo.
+    const speed = 0.12; // 120 px por segundo: continuo y claramente visible.
     const touchFirst = window.innerWidth <= 768
         || window.matchMedia('(hover: none), (pointer: coarse)').matches
         || navigator.maxTouchPoints > 0;
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     trendingViewport.dataset.carouselMode = touchFirst ? 'touch' : 'desktop';
 
     const normalizePosition = value => {
@@ -1985,8 +1985,10 @@ function setupTrendingCarousel() {
         }
     };
 
-    const pauseAutoScroll = (milliseconds = 1400) => {
-        resumeAt = Math.max(resumeAt, performance.now() + milliseconds);
+    const resumeImmediately = () => {
+        isPressed = false;
+        lastFrameTime = performance.now();
+        normalizeScroll();
     };
 
     const measureAndCenter = () => {
@@ -2015,9 +2017,8 @@ function setupTrendingCarousel() {
     };
 
     const moveCarousel = direction => {
-        pauseAutoScroll(1600);
-        trendingViewport.scrollBy({ left: getScrollStep() * direction, behavior: 'smooth' });
-        window.setTimeout(normalizeScroll, 700);
+        trendingViewport.scrollBy({ left: getScrollStep() * direction, behavior: 'auto' });
+        normalizeScroll();
     };
 
     const autoScroll = timestamp => {
@@ -2025,7 +2026,7 @@ function setupTrendingCarousel() {
         const elapsed = Math.min(timestamp - lastFrameTime, 50);
         lastFrameTime = timestamp;
 
-        if (!touchFirst && !reduceMotion && groupWidth && pointerId === null && timestamp >= resumeAt && !document.hidden) {
+        if (groupWidth && !isPressed && !touchActive && pointerId === null && !document.hidden) {
             trendingViewport.scrollLeft += elapsed * speed;
             normalizeScroll();
         }
@@ -2047,13 +2048,13 @@ function setupTrendingCarousel() {
         trendingViewport.classList.remove('is-dragging');
         window.clearTimeout(scrollTimer);
         scrollTimer = window.setTimeout(normalizeScroll, 180);
-        pauseAutoScroll(1200);
-        lastFrameTime = performance.now();
+        resumeImmediately();
         window.setTimeout(() => { suppressClick = false; }, 250);
     };
 
     trendingViewport.addEventListener('pointerdown', event => {
         if (event.pointerType === 'mouse' && event.button !== 0) return;
+        isPressed = true;
         pressedLink = event.target.closest('.product-detail-link');
         pressedLinkPointerId = pressedLink ? event.pointerId : null;
         pressedLinkStartX = event.clientX;
@@ -2064,7 +2065,6 @@ function setupTrendingCarousel() {
         // manualmente con mouse; en pantallas táctiles el viewport conserva
         // su scroll horizontal natural.
         if (event.pointerType !== 'mouse') {
-            pauseAutoScroll(2200);
             return;
         }
         if (pointerId !== null) return;
@@ -2072,7 +2072,6 @@ function setupTrendingCarousel() {
         dragStartX = event.clientX;
         dragStartScroll = trendingViewport.scrollLeft;
         dragDistance = 0;
-        pauseAutoScroll(2000);
         trendingViewport.classList.add('is-dragging');
     });
     trendingViewport.addEventListener('pointermove', event => {
@@ -2095,7 +2094,11 @@ function setupTrendingCarousel() {
         pressedLink = null;
         pressedLinkPointerId = null;
         pressedLinkDistance = 0;
-        if (!cleanTap) return false;
+        if (!cleanTap) {
+            resumeImmediately();
+            return false;
+        }
+        resumeImmediately();
         if (event.cancelable) event.preventDefault();
         window.location.assign(destination);
         return true;
@@ -2104,9 +2107,8 @@ function setupTrendingCarousel() {
     trendingViewport.addEventListener('pointerup', event => {
         if (openPressedLink(event)) return;
         if (event.pointerType !== 'mouse') {
-            pauseAutoScroll(1600);
             window.clearTimeout(scrollTimer);
-            scrollTimer = window.setTimeout(normalizeScroll, 360);
+            resumeImmediately();
             return;
         }
         endDragging(event);
@@ -2121,6 +2123,7 @@ function setupTrendingCarousel() {
             pressedLinkPointerId = null;
             pressedLinkDistance = 0;
         }
+        if (!touchActive) resumeImmediately();
         endDragging(event);
     }, { passive: true });
     trendingViewport.addEventListener('click', event => {
@@ -2140,19 +2143,23 @@ function setupTrendingCarousel() {
         window.location.assign(productLink.href);
     }, true);
     trendingViewport.addEventListener('scroll', () => {
-        if (!touchFirst || !hasMeasured) return;
-        pauseAutoScroll(1800);
+        if (!touchFirst || !hasMeasured || !touchActive) return;
         window.clearTimeout(scrollTimer);
-        // iOS conserva inercia después de touchend. Esperar a que realmente
-        // termine evita saltos y tarjetas que dejan de responder.
         scrollTimer = window.setTimeout(normalizeScroll, 240);
     }, { passive: true });
     trendingViewport.addEventListener('wheel', () => {
-        pauseAutoScroll(1200);
-        window.setTimeout(normalizeScroll, 180);
+        resumeImmediately();
     }, { passive: true });
-    trendingViewport.addEventListener('focusin', () => pauseAutoScroll(4000));
-    trendingViewport.addEventListener('focusout', () => pauseAutoScroll(700));
+    trendingViewport.addEventListener('touchstart', () => {
+        touchActive = true;
+        isPressed = true;
+    }, { passive: true });
+    const endTouch = () => {
+        touchActive = false;
+        resumeImmediately();
+    };
+    trendingViewport.addEventListener('touchend', endTouch, { passive: true });
+    trendingViewport.addEventListener('touchcancel', endTouch, { passive: true });
 
     let resizeObserver = null;
     const requestMeasure = () => {
