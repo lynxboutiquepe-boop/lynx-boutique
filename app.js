@@ -1957,8 +1957,15 @@ function setupTrendingCarousel() {
     let scrollTimer = 0;
     let resizeFrame = 0;
     let hasMeasured = false;
+    let pressedLink = null;
+    let pressedLinkPointerId = null;
+    let pressedLinkStartX = 0;
+    let pressedLinkStartY = 0;
+    let pressedLinkDistance = 0;
     const speed = 0.085; // 85 px por segundo.
-    const touchFirst = window.matchMedia('(hover: none), (pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+    const touchFirst = window.innerWidth <= 768
+        || window.matchMedia('(hover: none), (pointer: coarse)').matches
+        || navigator.maxTouchPoints > 0;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     trendingViewport.dataset.carouselMode = touchFirst ? 'touch' : 'desktop';
 
@@ -2047,6 +2054,11 @@ function setupTrendingCarousel() {
 
     trendingViewport.addEventListener('pointerdown', event => {
         if (event.pointerType === 'mouse' && event.button !== 0) return;
+        pressedLink = event.target.closest('.product-detail-link');
+        pressedLinkPointerId = pressedLink ? event.pointerId : null;
+        pressedLinkStartX = event.clientX;
+        pressedLinkStartY = event.clientY;
+        pressedLinkDistance = 0;
         // En iPhone/iPad el desplazamiento horizontal nativo es mucho más
         // fiable que capturar el dedo con Pointer Events. Solo arrastramos
         // manualmente con mouse; en pantallas táctiles el viewport conserva
@@ -2064,13 +2076,33 @@ function setupTrendingCarousel() {
         trendingViewport.classList.add('is-dragging');
     });
     trendingViewport.addEventListener('pointermove', event => {
+        if (event.pointerId === pressedLinkPointerId) {
+            pressedLinkDistance = Math.max(
+                pressedLinkDistance,
+                Math.hypot(event.clientX - pressedLinkStartX, event.clientY - pressedLinkStartY)
+            );
+        }
         if (event.pointerId !== pointerId) return;
         const delta = event.clientX - dragStartX;
         dragDistance = Math.max(dragDistance, Math.abs(delta));
         if (dragDistance > 3 && event.cancelable) event.preventDefault();
         trendingViewport.scrollLeft = dragStartScroll - delta;
     }, { passive: false });
+    const openPressedLink = event => {
+        if (event.pointerId !== pressedLinkPointerId) return false;
+        const destination = pressedLink?.href;
+        const cleanTap = pressedLinkDistance <= 9 && Boolean(destination);
+        pressedLink = null;
+        pressedLinkPointerId = null;
+        pressedLinkDistance = 0;
+        if (!cleanTap) return false;
+        if (event.cancelable) event.preventDefault();
+        window.location.assign(destination);
+        return true;
+    };
+
     trendingViewport.addEventListener('pointerup', event => {
+        if (openPressedLink(event)) return;
         if (event.pointerType !== 'mouse') {
             pauseAutoScroll(1600);
             window.clearTimeout(scrollTimer);
@@ -2078,11 +2110,17 @@ function setupTrendingCarousel() {
             return;
         }
         endDragging(event);
-    }, { passive: true });
+    }, { passive: false });
     window.addEventListener('pointerup', event => {
+        if (openPressedLink(event)) return;
         endDragging(event);
     }, { passive: false });
     trendingViewport.addEventListener('pointercancel', event => {
+        if (event.pointerId === pressedLinkPointerId) {
+            pressedLink = null;
+            pressedLinkPointerId = null;
+            pressedLinkDistance = 0;
+        }
         endDragging(event);
     }, { passive: true });
     trendingViewport.addEventListener('click', event => {

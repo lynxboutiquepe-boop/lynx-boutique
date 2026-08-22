@@ -33,7 +33,7 @@ for (const required of [
     'id="trending-track"',
     'class="trending-card-image product-detail-link"',
     'href="/cuenta"',
-    'app.js?v=20260821-responsive-ios-v18',
+    'app.js?v=20260821-responsive-ios-v20',
     'tiktok-videos.js?v=20260813-controls-fix-v3'
 ]) {
     if (!home.includes(required) && !fs.readFileSync(path.join(root, 'app.js'), 'utf8').includes(required)) {
