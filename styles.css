@@ -6084,3 +6084,75 @@ body {
         display: none;
     }
 }
+
+/* Laptop density guardrail — keeps every section proportional on 13–16 inch
+   screens without changing the established mobile composition. */
+@media (min-width: 769px) and (max-width: 1920px) {
+    .header-container {
+        max-width: 1240px;
+        padding: 14px 22px;
+    }
+
+    .desktop-nav { gap: clamp(17px, 1.7vw, 27px); }
+    .desktop-nav .nav-link { font-size: .73rem; }
+    .header-actions { gap: 13px; }
+    .account-btn { min-height: 38px; }
+    .stock-marquee { margin-top: 70px; }
+
+    .hero-section {
+        min-height: 440px;
+        height: 56vh;
+        max-height: 560px;
+    }
+
+    .hero-content {
+        max-width: 580px;
+        margin-bottom: clamp(28px, 4vh, 44px);
+    }
+
+    .hero-title {
+        font-size: clamp(3.55rem, 5vw, 4.65rem);
+    }
+
+    .trending-section {
+        padding: 58px max(22px, calc((100vw - 1240px) / 2));
+    }
+
+    .trending-header { margin-bottom: 28px; }
+    .trending-header h2 { font-size: clamp(1.9rem, 3vw, 2.8rem); }
+
+    .catalog-section { padding: 70px 24px; }
+    .catalog-header { margin-bottom: 30px; }
+    .category-tags { margin-bottom: 38px; }
+    .catalog-category-heading { margin-top: 44px; }
+
+    .outfit-builder-section,
+    .faq-section,
+    .reviews-section {
+        padding-top: 68px;
+        padding-bottom: 68px;
+    }
+
+    .tiktok-showcase { padding: 58px clamp(22px, 4vw, 64px) 46px; }
+    .tiktok-showcase-heading,
+    .tiktok-video-rail,
+    .tiktok-showcase-footer { max-width: 1200px; }
+    .tiktok-showcase-heading { margin-bottom: 24px; }
+    .tiktok-showcase h2 { font-size: clamp(2rem, 3vw, 3rem); }
+    .tiktok-video-rail {
+        grid-auto-columns: minmax(220px, 270px);
+        justify-content: center;
+        gap: 12px;
+    }
+    .tiktok-video-card { padding: 8px; }
+    .tiktok-card-top { min-height: 35px; }
+
+    .reviews-container,
+    .faq-container { width: min(100%, 1040px); }
+    .reviews-heading { margin-bottom: 30px; }
+    .reviews-heading h2,
+    .faq-heading h2 { font-size: clamp(2rem, 3vw, 3rem); }
+    .reviews-content { gap: clamp(26px, 3.5vw, 46px); }
+    .review-card { padding: 20px; }
+    .review-compose { padding: 24px; }
+}

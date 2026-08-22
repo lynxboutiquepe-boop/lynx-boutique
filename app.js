@@ -2902,6 +2902,11 @@ function setupEventListeners() {
     navLinks.forEach(link => {
         link.addEventListener('click', event => {
             event.preventDefault();
+            const anchorTarget = link.getAttribute('href');
+            if (anchorTarget?.startsWith('#')) {
+                document.querySelector(anchorTarget)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return;
+            }
             const navCategory = link.id === 'nav-all'
                 ? 'all'
                 : Object.keys(CATALOG_CATEGORY_META).find(category => CATALOG_CATEGORY_META[category].navId === link.id);

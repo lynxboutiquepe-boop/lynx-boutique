@@ -60,7 +60,7 @@
     <!-- Lucide Icons (CDN) -->
     <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260822-commerce-v15">
+    <link rel="stylesheet" href="styles.css?v=20260822-responsive-v16">
 </head>
 <body>
     <div class="page-scroll-progress" id="page-scroll-progress" aria-hidden="true"></div>
@@ -76,6 +76,7 @@
             <nav class="desktop-nav">
                 <button class="nav-link active" id="nav-all" type="button">Catálogo</button>
                 <button class="nav-link" id="nav-hoodies" type="button">Hoodies</button>
+                <button class="nav-link" id="nav-tshirts" type="button">T-Shirts</button>
                 <button class="nav-link" id="nav-jeans" type="button">Jeans & Pants</button>
                 <button class="nav-link" id="nav-conjuntos" type="button">Conjuntos</button>
                 <a class="nav-link nav-link-anchor" href="#lynx-tiktok">Videos</a>
@@ -101,6 +102,7 @@
             <nav class="mobile-nav" id="mobile-nav" aria-hidden="true" aria-label="Categorías de la tienda">
                 <button class="mobile-nav-link active" type="button" data-category="all">Catálogo</button>
                 <button class="mobile-nav-link" type="button" data-category="hoodies-jackets">Hoodies</button>
+                <button class="mobile-nav-link" type="button" data-category="t-shirts">T-Shirts</button>
                 <button class="mobile-nav-link" type="button" data-category="jeans-pants">Jeans & Pants</button>
                 <button class="mobile-nav-link" type="button" data-category="conjuntos">Conjuntos</button>
                 <a class="mobile-nav-link mobile-nav-anchor" href="#lynx-tiktok">Videos</a>
@@ -265,6 +267,7 @@
             <div class="category-tags" id="category-tags-container">
                 <button class="tag-btn active" data-category="all" id="tag-all">Todo</button>
                 <button class="tag-btn" data-category="hoodies-jackets" id="tag-hoodies">Hoodies & Jackets</button>
+                <button class="tag-btn" data-category="t-shirts" id="tag-tshirts">T-Shirts</button>
                 <button class="tag-btn" data-category="jeans-pants" id="tag-jeans">Jeans & Pants</button>
                 <button class="tag-btn" data-category="conjuntos" id="tag-conjuntos">Conjuntos</button>
             </div>
@@ -413,6 +416,7 @@
                 <h4>CATEGORÍAS LYNX</h4>
                 <ul>
                     <li><button class="footer-category-button" type="button" data-category="hoodies-jackets"><i data-lucide="arrow-right"></i> Hoodies</button></li>
+                    <li><button class="footer-category-button" type="button" data-category="t-shirts"><i data-lucide="arrow-right"></i> T-Shirts</button></li>
                     <li><button class="footer-category-button" type="button" data-category="jeans-pants"><i data-lucide="arrow-right"></i> Jeans & Pants</button></li>
                     <li><button class="footer-category-button" type="button" data-category="conjuntos"><i data-lucide="arrow-right"></i> Conjuntos</button></li>
                     <li><a class="footer-whatsapp-link" href="https://wa.me/51962210278?text=Hola%20LYNX%2C%20quiero%20informaci%C3%B3n%20sobre%20sus%20prendas." target="_blank" rel="noopener noreferrer" aria-label="Escribir a LYNX por WhatsApp al 962 210 278"><i data-lucide="phone"></i><span>Soporte WhatsApp: +51 962 210 278</span></a></li>
@@ -779,7 +783,7 @@
     <script src="supabase-config.js?v=20260716-admin-v1" defer></script>
     <script src="commerce-tracking.js?v=20260813-cro-v1" defer></script>
     <script src="product-image-overrides.js?v=20260822-mockups-v1" defer></script>
-    <script src="app.js?v=20260822-commerce-v29" defer></script>
+    <script src="app.js?v=20260822-responsive-v30" defer></script>
     <script src="tiktok-videos.js?v=20260813-controls-fix-v3" defer></script>
 </body>
 </html>

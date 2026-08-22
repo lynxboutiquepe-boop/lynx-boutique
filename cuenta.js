@@ -137,12 +137,44 @@ async function applyPendingMarketing() {
     await loadProfile();
 }
 
+async function requestWelcomeDiscount({ force = false } = {}) {
+    if (!client || !currentUser?.email_confirmed_at) return false;
+    const status = $('#discount-status');
+    if (status) status.textContent = force ? 'Reenviando tu código…' : 'Preparando tu código…';
+
+    try {
+        if (force) {
+            const { error: resetError } = await client.rpc('request_welcome_discount_resend');
+            if (resetError) throw resetError;
+        }
+
+        const { data, error } = await client.functions.invoke('send-welcome-discount', {
+            body: { force }
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+
+        await loadProfile();
+        if (status) status.textContent = data?.alreadySent
+            ? 'Tu código privado ya fue enviado a tu correo'
+            : 'Código enviado. Revisa también Spam o Promociones';
+        return true;
+    } catch (error) {
+        console.warn('No se pudo enviar el beneficio de bienvenida.', error);
+        if (status) status.textContent = 'No pudimos enviarlo. Pulsa “Reenviar código”';
+        return false;
+    }
+}
+
 async function completeSignIn(user) {
     currentUser = user;
     await loadProfile();
     await applyPendingMarketing();
     sessionStorage.removeItem(PENDING_EMAIL_KEY);
     renderDashboard();
+    if (currentUser.email_confirmed_at && !currentProfile?.welcome_discount_sent_at) {
+        await requestWelcomeDiscount();
+    }
     const returnTarget = safeReturnTarget();
     if (returnTarget) window.setTimeout(() => location.replace(returnTarget), 450);
 }
@@ -231,6 +263,12 @@ function bindEvents() {
         } catch (error) {
             setMessage('otp-message', accountError(error));
         }
+    });
+
+    $('#resend-discount-btn')?.addEventListener('click', async event => {
+        setLoading(event.currentTarget, true, 'REENVIANDO…');
+        await requestWelcomeDiscount({ force: true });
+        setLoading(event.currentTarget, false);
     });
 
     $$('.account-nav-link').forEach(button => button.addEventListener('click', () => switchPanel(button.dataset.panel)));
