@@ -856,6 +856,16 @@ let pendingVerificationEmail = '';
 const customerSupabase = window.getLynxSupabase?.() || null;
 const DISCOUNT_POPUP_SESSION_KEY = 'lynx_discount_popup_seen_v1';
 const DISCOUNT_EMAIL_SENT_KEY = 'lynx_discount_email_requested_v1';
+const APPLIED_DISCOUNT_SESSION_KEY = 'lynx_applied_discount_v1';
+let appliedDiscount = { code: '', percent: 0 };
+try {
+    const storedDiscount = JSON.parse(sessionStorage.getItem(APPLIED_DISCOUNT_SESSION_KEY) || '{}');
+    if (storedDiscount?.code && Number(storedDiscount?.percent) === 10) {
+        appliedDiscount = { code: String(storedDiscount.code).toUpperCase(), percent: 10 };
+    }
+} catch (_error) {
+    sessionStorage.removeItem(APPLIED_DISCOUNT_SESSION_KEY);
+}
 
 // 3. SELECCIÓN DE ELEMENTOS DEL DOM
 const productsGrid = document.getElementById('products-grid-container');
@@ -935,6 +945,11 @@ const checkoutSubtotal = document.getElementById('checkout-subtotal');
 const checkoutShipping = document.getElementById('checkout-shipping');
 const checkoutTotal = document.getElementById('checkout-total');
 const cartSubtotal = document.getElementById('cart-subtotal');
+const cartDiscount = document.getElementById('cart-discount');
+const cartDiscountRow = document.getElementById('cart-discount-row');
+const cartTotal = document.getElementById('cart-total');
+const checkoutDiscount = document.getElementById('checkout-discount');
+const checkoutDiscountRow = document.getElementById('checkout-discount-row');
 const cartItemsContainer = document.getElementById('cart-items-container');
 
 // Modal de Detalles
@@ -1033,15 +1048,27 @@ function showDiscountForm() {
     setAccountMessage('customer-email-message');
 }
 
-function showDiscountSent(email, verified = false) {
+function showDiscountSent(email, verified = false, delivery = 'pending') {
     document.getElementById('discount-form-view').hidden = true;
     document.getElementById('discount-sent-view').hidden = false;
     const message = document.getElementById('discount-sent-message');
     message.textContent = verified
-        ? `Correo verificado. Estamos enviando tu código privado del 10% a ${email}. No se mostrará en esta página.`
+        ? `Correo verificado. Tu código privado del 10% se enviará a ${email}. Úsalo en el carrito para ver el descuento al instante.`
         : `Enviamos un código a ${email}. Escríbelo abajo; al verificarlo recibirás allí tu descuento privado del 10%.`;
     const otpForm = document.getElementById('discount-otp-form');
     if (otpForm) otpForm.hidden = verified;
+    const resend = document.getElementById('discount-resend-email');
+    const deliveryMessage = document.getElementById('discount-delivery-message');
+    if (resend) resend.hidden = !verified;
+    if (deliveryMessage) {
+        deliveryMessage.classList.remove('success');
+        deliveryMessage.textContent = !verified ? '' : delivery === 'sent'
+            ? 'Código enviado. Revisa también Spam o Promociones.'
+            : delivery === 'failed'
+                ? 'Tu correo quedó verificado, pero el descuento no pudo enviarse. Pulsa “Reenviar código”.'
+                : 'Preparando el correo con tu descuento…';
+        deliveryMessage.classList.toggle('success', delivery === 'sent');
+    }
 }
 
 function openAccountDialog(_mode = 'discount', message = '') {
@@ -1063,16 +1090,22 @@ async function requireCustomerAccount() {
     return true;
 }
 
-async function requestWelcomeDiscountEmail() {
-    if (!customerSupabase || !customerUser?.email_confirmed_at) return;
+async function requestWelcomeDiscountEmail({ force = false } = {}) {
+    if (!customerSupabase || !customerUser?.email_confirmed_at) {
+        return { ok: false, error: 'Primero verifica tu correo.' };
+    }
     const requestedFor = localStorage.getItem(DISCOUNT_EMAIL_SENT_KEY);
-    if (requestedFor === customerUser.email) return;
-    const { error } = await customerSupabase.functions.invoke('send-welcome-discount');
-    if (error) {
-        console.warn('El correo de descuento todavía no pudo enviarse.', error.message);
-        return;
+    if (!force && requestedFor === customerUser.email) return { ok: true, alreadySent: true };
+    const { data, error } = await customerSupabase.functions.invoke('send-welcome-discount', {
+        body: { force }
+    });
+    if (error || !data?.sent) {
+        const message = data?.error || error?.message || 'No se pudo enviar el correo de descuento.';
+        console.warn('El correo de descuento todavía no pudo enviarse.', message);
+        return { ok: false, error: message };
     }
     localStorage.setItem(DISCOUNT_EMAIL_SENT_KEY, customerUser.email);
+    return { ok: true, alreadySent: Boolean(data?.alreadySent) };
 }
 
 function openCheckoutDrawer() {
@@ -1093,9 +1126,9 @@ async function initializeCustomerAccount() {
     updateAccountButton();
     syncReviewAccess();
     if (customerUser?.email_confirmed_at) {
-        await requestWelcomeDiscountEmail();
+        const delivery = await requestWelcomeDiscountEmail();
         if (location.hash.includes('access_token') || location.search.includes('code=')) {
-            showDiscountSent(customerUser.email, true);
+            showDiscountSent(customerUser.email, true, delivery.ok ? 'sent' : 'failed');
             if (!accountDialog.open) accountDialog.showModal();
         }
     } else if (!sessionStorage.getItem(DISCOUNT_POPUP_SESSION_KEY)) {
@@ -1112,8 +1145,8 @@ async function initializeCustomerAccount() {
             }
             syncReviewAccess();
             if (customerUser?.email_confirmed_at && event === 'SIGNED_IN') {
-                await requestWelcomeDiscountEmail();
-                showDiscountSent(customerUser.email, true);
+                const delivery = await requestWelcomeDiscountEmail();
+                showDiscountSent(customerUser.email, true, delivery.ok ? 'sent' : 'failed');
                 if (!accountDialog.open) accountDialog.showModal();
             }
         }, 0);
@@ -2223,6 +2256,101 @@ function setupTrendingCarousel() {
     }, { once: true });
 }
 
+function cartSubtotalValue() {
+    return cart.reduce((sum, item) => sum + (item.product.price * item.qty), 0);
+}
+
+function discountAmountFor(subtotal) {
+    return appliedDiscount.percent === 10 ? Math.round(subtotal * 10) / 100 : 0;
+}
+
+function setDiscountMessage(target, message = '', state = '') {
+    const element = document.getElementById(target);
+    if (!element) return;
+    element.textContent = message;
+    element.classList.toggle('is-success', state === 'success');
+    element.classList.toggle('is-error', state === 'error');
+}
+
+function syncDiscountInputs() {
+    ['cart-discount-code', 'checkout-discount-code'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input && document.activeElement !== input) input.value = appliedDiscount.code;
+    });
+}
+
+function saveAppliedDiscount(code = '', percent = 0) {
+    appliedDiscount = { code: String(code || '').trim().toUpperCase(), percent: Number(percent) === 10 ? 10 : 0 };
+    if (appliedDiscount.code && appliedDiscount.percent) {
+        sessionStorage.setItem(APPLIED_DISCOUNT_SESSION_KEY, JSON.stringify(appliedDiscount));
+    } else {
+        sessionStorage.removeItem(APPLIED_DISCOUNT_SESSION_KEY);
+    }
+    syncDiscountInputs();
+    renderCart();
+    updateCheckoutTotals();
+}
+
+async function validateWelcomeDiscount(code, email = '') {
+    const normalizedCode = String(code || '').trim().toUpperCase();
+    if (!normalizedCode) return { valid: false, error: 'Escribe tu código de descuento.' };
+    const client = window.getLynxSupabase?.();
+    if (!client) return { valid: false, error: 'No pudimos validar el código. Intenta nuevamente.' };
+    const rpcName = email ? 'validate_welcome_discount' : 'preview_welcome_discount';
+    const params = email
+        ? { p_code: normalizedCode, p_email: String(email).trim().toLowerCase() }
+        : { p_code: normalizedCode };
+    const { data, error } = await client.rpc(rpcName, params);
+    if (error) {
+        console.warn('No se pudo validar el descuento:', error.message);
+        return { valid: false, error: 'No pudimos validar el código. Revisa tu conexión e inténtalo otra vez.' };
+    }
+    const row = Array.isArray(data) ? data[0] : data;
+    return row?.valid && Number(row?.discount_percent) === 10
+        ? { valid: true, code: normalizedCode, percent: 10 }
+        : { valid: false, error: email ? 'El código no corresponde a este correo, ya fue usado o no es válido.' : 'Código no válido o ya utilizado.' };
+}
+
+async function applyDiscountCode(source = 'cart', { requireEmail = false } = {}) {
+    const inputId = source === 'checkout' ? 'checkout-discount-code' : 'cart-discount-code';
+    const buttonId = source === 'checkout' ? 'checkout-apply-discount-btn' : 'cart-apply-discount-btn';
+    const messageId = source === 'checkout' ? 'checkout-discount-message' : 'cart-discount-message';
+    const input = document.getElementById(inputId);
+    const button = document.getElementById(buttonId);
+    const code = input?.value.trim().toUpperCase() || '';
+    if (!code) {
+        saveAppliedDiscount();
+        setDiscountMessage(messageId, 'Escribe tu código de descuento.', 'error');
+        input?.focus();
+        return false;
+    }
+    const email = requireEmail ? document.getElementById('checkout-email')?.value.trim() || '' : '';
+    if (requireEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setDiscountMessage(messageId, 'Primero escribe el mismo correo donde recibiste el código.', 'error');
+        document.getElementById('checkout-email')?.focus();
+        return false;
+    }
+    button.disabled = true;
+    button.textContent = 'VALIDANDO…';
+    setDiscountMessage(messageId, 'Comprobando tu código…');
+    try {
+        const result = await validateWelcomeDiscount(code, email);
+        if (!result.valid) {
+            saveAppliedDiscount();
+            setDiscountMessage(messageId, result.error, 'error');
+            return false;
+        }
+        saveAppliedDiscount(result.code, result.percent);
+        setDiscountMessage('cart-discount-message', '¡Listo! Tu 10% ya está aplicado.', 'success');
+        setDiscountMessage('checkout-discount-message', '¡Listo! Tu 10% ya está aplicado.', 'success');
+        window.LynxTracking?.track('discount_applied', { code: result.code, source });
+        return true;
+    } finally {
+        button.disabled = false;
+        button.textContent = 'APLICAR';
+    }
+}
+
 function renderCart() {
     // Actualizar badge del header
     const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
@@ -2297,14 +2425,19 @@ function renderCart() {
     });
 
     // Calcular Subtotal
-    const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.qty), 0);
+    const subtotal = cartSubtotalValue();
+    const discount = discountAmountFor(subtotal);
     cartSubtotal.textContent = `S/. ${subtotal.toFixed(2)}`;
+    if (cartDiscount) cartDiscount.textContent = `- S/. ${discount.toFixed(2)}`;
+    if (cartDiscountRow) cartDiscountRow.hidden = discount <= 0;
+    if (cartTotal) cartTotal.textContent = `S/. ${(subtotal - discount).toFixed(2)}`;
+    syncDiscountInputs();
     
     lucide.createIcons();
 }
 
 function updateCheckoutTotals() {
-    const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.qty), 0);
+    const subtotal = cartSubtotalValue();
     let shipping = 0;
     
     // Capturar método de envío
@@ -2316,20 +2449,12 @@ function updateCheckoutTotals() {
         document.getElementById('checkout-dni-group')?.classList.add('hidden');
         document.getElementById('checkout-dni')?.removeAttribute('required');
         document.getElementById('checkout-address-label').textContent = 'Dirección de entrega y referencia *';
-        document.getElementById('payment-cash-card')?.classList.remove('is-disabled');
     } else {
         shipping = 0.00;
         limaPaymentConditionBox.classList.add('hidden');
         document.getElementById('checkout-dni-group')?.classList.remove('hidden');
         document.getElementById('checkout-dni')?.setAttribute('required', '');
         document.getElementById('checkout-address-label').textContent = 'Agencia Shalom donde recogerás *';
-        const cashCard = document.getElementById('payment-cash-card');
-        cashCard?.classList.add('is-disabled');
-        const cashRadio = cashCard?.querySelector('input');
-        if (cashRadio?.checked) {
-            const fallback = document.querySelector('input[name="payment-method"][value="yape-plin"]');
-            if (fallback) fallback.checked = true;
-        }
     }
 
     document.querySelectorAll('.payment-option-card').forEach(card => {
@@ -2337,9 +2462,12 @@ function updateCheckoutTotals() {
         card.classList.toggle('active', Boolean(radio?.checked));
     });
 
-    const total = subtotal + shipping;
+    const discount = discountAmountFor(subtotal);
+    const total = subtotal - discount + shipping;
 
     checkoutSubtotal.textContent = `S/. ${subtotal.toFixed(2)}`;
+    if (checkoutDiscount) checkoutDiscount.textContent = `- S/. ${discount.toFixed(2)}`;
+    if (checkoutDiscountRow) checkoutDiscountRow.hidden = discount <= 0;
     checkoutShipping.textContent = shipping === 0 ? 'FLETE POR PAGAR' : `S/. ${shipping.toFixed(2)}`;
     checkoutTotal.textContent = `S/. ${total.toFixed(2)}`;
 
@@ -2347,12 +2475,8 @@ function updateCheckoutTotals() {
     if (shippingMethod === 'shalom') {
         paymentExplanationText.innerHTML = `<strong>Envío Shalom a Provincias:</strong> El envío se realiza por pagar. Recogerás tu pedido en la agencia Shalom de tu ciudad en 2 a 3 días hábiles y pagarás el flete del transporte ahí mismo. El valor de las prendas se deposita previamente.`;
     } else if (shippingMethod === 'lima') {
-        if (limaReserveCheckbox.checked) {
-            const balance = total - 50.00;
-            paymentExplanationText.innerHTML = `<strong>Reserva Exclusiva Lima:</strong> Separarás tus prendas abonando un adelanto de <strong>S/. 50.00</strong> por transferencia (Yape/BCP/BBVA) para congelar el stock. El saldo restante (<strong>S/. ${balance.toFixed(2)}</strong>) lo cancelarás en efectivo o Yape cuando el motorizado entregue tu pedido en tu casa.`;
-        } else {
-            paymentExplanationText.innerHTML = `<strong>Pago Contra Entrega Completo:</strong> Pagarás el monto completo de <strong>S/. ${total.toFixed(2)}</strong> (prendas + envío) en efectivo o Yape directamente al motorizado en la puerta de tu casa.`;
-        }
+        const balance = Math.max(total - 50.00, 0);
+        paymentExplanationText.innerHTML = `<strong>Separación obligatoria en Lima:</strong> Abonas <strong>S/. 50.00</strong> por Yape, Plin o transferencia para reservar el stock. El saldo (<strong>S/. ${balance.toFixed(2)}</strong>) también se cancela por Yape, Plin o transferencia antes o al momento de la entrega. <strong>No aceptamos efectivo.</strong>`;
     }
 }
 
@@ -2611,11 +2735,32 @@ function setupCustomerAccountEvents() {
             customerUser = data.user;
             setAccountMessage('discount-otp-message', 'Correo verificado. Estamos enviando tu descuento.', true);
             window.LynxTracking?.track('discount_verified');
-            await requestWelcomeDiscountEmail();
-            showDiscountSent(email, true);
+            const delivery = await requestWelcomeDiscountEmail();
+            showDiscountSent(email, true, delivery.ok ? 'sent' : 'failed');
             updateAccountButton();
         } catch (error) {
             setAccountMessage('discount-otp-message', customerErrorMessage(error));
+        } finally {
+            setCustomerButtonLoading(button, false);
+            lucide.createIcons();
+        }
+    });
+
+    document.getElementById('discount-resend-email')?.addEventListener('click', async event => {
+        const button = event.currentTarget;
+        if (!customerUser?.email_confirmed_at) {
+            showDiscountSent(pendingVerificationEmail || 'tu correo', false);
+            return;
+        }
+        setCustomerButtonLoading(button, true, 'REENVIANDO…');
+        const deliveryMessage = document.getElementById('discount-delivery-message');
+        if (deliveryMessage) {
+            deliveryMessage.classList.remove('success');
+            deliveryMessage.textContent = 'Reenviando tu código…';
+        }
+        try {
+            const delivery = await requestWelcomeDiscountEmail({ force: true });
+            showDiscountSent(customerUser.email, true, delivery.ok ? 'sent' : 'failed');
         } finally {
             setCustomerButtonLoading(button, false);
             lucide.createIcons();
@@ -2647,6 +2792,25 @@ function setupEventListeners() {
     });
 
     closeCartBtn.addEventListener('click', () => cartDrawer.classList.remove('active'));
+
+    document.getElementById('cart-apply-discount-btn')?.addEventListener('click', () => applyDiscountCode('cart'));
+    document.getElementById('checkout-apply-discount-btn')?.addEventListener('click', () => applyDiscountCode('checkout', { requireEmail: true }));
+    ['cart-discount-code', 'checkout-discount-code'].forEach(id => {
+        document.getElementById(id)?.addEventListener('keydown', event => {
+            if (event.key !== 'Enter') return;
+            event.preventDefault();
+            applyDiscountCode(id.startsWith('checkout') ? 'checkout' : 'cart', { requireEmail: id.startsWith('checkout') });
+        });
+        document.getElementById(id)?.addEventListener('input', event => {
+            event.target.value = event.target.value.toUpperCase();
+            if (appliedDiscount.code && event.target.value.trim() !== appliedDiscount.code) {
+                appliedDiscount = { code: '', percent: 0 };
+                sessionStorage.removeItem(APPLIED_DISCOUNT_SESSION_KEY);
+                renderCart();
+                updateCheckoutTotals();
+            }
+        });
+    });
 
     cartDrawer.addEventListener('click', event => {
         if (event.target === cartDrawer) cartDrawer.classList.remove('active');
@@ -3298,9 +3462,10 @@ async function createPendingWebOrder(details) {
         if (error) throw error;
         return Array.isArray(data) ? data[0]?.order_code || '' : data?.order_code || '';
     } catch (error) {
-        // El pedido por WhatsApp sigue funcionando aunque la migración de
-        // pedidos todavía no esté activa en Supabase.
         console.warn('Pedido no registrado aún en el panel:', error.message);
+        if (details.discountCode) throw new Error(error.message || 'El código de descuento no pudo validarse.');
+        // Sin cupón, WhatsApp sigue disponible aunque la migración de pedidos
+        // aún no esté activa en Supabase.
         return '';
     }
 }
@@ -3336,22 +3501,44 @@ async function submitOrder(confirmed = false) {
         return;
     }
 
-    const reserveLima = limaReserveCheckbox.checked;
-    const discountCode = document.getElementById('checkout-discount-code')?.value.trim().toUpperCase() || '';
-    const paymentMethod = document.querySelector('input[name="payment-method"]:checked')?.value || 'yape-plin';
+    const reserveLima = shippingMethod === 'lima';
+    const enteredDiscountCode = document.getElementById('checkout-discount-code')?.value.trim().toUpperCase() || '';
+    let paymentMethod = document.querySelector('input[name="payment-method"]:checked')?.value || 'yape-plin';
     const paymentLabels = {
         'yape-plin': 'Yape o Plin',
         transferencia: 'Transferencia BCP / BBVA',
-        'tarjeta-link': 'Tarjeta mediante link de pago',
-        contraentrega: 'Contraentrega en Lima'
+        'tarjeta-link': 'Tarjeta mediante link de pago'
     };
+
+    if (paymentMethod === 'contraentrega') {
+        const fallback = document.querySelector('input[name="payment-method"][value="yape-plin"]');
+        if (fallback) fallback.checked = true;
+        paymentMethod = 'yape-plin';
+    }
+
+    if (enteredDiscountCode) {
+        const validForEmail = await validateWelcomeDiscount(enteredDiscountCode, email);
+        if (!validForEmail.valid) {
+            saveAppliedDiscount();
+            setDiscountMessage('checkout-discount-message', validForEmail.error, 'error');
+            document.getElementById('checkout-discount-code')?.focus();
+            setCheckoutReviewMode(false);
+            return;
+        }
+        saveAppliedDiscount(validForEmail.code, validForEmail.percent);
+        setDiscountMessage('checkout-discount-message', '¡Listo! Tu 10% ya está aplicado.', 'success');
+    } else if (appliedDiscount.code) {
+        saveAppliedDiscount();
+    }
+    const discountCode = appliedDiscount.code;
 
     if (!confirmed && !(await validateCartStock())) return;
 
     // Calcular montos
     const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.qty), 0);
     const shippingCost = shippingMethod === 'lima' ? 15.00 : 0.00;
-    const total = subtotal + shippingCost;
+    const discountAmount = discountAmountFor(subtotal);
+    const total = subtotal - discountAmount + shippingCost;
 
     // Crear lista de productos formateada
     let productsText = '';
@@ -3366,6 +3553,8 @@ async function submitOrder(confirmed = false) {
             <div class="checkout-review-row"><span>Contacto</span><strong>${escapeHtml(phone)}<br>${escapeHtml(email)}</strong></div>
             <div class="checkout-review-row"><span>Entrega</span><strong>${shippingMethod === 'shalom' ? 'Shalom · flete en agencia' : 'Motorizado Lima'}<br>${escapeHtml(city)} · ${escapeHtml(address)}</strong></div>
             <div class="checkout-review-row"><span>Pago preferido</span><strong>${escapeHtml(paymentLabels[paymentMethod])}</strong></div>
+            ${discountCode ? `<div class="checkout-review-row"><span>Código 10% aplicado</span><strong>${escapeHtml(discountCode)} · - S/. ${discountAmount.toFixed(2)}</strong></div>` : ''}
+            ${shippingMethod === 'lima' ? `<div class="checkout-review-row"><span>Separación obligatoria</span><strong>S/. 50.00 · saldo digital S/. ${Math.max(total - 50, 0).toFixed(2)}</strong></div>` : ''}
             <div class="checkout-review-row"><span>Total de prendas y delivery</span><strong>S/. ${total.toFixed(2)}${shippingMethod === 'shalom' ? ' + flete Shalom' : ''}</strong></div>`;
         setCheckoutReviewMode(true);
         lucide.createIcons();
@@ -3380,19 +3569,26 @@ async function submitOrder(confirmed = false) {
     }
     checkoutConfirmBtn.disabled = true;
     checkoutConfirmBtn.textContent = 'PREPARANDO PEDIDO...';
-    const orderCode = await createPendingWebOrder({ name, phone, email, dni, city, address, shippingMethod, paymentMethod, discountCode });
+    let orderCode = '';
+    try {
+        orderCode = await createPendingWebOrder({ name, phone, email, dni, city, address, shippingMethod, paymentMethod, discountCode });
+    } catch (error) {
+        checkoutConfirmBtn.disabled = false;
+        checkoutConfirmBtn.innerHTML = '<i data-lucide="message-square"></i> ABRIR WHATSAPP';
+        setCheckoutReviewMode(false);
+        setDiscountMessage('checkout-discount-message', customerErrorMessage(error), 'error');
+        document.getElementById('checkout-discount-code')?.focus();
+        lucide.createIcons();
+        return;
+    }
 
     // Formatear Detalles de Pago en el mensaje
     let paymentDetailText = '';
     if (shippingMethod === 'shalom') {
-        paymentDetailText = `📦 *ENVÍO A PROVINCIA (SHALOM):*\n- Flete de envío se cancela al recoger en agencia.\n- Depósito de prendas requerido para el despacho.\n- *Total Prendas: S/. ${subtotal.toFixed(2)}*`;
+        paymentDetailText = `📦 *ENVÍO A PROVINCIA (SHALOM):*\n- Flete de envío se cancela al recoger en agencia.\n- Depósito de prendas requerido para el despacho.\n- *Total Prendas: S/. ${(subtotal - discountAmount).toFixed(2)}*`;
     } else { // Lima
-        if (reserveLima) {
-            const balance = total - 50.00;
-            paymentDetailText = `🛵 *DELIVERY MOTORIZADO LIMA (RESERVA):*\n- Adelanto de Reserva: *S/. 50.00*\n- Saldo a pagar al recibir: *S/. ${balance.toFixed(2)}*\n- *Total del Pedido: S/. ${total.toFixed(2)}*`;
-        } else {
-            paymentDetailText = `🛵 *DELIVERY MOTORIZADO LIMA (CONTRA ENTREGA):*\n- *Pago Completo al Recibir: S/. ${total.toFixed(2)}*`;
-        }
+        const balance = Math.max(total - 50.00, 0);
+        paymentDetailText = `🛵 *DELIVERY MOTORIZADO LIMA:*\n- Separación obligatoria: *S/. 50.00*\n- Saldo digital por Yape, Plin o transferencia: *S/. ${balance.toFixed(2)}*\n- No se acepta efectivo.\n- *Total del Pedido: S/. ${total.toFixed(2)}*`;
     }
 
     // Mensaje final para WhatsApp
@@ -3407,7 +3603,7 @@ async function submitOrder(confirmed = false) {
                     `- *Dirección:* ${address}\n` +
                     `${shippingMethod === 'shalom' ? `- *DNI para recojo:* ${dni}\n` : ''}` +
                     `- *Pago preferido:* ${paymentLabels[paymentMethod]}\n` +
-                    `${discountCode ? `- *Código de descuento:* ${discountCode} (por validar)\n` : ''}\n` +
+                    `${discountCode ? `- *Código de descuento aplicado:* ${discountCode}\n- *Descuento 10%:* - S/. ${discountAmount.toFixed(2)}\n` : ''}\n` +
                     `🛒 *PRODUCTOS DEL PEDIDO:*\n${productsText}\n` +
                     `${paymentDetailText}\n\n` +
                     `💬 *Mensaje:* Hola, me gustaría confirmar mi pedido. Por favor, bríndame los datos de cuenta para realizar el depósito correspondiente.`;

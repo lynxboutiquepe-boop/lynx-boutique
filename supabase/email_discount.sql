@@ -49,3 +49,58 @@ for each row execute function public.handle_new_customer();
 
 -- El envío real se realiza mediante la Edge Function send-welcome-discount.
 -- La función debe comprobar email_confirmed_at antes de generar o enviar el código.
+
+-- Validación pública mínima para mostrar el ahorro en el carrito. No expone
+-- correos ni permite consultar códigos: solo responde sobre el código exacto.
+create or replace function public.preview_welcome_discount(p_code text)
+returns table(valid boolean, discount_percent integer)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    exists (
+      select 1 from public.welcome_discount_codes w
+      where w.code = upper(trim(coalesce(p_code, '')))
+        and w.sent_at is not null
+        and w.redeemed_at is null
+    ) as valid,
+    case when exists (
+      select 1 from public.welcome_discount_codes w
+      where w.code = upper(trim(coalesce(p_code, '')))
+        and w.sent_at is not null
+        and w.redeemed_at is null
+    ) then 10 else 0 end as discount_percent;
+$$;
+
+-- Validación final: el código debe pertenecer al mismo correo ingresado en
+-- checkout. El descuento definitivo también se recalcula dentro del pedido.
+create or replace function public.validate_welcome_discount(p_code text, p_email text)
+returns table(valid boolean, discount_percent integer)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    exists (
+      select 1 from public.welcome_discount_codes w
+      where w.code = upper(trim(coalesce(p_code, '')))
+        and lower(w.email) = lower(trim(coalesce(p_email, '')))
+        and w.sent_at is not null
+        and w.redeemed_at is null
+    ) as valid,
+    case when exists (
+      select 1 from public.welcome_discount_codes w
+      where w.code = upper(trim(coalesce(p_code, '')))
+        and lower(w.email) = lower(trim(coalesce(p_email, '')))
+        and w.sent_at is not null
+        and w.redeemed_at is null
+    ) then 10 else 0 end as discount_percent;
+$$;
+
+revoke all on function public.preview_welcome_discount(text) from public;
+revoke all on function public.validate_welcome_discount(text,text) from public;
+grant execute on function public.preview_welcome_discount(text) to anon, authenticated;
+grant execute on function public.validate_welcome_discount(text,text) to anon, authenticated;

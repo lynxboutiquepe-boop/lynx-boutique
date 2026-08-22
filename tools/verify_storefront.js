@@ -34,7 +34,7 @@ for (const required of [
     'class="trending-card-image product-detail-link"',
     'href="/cuenta"',
     'product-image-overrides.js?v=20260822-mockups-v1',
-    'app.js?v=20260822-commerce-v27',
+    'app.js?v=20260822-commerce-v28',
     'tiktok-videos.js?v=20260813-controls-fix-v3'
 ]) {
     if (!home.includes(required) && !fs.readFileSync(path.join(root, 'app.js'), 'utf8').includes(required)) {
@@ -46,6 +46,9 @@ for (const required of [
     'id="checkout-email"',
     'name="payment-method"',
     'id="checkout-review-panel"',
+    'id="cart-discount-code"',
+    'id="checkout-apply-discount-btn"',
+    'id="checkout-discount-row"',
     'id="review-fit"',
     'href="/guia/tallas"'
 ]) {
@@ -53,7 +56,7 @@ for (const required of [
 }
 
 const app = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
-for (const required of ['validateCartStock', 'create_whatsapp_order', 'getAvailableProductSize']) {
+for (const required of ['validateCartStock', 'create_whatsapp_order', 'getAvailableProductSize', 'validateWelcomeDiscount', 'discountAmountFor']) {
     if (!app.includes(required)) errors.push(`Falta validación de comercio: ${required}`);
 }
 

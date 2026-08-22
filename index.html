@@ -60,7 +60,7 @@
     <!-- Lucide Icons (CDN) -->
     <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260822-commerce-v14">
+    <link rel="stylesheet" href="styles.css?v=20260822-commerce-v15">
 </head>
 <body>
     <div class="page-scroll-progress" id="page-scroll-progress" aria-hidden="true"></div>
@@ -378,7 +378,7 @@
                 </details>
                 <details class="faq-item">
                     <summary>¿Cómo funciona la reserva de una prenda?</summary>
-                    <p>Para entregas en Lima puedes reservar el stock con S/. 50. El saldo restante se paga en efectivo o Yape cuando llegue el motorizado.</p>
+                    <p>Para entregas en Lima la separación de S/. 50 es obligatoria. El adelanto y el saldo se pagan por Yape, Plin o transferencia; no aceptamos efectivo.</p>
                 </details>
                 <details class="faq-item">
                     <summary>¿Cómo confirmo mi talla?</summary>
@@ -537,9 +537,25 @@
 
             <!-- Cart Footer -->
             <div class="drawer-footer" id="cart-summary-footer">
+                <div class="cart-discount-box">
+                    <label for="cart-discount-code">¿Tienes un código?</label>
+                    <div class="discount-code-control">
+                        <input type="text" id="cart-discount-code" autocomplete="off" maxlength="32" placeholder="LYNX10-XXXXXXXX">
+                        <button type="button" id="cart-apply-discount-btn">APLICAR</button>
+                    </div>
+                    <small class="discount-code-message" id="cart-discount-message" aria-live="polite"></small>
+                </div>
                 <div class="summary-row">
                     <span>Subtotal:</span>
                     <span class="summary-price" id="cart-subtotal">S/. 0.00</span>
+                </div>
+                <div class="summary-row discount-summary-row" id="cart-discount-row" hidden>
+                    <span>Descuento 10%:</span>
+                    <span class="summary-price" id="cart-discount">- S/. 0.00</span>
+                </div>
+                <div class="summary-row cart-final-row">
+                    <span>Total prendas:</span>
+                    <span class="summary-price" id="cart-total">S/. 0.00</span>
                 </div>
                 <p class="summary-disclaimer">Los costos de envío y reservas se calculan al finalizar pedido.</p>
                 <button class="btn btn-primary btn-block" id="go-to-checkout-btn">
@@ -605,8 +621,11 @@
 
                     <div class="form-group">
                         <label for="checkout-discount-code">Código de descuento <span>(opcional)</span></label>
-                        <input type="text" id="checkout-discount-code" autocomplete="off" maxlength="32" placeholder="Ejemplo: LYNX10-XXXXXXXX">
-                        <small>Lo validaremos al confirmar tu pedido por WhatsApp.</small>
+                        <div class="discount-code-control">
+                            <input type="text" id="checkout-discount-code" autocomplete="off" maxlength="32" placeholder="Ejemplo: LYNX10-XXXXXXXX">
+                            <button type="button" id="checkout-apply-discount-btn">APLICAR</button>
+                        </div>
+                        <small class="discount-code-message" id="checkout-discount-message" aria-live="polite">Ingresa el código que llegó a tu correo.</small>
                     </div>
 
                     <!-- Shipping Method Selection -->
@@ -636,10 +655,10 @@
                     <!-- Payment Condition Reservation for Lima -->
                     <div class="form-group hidden" id="lima-payment-condition-box">
                         <div class="reservation-checkbox-wrapper">
-                            <input type="checkbox" id="lima-reserve-checkbox" checked>
+                            <input type="checkbox" id="lima-reserve-checkbox" checked disabled aria-describedby="lima-reserve-note">
                             <label for="lima-reserve-checkbox">
-                                <strong>Separar mi pedido con S/. 50.00</strong>
-                                <span class="checkbox-desc">Pagas 50 soles por transferencia bancaria (BCP/BBVA/Yape) para reservar tu stock y el saldo restante en efectivo o Yape cuando el motorizado llegue.</span>
+                                <strong>Separación obligatoria de S/. 50.00</strong>
+                                <span class="checkbox-desc" id="lima-reserve-note">Abonas S/. 50 por Yape, Plin o transferencia para reservar el stock. El saldo restante también se paga digitalmente antes o al momento de la entrega. No aceptamos efectivo.</span>
                             </label>
                         </div>
                     </div>
@@ -659,10 +678,6 @@
                                 <input type="radio" name="payment-method" value="tarjeta-link">
                                 <span><strong>Tarjeta mediante link</strong><small>Solicita un enlace de pago seguro al confirmar.</small></span>
                             </label>
-                            <label class="payment-option-card" id="payment-cash-card">
-                                <input type="radio" name="payment-method" value="contraentrega">
-                                <span><strong>Contraentrega en Lima</strong><small>Efectivo o Yape al recibir, sujeto a confirmación.</small></span>
-                            </label>
                         </div>
                     </div>
                 </form>
@@ -673,6 +688,10 @@
                     <div class="total-row">
                         <span>Prendas:</span>
                         <span id="checkout-subtotal">S/. 0.00</span>
+                    </div>
+                    <div class="total-row discount-total-row" id="checkout-discount-row" hidden>
+                        <span>Descuento 10%:</span>
+                        <span id="checkout-discount">- S/. 0.00</span>
                     </div>
                     <div class="total-row">
                         <span>Costo de Envío:</span>
@@ -748,6 +767,8 @@
                     <p class="account-message" id="discount-otp-message" aria-live="polite"></p>
                     <button class="btn btn-primary btn-block" type="submit"><span>VERIFICAR Y RECIBIR 10%</span><i data-lucide="check"></i></button>
                 </form>
+                <p class="account-message discount-delivery-message" id="discount-delivery-message" aria-live="polite"></p>
+                <button class="account-secondary-btn" id="discount-resend-email" type="button" hidden>REENVIAR CÓDIGO DE DESCUENTO</button>
                 <button class="account-secondary-btn" id="discount-use-another-email" type="button">USAR OTRO CORREO</button>
             </div>
         </div>
@@ -758,7 +779,7 @@
     <script src="supabase-config.js?v=20260716-admin-v1" defer></script>
     <script src="commerce-tracking.js?v=20260813-cro-v1" defer></script>
     <script src="product-image-overrides.js?v=20260822-mockups-v1" defer></script>
-    <script src="app.js?v=20260822-commerce-v27" defer></script>
+    <script src="app.js?v=20260822-commerce-v28" defer></script>
     <script src="tiktok-videos.js?v=20260813-controls-fix-v3" defer></script>
 </body>
 </html>

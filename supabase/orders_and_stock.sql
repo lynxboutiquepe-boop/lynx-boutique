@@ -18,8 +18,10 @@ create table if not exists public.orders (
   city text not null,
   delivery_address text not null,
   shipping_method text not null check (shipping_method in ('shalom','lima')),
-  payment_method text not null check (payment_method in ('yape-plin','transferencia','tarjeta-link','contraentrega')),
+  payment_method text not null check (payment_method in ('yape-plin','transferencia','tarjeta-link')),
   discount_code text not null default '',
+  discount_percent integer not null default 0 check (discount_percent between 0 and 100),
+  discount_amount numeric(12,2) not null default 0 check (discount_amount >= 0),
   subtotal numeric(12,2) not null check (subtotal >= 0),
   shipping_cost numeric(12,2) not null default 0 check (shipping_cost >= 0),
   total numeric(12,2) not null check (total >= 0),
@@ -29,6 +31,9 @@ create table if not exists public.orders (
   confirmed_at timestamptz,
   updated_at timestamptz not null default now()
 );
+
+alter table public.orders add column if not exists discount_percent integer not null default 0;
+alter table public.orders add column if not exists discount_amount numeric(12,2) not null default 0;
 
 create table if not exists public.order_items (
   id bigint generated always as identity primary key,
@@ -136,12 +141,14 @@ declare
   v_size text;
   v_subtotal numeric(12,2) := 0;
   v_shipping numeric(12,2) := 0;
+  v_discount_percent integer := 0;
+  v_discount_amount numeric(12,2) := 0;
 begin
   if char_length(trim(coalesce(p_customer_name,''))) < 3 then raise exception 'Nombre inválido'; end if;
   if char_length(trim(coalesce(p_customer_phone,''))) < 9 then raise exception 'WhatsApp inválido'; end if;
   if position('@' in coalesce(p_customer_email,'')) < 2 then raise exception 'Correo inválido'; end if;
   if p_shipping_method not in ('shalom','lima') then raise exception 'Envío inválido'; end if;
-  if p_payment_method not in ('yape-plin','transferencia','tarjeta-link','contraentrega') then raise exception 'Pago inválido'; end if;
+  if p_payment_method not in ('yape-plin','transferencia','tarjeta-link') then raise exception 'Pago inválido'; end if;
   if p_shipping_method = 'shalom' and p_customer_dni !~ '^[0-9]{8}$' then raise exception 'DNI inválido'; end if;
   if jsonb_typeof(p_items) <> 'array' or jsonb_array_length(p_items) < 1 or jsonb_array_length(p_items) > 20 then raise exception 'Pedido inválido'; end if;
 
@@ -156,14 +163,27 @@ begin
     v_subtotal := v_subtotal + (v_product.price * v_qty);
   end loop;
 
+  if trim(coalesce(p_discount_code,'')) <> '' then
+    select w.discount_percent into v_discount_percent
+    from public.welcome_discount_codes w
+    where w.code = upper(trim(p_discount_code))
+      and lower(w.email) = lower(trim(p_customer_email))
+      and w.sent_at is not null
+      and w.redeemed_at is null
+    for share;
+    if not found then raise exception 'Código de descuento inválido, usado o vinculado a otro correo'; end if;
+    v_discount_amount := round(v_subtotal * v_discount_percent / 100.0, 2);
+  end if;
+
   if p_shipping_method = 'lima' then v_shipping := 15; end if;
   insert into public.orders (
     customer_name,customer_phone,customer_email,customer_dni,city,delivery_address,
-    shipping_method,payment_method,discount_code,subtotal,shipping_cost,total,customer_user_id
+    shipping_method,payment_method,discount_code,discount_percent,discount_amount,
+    subtotal,shipping_cost,total,customer_user_id
   ) values (
     trim(p_customer_name),trim(p_customer_phone),lower(trim(p_customer_email)),trim(coalesce(p_customer_dni,'')),
     trim(p_city),trim(p_delivery_address),p_shipping_method,p_payment_method,upper(trim(coalesce(p_discount_code,''))),
-    v_subtotal,v_shipping,v_subtotal+v_shipping,auth.uid()
+    v_discount_percent,v_discount_amount,v_subtotal,v_shipping,v_subtotal-v_discount_amount+v_shipping,auth.uid()
   ) returning id, orders.order_code into v_order_id, v_order_code;
 
   for v_item in select * from jsonb_array_elements(p_items)
@@ -191,16 +211,32 @@ as $$
 declare
   v_order public.orders%rowtype;
   v_item public.order_items%rowtype;
+  v_discount_user_id uuid;
 begin
   if not public.is_admin() then raise exception 'Acceso no autorizado'; end if;
   select * into v_order from public.orders where id = p_order_id for update;
   if not found then raise exception 'Pedido no encontrado'; end if;
   if v_order.status <> 'pending_whatsapp' then raise exception 'Este pedido ya fue procesado'; end if;
 
+  if trim(coalesce(v_order.discount_code,'')) <> '' then
+    select w.user_id into v_discount_user_id
+    from public.welcome_discount_codes w
+    where w.code = v_order.discount_code
+      and lower(w.email) = lower(v_order.customer_email)
+      and w.sent_at is not null
+      and w.redeemed_at is null
+    for update;
+    if not found then raise exception 'El código de descuento ya fue usado o dejó de ser válido'; end if;
+  end if;
+
   for v_item in select * from public.order_items where order_id = p_order_id order by id
   loop
     perform public.register_sale_with_size(v_item.product_id,v_item.quantity,v_item.size,'Pedido web ' || v_order.order_code);
   end loop;
+
+  if v_discount_user_id is not null then
+    update public.welcome_discount_codes set redeemed_at = now() where user_id = v_discount_user_id;
+  end if;
 
   update public.orders set status='confirmed',confirmed_by=auth.uid(),confirmed_at=now() where id=p_order_id;
 end;

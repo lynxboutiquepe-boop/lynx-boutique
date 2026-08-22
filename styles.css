@@ -3339,6 +3339,69 @@ html.is-android .stock-marquee {
     margin-bottom: 24px;
 }
 
+.cart-discount-box {
+    margin-bottom: 18px;
+    padding: 14px;
+    border: 1px solid rgba(var(--gold-rgb), .3);
+    border-radius: 10px;
+    background: rgba(var(--gold-rgb), .055);
+}
+
+.cart-discount-box > label {
+    display: block;
+    margin-bottom: 9px;
+    color: var(--text-secondary);
+    font: 700 .68rem/1 var(--font-title);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.discount-code-control {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+}
+
+.discount-code-control input {
+    min-width: 0;
+    height: 46px;
+    padding: 0 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 7px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-family: var(--font-title);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.discount-code-control button {
+    min-width: 94px;
+    min-height: 46px;
+    padding: 0 14px;
+    border: 1px solid var(--gold);
+    border-radius: 7px;
+    background: var(--gold);
+    color: #080808;
+    cursor: pointer;
+    font: 800 .64rem/1 var(--font-title);
+    letter-spacing: .08em;
+}
+
+.discount-code-control button:disabled { cursor: wait; opacity: .62; }
+.discount-code-message { display: block; min-height: 1.25em; margin-top: 7px; color: var(--text-muted); font-size: .67rem; line-height: 1.35; }
+.discount-code-message.is-success { color: #71cf91; }
+.discount-code-message.is-error { color: #ff8585; }
+.discount-summary-row,.discount-total-row { color: #71cf91; }
+.discount-summary-row .summary-price { color: #71cf91; font-size: 1rem; }
+.cart-final-row { padding-top: 11px; border-top: 1px solid var(--border-color); }
+.discount-delivery-message { min-height: 1.5em; margin-top: 18px; }
+
+@media (max-width: 380px) {
+    .discount-code-control { grid-template-columns: 1fr; }
+    .discount-code-control button { width: 100%; }
+}
+
 /* Checkout Form Layout */
 .checkout-form-container {
     display: flex;

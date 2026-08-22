@@ -26,7 +26,7 @@ Deno.serve(async (request) => {
     }
 
     const confirmUrl = verificationUrl(email_data.token_hash, email_data.email_action_type, email_data.redirect_to)
-    const html = `<div style="background:#090909;color:#fff;padding:40px;font-family:Arial,sans-serif"><p style="color:#e1bb38;letter-spacing:3px;font-size:12px">LYNX BOUTIQUE</p><h1>Verifica tu correo</h1><p>Confirma que este correo es tuyo para recibir tu cÃ³digo privado del 10% en tu primera compra.</p><p style="margin:32px 0"><a href="${confirmUrl}" style="background:#e1bb38;color:#090909;padding:15px 24px;text-decoration:none;font-weight:800">VERIFICAR MI CORREO</a></p><p>TambiÃ©n te avisaremos sobre promociones, nuevo stock y nuestros prÃ³ximos lives.</p><p style="color:#999;font-size:12px">Si no solicitaste este registro, ignora este mensaje.</p></div>`
+    const html = `<div style="background:#090909;color:#fff;padding:40px;font-family:Arial,sans-serif"><p style="color:#e1bb38;letter-spacing:3px;font-size:12px">LYNX BOUTIQUE</p><h1>Verifica tu correo</h1><p>Confirma que este correo es tuyo para recibir tu código privado del 10% en tu primera compra.</p><p style="margin:32px 0"><a href="${confirmUrl}" style="background:#e1bb38;color:#090909;padding:15px 24px;text-decoration:none;font-weight:800">VERIFICAR MI CORREO</a></p><p>También te avisaremos sobre promociones, nuevo stock y nuestros próximos lives.</p><p style="color:#999;font-size:12px">Si no solicitaste este registro, ignora este mensaje.</p></div>`
 
     const mailResponse = await fetch(mailBridgeUrl, {
       method: 'POST',
@@ -43,7 +43,7 @@ Deno.serve(async (request) => {
     return Response.json({})
   } catch (error) {
     return Response.json(
-      { error: { http_code: 401, message: error instanceof Error ? error.message : 'Solicitud no vÃ¡lida' } },
+      { error: { http_code: 401, message: error instanceof Error ? error.message : 'Solicitud no válida' } },
       { status: 401 },
     )
   }

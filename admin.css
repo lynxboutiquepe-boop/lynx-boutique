@@ -596,3 +596,4 @@ input, select, textarea, .quick-edit input { background: #fff; color: var(--ink)
 .conversion-funnel i { display: block; min-width: 4px; height: 10px; border-radius: 999px; background: linear-gradient(90deg, #d4af37, #f0d87a); box-shadow: 0 0 15px rgba(212,175,55,.18); }
 .conversion-funnel strong { color: #fff; }
 @media (max-width: 600px) { .conversion-funnel > div { grid-template-columns: 1fr auto; } .conversion-funnel i { grid-column: 1 / -1; } }
+.order-discount { display:block; margin-top:5px; color:#b8942a; font-size:.64rem; line-height:1.35; }

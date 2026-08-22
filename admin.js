@@ -344,7 +344,7 @@ function renderOrders() {
         <td><div class="order-customer"><strong>${escapeHtml(order.customer_name)}</strong><span>${escapeHtml(order.customer_phone)}<br>${escapeHtml(order.customer_email)}</span></div></td>
         <td class="order-items-copy">${escapeHtml(orderItemsText(order))}</td>
         <td>${escapeHtml(order.shipping_method === 'shalom' ? 'Shalom' : 'Lima')}<br><small>${escapeHtml(order.city)}</small></td>
-        <td><strong>${money(order.total)}</strong></td>
+        <td><strong>${money(order.total)}</strong>${Number(order.discount_amount || 0) > 0 ? `<small class="order-discount">10% · -${money(order.discount_amount)}<br>${escapeHtml(order.discount_code)}</small>` : ''}</td>
         <td><span class="order-status ${escapeHtml(order.status)}">${ORDER_STATUS_LABELS[order.status] || escapeHtml(order.status)}</span></td>
         <td><div class="row-actions">${orderActionButtons(order)}</div></td>
     </tr>`).join('') : '<tr><td class="empty-state" colspan="7">Todavía no hay pedidos registrados desde la web.</td></tr>';
@@ -353,7 +353,7 @@ function renderOrders() {
         <header><div class="order-customer"><strong class="order-code">${escapeHtml(order.order_code)}</strong><span>${localDateTime(order.created_at)}</span></div><span class="order-status ${escapeHtml(order.status)}">${ORDER_STATUS_LABELS[order.status] || escapeHtml(order.status)}</span></header>
         <div class="order-customer"><strong>${escapeHtml(order.customer_name)}</strong><span>${escapeHtml(order.customer_phone)} · ${escapeHtml(order.customer_email)}</span></div>
         <div class="order-items-copy">${escapeHtml(orderItemsText(order))}</div>
-        <div class="mobile-order-meta"><span>${order.shipping_method === 'shalom' ? 'Shalom' : 'Motorizado Lima'}<br>${escapeHtml(order.city)}</span><strong>${money(order.total)}</strong></div>
+        <div class="mobile-order-meta"><span>${order.shipping_method === 'shalom' ? 'Shalom' : 'Motorizado Lima'}<br>${escapeHtml(order.city)}${Number(order.discount_amount || 0) > 0 ? `<br><small>10% aplicado · ${escapeHtml(order.discount_code)}</small>` : ''}</span><strong>${money(order.total)}</strong></div>
         <div class="mobile-order-actions">${orderActionButtons(order)}</div>
     </article>`).join('') : '<p class="empty-state">Todavía no hay pedidos registrados desde la web.</p>';
     lucide.createIcons();
