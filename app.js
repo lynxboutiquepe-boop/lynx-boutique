@@ -2091,6 +2091,15 @@ function setupTrendingCarousel() {
             event.stopPropagation();
             return;
         }
+
+        const productLink = event.target.closest('.product-detail-link');
+        if (!productLink || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+
+        // Safari puede cancelar la navegación nativa si la tarjeta cambia unos
+        // píxeles entre pointerdown y click. El click ya confirmó que no fue un
+        // arrastre, así que abrimos la ficha de forma explícita y predecible.
+        event.preventDefault();
+        window.location.assign(productLink.href);
     }, true);
     trendingViewport.addEventListener('scroll', () => {
         if (!touchFirst || !hasMeasured) return;
