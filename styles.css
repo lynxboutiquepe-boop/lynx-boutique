@@ -5792,3 +5792,188 @@ body {
     #catalog .search-box input { width: 100%; min-width: 0; }
     #catalog .category-tags { max-width: calc(100vw - 32px); }
 }
+
+/* Responsive + iOS audit guardrails — 2026-08-21
+   Estas reglas son deliberadamente finales: sustituyen medidas antiguas que
+   se contradecían entre sí en Safari y en teléfonos de 320 a 430 px. */
+#catalog {
+    scroll-margin-top: 96px;
+}
+
+.trending-viewport {
+    overflow-x: scroll;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (hover: none), (pointer: coarse) {
+    .trending-viewport {
+        cursor: auto;
+        touch-action: pan-x pan-y;
+        scroll-snap-type: x proximity;
+    }
+
+    .trending-card {
+        scroll-snap-align: start;
+        transform: none !important;
+        transform-style: flat;
+    }
+
+    .trending-card-image,
+    .trending-card-image img {
+        transform: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    #catalog {
+        scroll-margin-top: calc(82px + env(safe-area-inset-top));
+    }
+
+    .trending-section {
+        padding-inline: 16px;
+    }
+
+    .trending-header {
+        align-items: center;
+    }
+
+    .trending-controls {
+        display: none;
+    }
+
+    .trending-card {
+        flex-basis: calc((100vw - 46px) / 2);
+        min-width: 0;
+    }
+
+    .trending-card-title {
+        display: -webkit-box;
+        min-height: 2.6em;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+
+    .social-fab-group {
+        right: max(8px, env(safe-area-inset-right));
+        bottom: max(9px, env(safe-area-inset-bottom));
+        flex-direction: row;
+        gap: 5px;
+    }
+
+    .social-fab {
+        width: 38px;
+        height: 38px;
+        min-height: 38px;
+        padding: 0;
+        justify-content: center;
+        opacity: 0.94;
+    }
+
+    .social-fab span:not(.social-brand-icon) {
+        display: none;
+    }
+
+    .social-fab .social-brand-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .discount-dialog {
+        width: calc(100vw - 16px);
+        max-width: calc(100vw - 16px);
+        max-height: calc(100dvh - 16px);
+        margin: auto;
+    }
+
+    .discount-card {
+        max-height: calc(100dvh - 16px);
+    }
+
+    .discount-card-art {
+        min-height: clamp(132px, 23dvh, 174px);
+    }
+
+    .discount-card-art strong {
+        font-size: clamp(4rem, 20vw, 4.8rem);
+    }
+
+    .discount-card-content {
+        padding: 24px 18px max(22px, env(safe-area-inset-bottom));
+    }
+
+    .discount-card-content h2 {
+        margin: 9px 0 13px;
+        font-size: clamp(2rem, 10vw, 2.8rem);
+    }
+
+    .discount-card-content > p {
+        font-size: 0.78rem;
+        line-height: 1.5;
+    }
+
+    .discount-email-form {
+        margin-top: 18px;
+    }
+
+    .discount-consent {
+        font-size: 0.64rem;
+    }
+
+    .drawer-content,
+    .modal-content {
+        max-width: 100vw;
+    }
+}
+
+@media (max-width: 340px) {
+    #catalog.catalog-section {
+        padding-inline: 10px;
+    }
+
+    #catalog .category-tags {
+        max-width: calc(100vw - 20px);
+    }
+
+    .products-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 26px 8px;
+    }
+
+    .product-card-title {
+        font-size: 0.72rem;
+        line-height: 1.25;
+    }
+
+    .product-card-price {
+        font-size: 0.78rem;
+    }
+
+    .product-card-footer .btn {
+        min-height: 38px;
+        padding-inline: 5px;
+        font-size: 0.54rem;
+        letter-spacing: 0.02em;
+    }
+
+    .trending-section {
+        padding-inline: 10px;
+    }
+
+    .trending-card {
+        flex-basis: calc((100vw - 30px) / 2);
+    }
+
+    .catalog-category-count {
+        display: none;
+    }
+}

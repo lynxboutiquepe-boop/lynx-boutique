@@ -1780,7 +1780,7 @@ function renderTrendingProducts() {
         <article class="trending-card" ${isDuplicate ? 'aria-hidden="true"' : ''}>
             <a class="trending-card-image product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}" aria-label="Ver detalles de ${escapeHtml(product.title)}" ${isDuplicate ? 'tabindex="-1"' : ''}>
                 <span class="trending-card-badge">${product.badge}</span>
-                <img class="trending-primary-img" src="${product.image}" alt="${isDuplicate ? '' : product.title}" loading="${!isDuplicate && productIndex < 2 ? 'eager' : 'lazy'}" decoding="async" ${!isDuplicate && productIndex < 2 ? 'fetchpriority="high"' : 'fetchpriority="low"'}>
+                <img class="trending-primary-img" src="${product.image}" alt="${isDuplicate ? '' : product.title}" loading="${isDuplicate ? 'lazy' : 'eager'}" decoding="async" ${!isDuplicate && productIndex < 2 ? 'fetchpriority="high"' : 'fetchpriority="auto"'}>
                 ${supportsProductHover && product.images?.[1] ? `<img class="trending-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="eager" decoding="async">` : ''}
             </a>
             <a class="trending-card-title product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}" ${isDuplicate ? 'tabindex="-1"' : ''}>${product.title}</a>
@@ -1953,17 +1953,21 @@ function setupTrendingCarousel() {
     let dragStartX = 0;
     let dragStartScroll = 0;
     let dragDistance = 0;
-    let linkPointerId = null;
-    let linkStartX = 0;
-    let linkDistance = 0;
-    let pendingProductLink = null;
     let suppressClick = false;
+    let scrollTimer = 0;
+    let resizeFrame = 0;
+    let hasMeasured = false;
     const speed = 0.085; // 85 px por segundo.
+    const touchFirst = window.matchMedia('(hover: none), (pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    trendingViewport.dataset.carouselMode = touchFirst ? 'touch' : 'desktop';
 
     const normalizePosition = value => {
         if (!groupWidth) return value;
-        while (value >= groupWidth * 2.5) value -= groupWidth;
-        while (value < groupWidth * 1.5) value += groupWidth;
+        // La copia central es la visible y accesible. Se normaliza lejos de sus
+        // bordes para que el salto invisible nunca ocurra bajo el dedo.
+        while (value >= groupWidth * 1.8) value -= groupWidth;
+        while (value < groupWidth * 0.8) value += groupWidth;
         return value;
     };
 
@@ -1983,12 +1987,17 @@ function setupTrendingCarousel() {
         if (!group) return;
 
         const previousWidth = groupWidth;
-        const previousProgress = previousWidth ? (trendingViewport.scrollLeft % previousWidth) / previousWidth : 0;
+        const previousProgress = previousWidth
+            ? ((trendingViewport.scrollLeft % previousWidth) + previousWidth) % previousWidth / previousWidth
+            : 0;
 
         groupWidth = group.getBoundingClientRect().width;
         if (!groupWidth) return;
 
-        trendingViewport.scrollLeft = groupWidth * (2 + Math.max(0, Math.min(0.999, previousProgress)));
+        // Empezar siempre en la copia central evita que Safari tenga que pintar
+        // imágenes lazy de una copia oculta antes de mostrar el carrusel.
+        trendingViewport.scrollLeft = groupWidth * (1 + Math.max(0, Math.min(0.999, previousProgress)));
+        hasMeasured = true;
     };
 
     const getScrollStep = () => {
@@ -2009,7 +2018,7 @@ function setupTrendingCarousel() {
         const elapsed = Math.min(timestamp - lastFrameTime, 50);
         lastFrameTime = timestamp;
 
-        if (groupWidth && pointerId === null && timestamp >= resumeAt) {
+        if (!touchFirst && !reduceMotion && groupWidth && pointerId === null && timestamp >= resumeAt && !document.hidden) {
             trendingViewport.scrollLeft += elapsed * speed;
             normalizeScroll();
         }
@@ -2029,7 +2038,8 @@ function setupTrendingCarousel() {
         suppressClick = dragDistance > 6;
         pointerId = null;
         trendingViewport.classList.remove('is-dragging');
-        normalizeScroll();
+        window.clearTimeout(scrollTimer);
+        scrollTimer = window.setTimeout(normalizeScroll, 180);
         pauseAutoScroll(1200);
         lastFrameTime = performance.now();
         window.setTimeout(() => { suppressClick = false; }, 250);
@@ -2037,17 +2047,6 @@ function setupTrendingCarousel() {
 
     trendingViewport.addEventListener('pointerdown', event => {
         if (event.pointerType === 'mouse' && event.button !== 0) return;
-        // Los enlaces deben conservar siempre su clic nativo. El carrusel puede
-        // arrastrarse desde el espacio libre de las tarjetas y con scroll táctil.
-        const pressedProductLink = event.target.closest('.product-detail-link');
-        if (pressedProductLink) {
-            linkPointerId = event.pointerId;
-            linkStartX = event.clientX;
-            linkDistance = 0;
-            pendingProductLink = pressedProductLink;
-            pauseAutoScroll(2200);
-            return;
-        }
         // En iPhone/iPad el desplazamiento horizontal nativo es mucho más
         // fiable que capturar el dedo con Pointer Events. Solo arrastramos
         // manualmente con mouse; en pantallas táctiles el viewport conserva
@@ -2065,51 +2064,25 @@ function setupTrendingCarousel() {
         trendingViewport.classList.add('is-dragging');
     });
     trendingViewport.addEventListener('pointermove', event => {
-        if (event.pointerId === linkPointerId) {
-            linkDistance = Math.max(linkDistance, Math.abs(event.clientX - linkStartX));
-            return;
-        }
         if (event.pointerId !== pointerId) return;
         const delta = event.clientX - dragStartX;
         dragDistance = Math.max(dragDistance, Math.abs(delta));
         if (dragDistance > 3 && event.cancelable) event.preventDefault();
         trendingViewport.scrollLeft = dragStartScroll - delta;
     }, { passive: false });
-    const openPressedProduct = event => {
-        if (event.pointerId === linkPointerId) {
-            const destination = pendingProductLink?.href;
-            const shouldOpen = linkDistance <= 8 && Boolean(destination);
-            linkPointerId = null;
-            pendingProductLink = null;
-            linkDistance = 0;
-            if (shouldOpen) {
-                event.preventDefault();
-                window.location.assign(destination);
-            }
-            return true;
-        }
-        return false;
-    };
     trendingViewport.addEventListener('pointerup', event => {
-        if (openPressedProduct(event)) return;
         if (event.pointerType !== 'mouse') {
             pauseAutoScroll(1600);
-            window.setTimeout(normalizeScroll, 0);
+            window.clearTimeout(scrollTimer);
+            scrollTimer = window.setTimeout(normalizeScroll, 360);
             return;
         }
         endDragging(event);
     }, { passive: true });
     window.addEventListener('pointerup', event => {
-        if (openPressedProduct(event)) return;
         endDragging(event);
     }, { passive: false });
     trendingViewport.addEventListener('pointercancel', event => {
-        if (event.pointerId === linkPointerId) {
-            linkPointerId = null;
-            pendingProductLink = null;
-            linkDistance = 0;
-            return;
-        }
         endDragging(event);
     }, { passive: true });
     trendingViewport.addEventListener('click', event => {
@@ -2118,15 +2091,15 @@ function setupTrendingCarousel() {
             event.stopPropagation();
             return;
         }
-
-        const productLink = event.target.closest('.product-detail-link');
-        if (!productLink || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
-
-        // El arrastre del carrusel puede cancelar la navegación nativa en algunos
-        // navegadores. Forzamos la ficha solo cuando fue un clic limpio.
-        event.preventDefault();
-        window.location.assign(productLink.href);
     }, true);
+    trendingViewport.addEventListener('scroll', () => {
+        if (!touchFirst || !hasMeasured) return;
+        pauseAutoScroll(1800);
+        window.clearTimeout(scrollTimer);
+        // iOS conserva inercia después de touchend. Esperar a que realmente
+        // termine evita saltos y tarjetas que dejan de responder.
+        scrollTimer = window.setTimeout(normalizeScroll, 240);
+    }, { passive: true });
     trendingViewport.addEventListener('wheel', () => {
         pauseAutoScroll(1200);
         window.setTimeout(normalizeScroll, 180);
@@ -2135,12 +2108,15 @@ function setupTrendingCarousel() {
     trendingViewport.addEventListener('focusout', () => pauseAutoScroll(700));
 
     let resizeObserver = null;
+    const requestMeasure = () => {
+        cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(measureAndCenter);
+    };
     if ('ResizeObserver' in window) {
-        resizeObserver = new ResizeObserver(measureAndCenter);
+        resizeObserver = new ResizeObserver(requestMeasure);
         resizeObserver.observe(trendingViewport);
-        resizeObserver.observe(trendingTrack);
     } else {
-        window.addEventListener('resize', measureAndCenter, { passive: true });
+        window.addEventListener('resize', requestMeasure, { passive: true });
     }
 
     measureAndCenter();
@@ -2149,8 +2125,10 @@ function setupTrendingCarousel() {
 
     window.addEventListener('pagehide', () => {
         cancelAnimationFrame(animationFrame);
+        cancelAnimationFrame(resizeFrame);
+        window.clearTimeout(scrollTimer);
         resizeObserver?.disconnect();
-        window.removeEventListener('resize', measureAndCenter);
+        window.removeEventListener('resize', requestMeasure);
     }, { once: true });
 }
 
