@@ -1096,6 +1096,14 @@ async function requestWelcomeDiscountEmail({ force = false } = {}) {
     }
     const requestedFor = localStorage.getItem(DISCOUNT_EMAIL_SENT_KEY);
     if (!force && requestedFor === customerUser.email) return { ok: true, alreadySent: true };
+    if (force) {
+        const { error: resetError } = await customerSupabase.rpc('request_welcome_discount_resend');
+        if (resetError) {
+            console.warn('No se pudo preparar el reenvío del descuento.', resetError.message);
+            return { ok: false, error: resetError.message || 'No se pudo preparar el reenvío.' };
+        }
+        localStorage.removeItem(DISCOUNT_EMAIL_SENT_KEY);
+    }
     const { data, error } = await customerSupabase.functions.invoke('send-welcome-discount', {
         body: { force }
     });

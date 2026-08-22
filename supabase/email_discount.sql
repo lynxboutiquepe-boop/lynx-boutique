@@ -104,3 +104,35 @@ revoke all on function public.preview_welcome_discount(text) from public;
 revoke all on function public.validate_welcome_discount(text,text) from public;
 grant execute on function public.preview_welcome_discount(text) to anon, authenticated;
 grant execute on function public.validate_welcome_discount(text,text) to anon, authenticated;
+
+-- Permite que el propio usuario verificado solicite un reenvío. No expone el
+-- código ni acepta un user_id externo; siempre trabaja con auth.uid().
+create or replace function public.request_welcome_discount_resend()
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then raise exception 'Sesión no válida'; end if;
+  if exists (
+    select 1 from public.welcome_discount_codes
+    where user_id = auth.uid() and redeemed_at is not null
+  ) then
+    raise exception 'Este código de bienvenida ya fue utilizado';
+  end if;
+
+  update public.welcome_discount_codes
+  set sent_at = null
+  where user_id = auth.uid() and redeemed_at is null;
+
+  update public.customer_profiles
+  set welcome_discount_sent_at = null
+  where user_id = auth.uid();
+
+  return true;
+end;
+$$;
+
+revoke all on function public.request_welcome_discount_resend() from public;
+grant execute on function public.request_welcome_discount_resend() to authenticated;
