@@ -327,7 +327,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
     .admin-topbar { min-height: 62px; }
     .admin-user > span { display: none; }
     .admin-layout { display: block; }
-    .admin-sidebar { position: sticky; top: 62px; z-index: 40; width: 100%; height: auto; display: block; padding: 8px 14px; border-right: 0; border-bottom: 1px solid var(--line); overflow-x: auto; }
+    .admin-sidebar { position: sticky; top: 62px; z-index: 40; width: 100%; height: auto; display: block; padding: 8px 14px; border-right: 0; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+    .admin-sidebar::-webkit-scrollbar { display: none; }
     .sidebar-heading, .store-link { display: none; }
     .admin-tabs { display: flex; min-width: max-content; }
     .admin-tab { width: auto; min-height: 42px; padding-inline: 13px; }
