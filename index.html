@@ -60,7 +60,7 @@
     <!-- Lucide Icons (CDN) -->
     <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260821-responsive-ios-v11">
+    <link rel="stylesheet" href="styles.css?v=20260822-commerce-v14">
 </head>
 <body>
     <div class="page-scroll-progress" id="page-scroll-progress" aria-hidden="true"></div>
@@ -303,7 +303,7 @@
             <div class="reviews-heading">
                 <span class="faq-kicker">COMUNIDAD LYNX</span>
                 <h2 id="reviews-title">RESEÑAS REALES</h2>
-                <p>Opiniones de clientes LYNX verificadas y publicadas por nuestro equipo.</p>
+                <p>Opiniones con correo verificado, moderadas por LYNX. Las compras confirmadas llevan su propia insignia.</p>
             </div>
             <div class="reviews-content">
                 <div class="reviews-list" id="reviews-list" aria-live="polite">
@@ -327,6 +327,11 @@
                                 <label><input type="radio" name="review-rating" value="5" checked><span>★</span><span class="sr-only">5 estrellas</span></label>
                             </div>
                         </fieldset>
+                        <div class="review-fit-fields">
+                            <label><span>Talla comprada</span><input id="review-size" type="text" maxlength="20" placeholder="Ejemplo: M o 34"></label>
+                            <label><span>Tu estatura (cm)</span><input id="review-height" type="number" min="120" max="230" inputmode="numeric" placeholder="Ejemplo: 178"></label>
+                            <label><span>¿Cómo te quedó?</span><select id="review-fit"><option value="">Selecciona</option><option value="ajustado">Más ajustado</option><option value="fiel">Fiel a la talla</option><option value="holgado">Más holgado</option></select></label>
+                        </div>
                         <label><span>Tu reseña</span><textarea id="review-comment" minlength="10" maxlength="600" required placeholder="¿Cómo fue tu experiencia con LYNX?"></textarea></label>
                         <label class="review-photo-picker">
                             <span>Fotos (opcional, máximo 3)</span>
@@ -402,6 +407,7 @@
                 <h3>LYNX</h3>
                 <p>Selección curada de streetwear Fashion Nova con disponibilidad limitada en Perú.</p>
                 <a class="footer-guide-link" href="/guia/lynx-streetwear-peru">Guía de streetwear LYNX →</a>
+                <a class="footer-guide-link" href="/guia/tallas">Guía de tallas para hombre →</a>
             </div>
             <div class="footer-info">
                 <h4>CATEGORÍAS LYNX</h4>
@@ -555,7 +561,7 @@
                     <i data-lucide="x"></i>
                 </button>
             </div>
-            <div class="checkout-progress" aria-label="Proceso de pedido"><span class="is-complete">1 · Carrito</span><span class="is-active">2 · Entrega</span><span>3 · Confirmación</span></div>
+            <div class="checkout-progress" aria-label="Proceso de pedido"><span class="is-complete">1 · Carrito</span><span class="is-active" id="checkout-progress-delivery">2 · Entrega</span><span id="checkout-progress-confirmation">3 · Confirmación</span></div>
             
             <div class="drawer-body">
                 <form id="checkout-form" class="checkout-form-container">
@@ -572,15 +578,29 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="checkout-email">Correo para confirmar el pedido *</label>
+                        <input type="email" id="checkout-email" required autocomplete="email" placeholder="tu@correo.com">
+                        <small class="field-help">Solo lo usaremos para confirmar este pedido y las actualizaciones que autorices.</small>
+                        <small class="field-error" id="checkout-email-error"></small>
+                    </div>
+
+                    <div class="form-group">
                         <label for="checkout-city">Ciudad / Departamento *</label>
                         <input type="text" id="checkout-city" required minlength="3" autocomplete="address-level1" placeholder="Ejemplo: Lima, Cusco o Arequipa">
                         <small class="field-error" id="checkout-city-error"></small>
                     </div>
 
                     <div class="form-group">
-                        <label for="checkout-address">Dirección de Entrega *</label>
+                        <label for="checkout-address" id="checkout-address-label">Agencia Shalom o dirección de entrega *</label>
                         <input type="text" id="checkout-address" required minlength="6" autocomplete="street-address" placeholder="Av., calle, número y referencia">
                         <small class="field-error" id="checkout-address-error"></small>
+                    </div>
+
+                    <div class="form-group" id="checkout-dni-group">
+                        <label for="checkout-dni">DNI de quien recoge en Shalom *</label>
+                        <input type="text" id="checkout-dni" inputmode="numeric" autocomplete="off" maxlength="8" pattern="[0-9]{8}" placeholder="8 dígitos">
+                        <small class="field-help">Shalom lo solicitará al entregar el paquete.</small>
+                        <small class="field-error" id="checkout-dni-error"></small>
                     </div>
 
                     <div class="form-group">
@@ -623,6 +643,28 @@
                             </label>
                         </div>
                     </div>
+
+                    <div class="form-group">
+                        <label>Método de pago preferido *</label>
+                        <div class="payment-options-grid" id="payment-options-grid">
+                            <label class="payment-option-card active">
+                                <input type="radio" name="payment-method" value="yape-plin" checked>
+                                <span><strong>Yape o Plin</strong><small>Te enviaremos el número oficial al confirmar.</small></span>
+                            </label>
+                            <label class="payment-option-card">
+                                <input type="radio" name="payment-method" value="transferencia">
+                                <span><strong>Transferencia BCP / BBVA</strong><small>Recibirás los datos oficiales por WhatsApp.</small></span>
+                            </label>
+                            <label class="payment-option-card">
+                                <input type="radio" name="payment-method" value="tarjeta-link">
+                                <span><strong>Tarjeta mediante link</strong><small>Solicita un enlace de pago seguro al confirmar.</small></span>
+                            </label>
+                            <label class="payment-option-card" id="payment-cash-card">
+                                <input type="radio" name="payment-method" value="contraentrega">
+                                <span><strong>Contraentrega en Lima</strong><small>Efectivo o Yape al recibir, sujeto a confirmación.</small></span>
+                            </label>
+                        </div>
+                    </div>
                 </form>
 
                 <!-- Order Totals Box -->
@@ -651,12 +693,23 @@
                         </div>
                     </div>
                 </div>
+
+                <section class="checkout-review-panel" id="checkout-review-panel" hidden aria-live="polite">
+                    <span class="checkout-review-kicker">REVISA ANTES DE ENVIAR</span>
+                    <h4>Tu pedido está casi listo</h4>
+                    <div id="checkout-review-content"></div>
+                    <p>Al continuar se abrirá WhatsApp con este resumen. El pedido queda pendiente hasta que LYNX confirme stock, pago y despacho.</p>
+                    <div class="checkout-review-actions">
+                        <button type="button" class="btn btn-secondary" id="checkout-edit-btn">EDITAR DATOS</button>
+                        <button type="button" class="btn btn-whatsapp" id="checkout-confirm-btn"><i data-lucide="message-square"></i> ABRIR WHATSAPP</button>
+                    </div>
+                </section>
             </div>
 
             <!-- Checkout Footer CTA -->
             <div class="drawer-footer">
                 <button type="button" class="btn btn-whatsapp btn-block" id="submit-order-btn">
-                    <i data-lucide="message-square"></i> REVISAR PEDIDO EN WHATSAPP
+                    <i data-lucide="clipboard-check"></i> REVISAR PEDIDO
                 </button>
                 <div class="checkout-confidence"><span><i data-lucide="shield-check"></i> Sin cobros automáticos</span><span><i data-lucide="package-check"></i> Stock confirmado por una persona</span></div>
                 <p class="whatsapp-security-notice">Abriremos WhatsApp con tu resumen listo. Podrás revisarlo antes de enviarlo; todavía no se realiza ningún pago.</p>
@@ -705,7 +758,7 @@
     <script src="supabase-config.js?v=20260716-admin-v1" defer></script>
     <script src="commerce-tracking.js?v=20260813-cro-v1" defer></script>
     <script src="product-image-overrides.js?v=20260822-mockups-v1" defer></script>
-    <script src="app.js?v=20260822-mockups-responsive-v22" defer></script>
+    <script src="app.js?v=20260822-commerce-v27" defer></script>
     <script src="tiktok-videos.js?v=20260813-controls-fix-v3" defer></script>
 </body>
 </html>

@@ -18,7 +18,8 @@ const state = {
     finances: [],
     customers: [],
     reviews: [],
-    events: []
+    events: [],
+    orders: []
 };
 
 const $ = selector => document.querySelector(selector);
@@ -150,13 +151,14 @@ async function initialize() {
 
 async function loadAll() {
     const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    const [{ data: products, error: productError }, { data: sales, error: salesError }, { data: finances, error: financeError }, { data: customers, error: customerError }, { data: reviews, error: reviewError }, { data: events, error: eventsError }] = await Promise.all([
+    const [{ data: products, error: productError }, { data: sales, error: salesError }, { data: finances, error: financeError }, { data: customers, error: customerError }, { data: reviews, error: reviewError }, { data: events, error: eventsError }, { data: orders, error: ordersError }] = await Promise.all([
         supabaseClient.rpc('get_admin_products'),
         supabaseClient.from('sales').select('*, products(title)').order('created_at', { ascending: false }).limit(1000),
         supabaseClient.from('finance_entries').select('*').order('entry_date', { ascending: false }).order('created_at', { ascending: false }).limit(500),
         supabaseClient.from('customer_profiles').select('*').order('created_at', { ascending: false }).limit(2000),
         supabaseClient.from('customer_reviews').select('*').order('created_at', { ascending: false }).limit(500),
-        supabaseClient.from('commerce_events').select('event_name,session_id,device_type,payload,created_at').gte('created_at', since).order('created_at', { ascending: false }).limit(10000)
+        supabaseClient.from('commerce_events').select('event_name,session_id,device_type,payload,created_at').gte('created_at', since).order('created_at', { ascending: false }).limit(10000),
+        supabaseClient.from('orders').select('*,order_items(*)').order('created_at', { ascending: false }).limit(500)
     ]);
 
     if (productError) throw productError;
@@ -165,6 +167,7 @@ async function loadAll() {
     if (customerError) throw customerError;
     if (reviewError) throw reviewError;
     if (eventsError) console.warn('Métricas todavía no disponibles:', eventsError.message);
+    if (ordersError) console.warn('Pedidos web todavía no disponibles:', ordersError.message);
 
     state.products = products || [];
     state.sales = sales || [];
@@ -172,6 +175,8 @@ async function loadAll() {
     state.customers = customers || [];
     state.reviews = reviews || [];
     state.events = events || [];
+    state.orders = orders || [];
+    $('#orders-setup-note').hidden = !ordersError;
     renderEverything();
 }
 
@@ -183,6 +188,7 @@ function renderEverything() {
     renderFinance();
     renderCustomers();
     renderReviews();
+    renderOrders();
     renderConversion();
     renderSaleProducts();
     renderAttention();
@@ -304,9 +310,73 @@ function renderSales() {
     const total = monthSales.reduce((sum, sale) => sum + Number(sale.total), 0);
     const units = monthSales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
     $('#sales-summary').innerHTML = `<article><span>VENTAS DEL MES</span><strong>${monthSales.length}</strong></article><article><span>UNIDADES VENDIDAS</span><strong>${units}</strong></article><article class="highlight"><span>INGRESO GENERADO</span><strong>${money(total)}</strong></article>`;
-    const rows = state.sales.map(sale => `<tr><td>${localDateTime(sale.created_at)}</td><td><strong>${escapeHtml(sale.products?.title || 'Producto')}</strong></td><td>${sale.quantity}</td><td>${money(sale.unit_price)}</td><td class="amount-income">${money(sale.total)}</td><td>${escapeHtml(sale.note || '—')}</td></tr>`).join('');
-    $('#sales-tbody').innerHTML = rows || '<tr><td class="empty-state" colspan="6">Todavía no hay ventas registradas.</td></tr>';
-    $('#mobile-sales-list').innerHTML = state.sales.length ? state.sales.map(sale => `<article class="mobile-sale-card"><div><strong>${escapeHtml(sale.products?.title || 'Producto')}</strong><span>${localDateTime(sale.created_at)} · ${sale.quantity} und.</span></div><b>${money(sale.total)}</b></article>`).join('') : '<p class="empty-state">Todavía no hay ventas registradas.</p>';
+    const rows = state.sales.map(sale => `<tr><td>${localDateTime(sale.created_at)}</td><td><strong>${escapeHtml(sale.products?.title || 'Producto')}</strong></td><td>${escapeHtml(sale.size || '—')}</td><td>${sale.quantity}</td><td>${money(sale.unit_price)}</td><td class="amount-income">${money(sale.total)}</td><td>${escapeHtml(sale.note || '—')}</td></tr>`).join('');
+    $('#sales-tbody').innerHTML = rows || '<tr><td class="empty-state" colspan="7">Todavía no hay ventas registradas.</td></tr>';
+    $('#mobile-sales-list').innerHTML = state.sales.length ? state.sales.map(sale => `<article class="mobile-sale-card"><div><strong>${escapeHtml(sale.products?.title || 'Producto')}</strong><span>${localDateTime(sale.created_at)} · talla ${escapeHtml(sale.size || '—')} · ${sale.quantity} und.</span></div><b>${money(sale.total)}</b></article>`).join('') : '<p class="empty-state">Todavía no hay ventas registradas.</p>';
+}
+
+const ORDER_STATUS_LABELS = {
+    pending_whatsapp: 'PENDIENTE', confirmed: 'CONFIRMADO', paid: 'PAGADO',
+    shipped: 'ENVIADO', completed: 'COMPLETADO', cancelled: 'CANCELADO'
+};
+
+function orderItemsText(order) {
+    return (order.order_items || []).map(item => `${item.quantity}× ${item.product_title} · ${item.size}`).join(' · ') || 'Sin productos';
+}
+
+function orderWhatsappUrl(order) {
+    const digits = String(order.customer_phone || '').replace(/\D/g, '');
+    const phone = digits.startsWith('51') ? digits : `51${digits}`;
+    return `https://wa.me/${phone}?text=${encodeURIComponent(`Hola ${order.customer_name}, te escribimos de LYNX por tu pedido ${order.order_code}.`)}`;
+}
+
+function orderActionButtons(order) {
+    if (order.status !== 'pending_whatsapp') return `<a class="secondary-btn" href="${orderWhatsappUrl(order)}" target="_blank" rel="noopener">WhatsApp</a>`;
+    return `<button class="primary-btn confirm-web-order" type="button" data-id="${order.id}">Confirmar</button><button class="secondary-btn cancel-web-order" type="button" data-id="${order.id}">Cancelar</button>`;
+}
+
+function renderOrders() {
+    const pending = state.orders.filter(order => order.status === 'pending_whatsapp');
+    const confirmed = state.orders.filter(order => ['confirmed','paid','shipped','completed'].includes(order.status));
+    $('#order-summary-strip').innerHTML = `<article><span>PENDIENTES</span><strong>${pending.length}</strong></article><article><span>CONFIRMADOS</span><strong>${confirmed.length}</strong></article><article><span>VALOR PENDIENTE</span><strong>${money(pending.reduce((sum,order)=>sum+Number(order.total||0),0))}</strong></article>`;
+    $('#orders-tbody').innerHTML = state.orders.length ? state.orders.map(order => `<tr>
+        <td><div class="order-customer"><strong class="order-code">${escapeHtml(order.order_code)}</strong><span>${localDateTime(order.created_at)}</span></div></td>
+        <td><div class="order-customer"><strong>${escapeHtml(order.customer_name)}</strong><span>${escapeHtml(order.customer_phone)}<br>${escapeHtml(order.customer_email)}</span></div></td>
+        <td class="order-items-copy">${escapeHtml(orderItemsText(order))}</td>
+        <td>${escapeHtml(order.shipping_method === 'shalom' ? 'Shalom' : 'Lima')}<br><small>${escapeHtml(order.city)}</small></td>
+        <td><strong>${money(order.total)}</strong></td>
+        <td><span class="order-status ${escapeHtml(order.status)}">${ORDER_STATUS_LABELS[order.status] || escapeHtml(order.status)}</span></td>
+        <td><div class="row-actions">${orderActionButtons(order)}</div></td>
+    </tr>`).join('') : '<tr><td class="empty-state" colspan="7">Todavía no hay pedidos registrados desde la web.</td></tr>';
+
+    $('#mobile-order-list').innerHTML = state.orders.length ? state.orders.map(order => `<article class="mobile-order-card">
+        <header><div class="order-customer"><strong class="order-code">${escapeHtml(order.order_code)}</strong><span>${localDateTime(order.created_at)}</span></div><span class="order-status ${escapeHtml(order.status)}">${ORDER_STATUS_LABELS[order.status] || escapeHtml(order.status)}</span></header>
+        <div class="order-customer"><strong>${escapeHtml(order.customer_name)}</strong><span>${escapeHtml(order.customer_phone)} · ${escapeHtml(order.customer_email)}</span></div>
+        <div class="order-items-copy">${escapeHtml(orderItemsText(order))}</div>
+        <div class="mobile-order-meta"><span>${order.shipping_method === 'shalom' ? 'Shalom' : 'Motorizado Lima'}<br>${escapeHtml(order.city)}</span><strong>${money(order.total)}</strong></div>
+        <div class="mobile-order-actions">${orderActionButtons(order)}</div>
+    </article>`).join('') : '<p class="empty-state">Todavía no hay pedidos registrados desde la web.</p>';
+    lucide.createIcons();
+}
+
+async function processWebOrder(id, action, button) {
+    setButtonLoading(button, true, action === 'confirm' ? 'Confirmando...' : 'Cancelando...');
+    try {
+        if (action === 'confirm') {
+            const { error } = await supabaseClient.rpc('confirm_web_order', { p_order_id: id });
+            if (error) throw error;
+            const { error: emailError } = await supabaseClient.functions.invoke('send-order-confirmation', { body: { orderId: id } });
+            showToast(emailError ? 'Pedido confirmado. Stock y caja actualizados; el correo quedó pendiente.' : 'Pedido confirmado. Stock, caja y correo actualizados.');
+        } else {
+            const { error } = await supabaseClient.from('orders').update({ status: 'cancelled' }).eq('id', id);
+            if (error) throw error;
+            showToast('Pedido cancelado sin descontar stock.');
+        }
+        await loadAll();
+    } catch (error) {
+        showToast(error.message, 'error');
+        setButtonLoading(button, false);
+    }
 }
 
 function renderAttention() {
@@ -390,6 +460,11 @@ function renderSaleProductPreview(product) {
         <img src="${escapeHtml(safeImageUrl(productPreviewImages(product)[0]))}" alt="Previsualización de ${escapeHtml(product.title)}">
         <div><span class="sale-preview-kicker">PRENDA SELECCIONADA</span><strong>${escapeHtml(product.title)}</strong><p>${escapeHtml(product.color || 'Sin color')} · ${escapeHtml((product.sizes || []).join(', ') || 'Sin tallas')}</p><div class="sale-preview-meta"><b>${money(product.price)}</b><span>${product.stock} ${Number(product.stock) === 1 ? 'unidad' : 'unidades'}</span><span>${escapeHtml(meta.label)}</span></div></div>
         <button class="sale-product-clear" type="button" aria-label="Quitar selección"><i data-lucide="x"></i></button>`;
+    const sizes = Array.isArray(product.sizes) && product.sizes.length ? product.sizes : ['ÚNICA'];
+    $('#sale-size').innerHTML = sizes.map(size => {
+        const available = product.size_stock && Object.prototype.hasOwnProperty.call(product.size_stock,size) ? Number(product.size_stock[size]) : null;
+        return `<option value="${escapeHtml(size)}" ${available !== null && available <= 0 ? 'disabled' : ''}>${escapeHtml(size)}${available !== null ? ` · ${available} und.` : ''}</option>`;
+    }).join('');
     lucide.createIcons();
 }
 
@@ -403,6 +478,7 @@ function selectSaleProduct(product) {
 
 function clearSaleProductSelection() {
     $('#sale-product').value = '';
+    $('#sale-size').innerHTML = '<option value="">Selecciona una prenda primero</option>';
     $('#sale-product-preview').innerHTML = '<div class="sale-product-preview-empty"><i data-lucide="shirt"></i><span>Busca y selecciona una prenda para previsualizarla.</span></div>';
     lucide.createIcons();
 }
@@ -463,9 +539,9 @@ function renderReviews() {
     const reviews = state.reviews.filter(review => filter === 'all' || review.status === filter);
     $('#reviews-tbody').innerHTML = reviews.length ? reviews.map(review => `
         <tr>
-            <td><div class="customer-identity"><strong>${escapeHtml(review.author_name)}</strong><span>Cliente verificado</span></div></td>
+            <td><div class="customer-identity"><strong>${escapeHtml(review.author_name)}</strong><span>${review.verified_purchase ? '✓ Compra verificada' : 'Correo verificado'}</span></div></td>
             <td><span class="review-rating-admin">${'★'.repeat(Number(review.rating) || 0)}<span class="review-rating-empty">${'☆'.repeat(5 - (Number(review.rating) || 0))}</span></span></td>
-            <td class="review-comment-cell">${escapeHtml(review.comment)}</td>
+            <td class="review-comment-cell">${escapeHtml(review.comment)}${review.purchased_size || review.height_cm || review.fit_feedback ? `<small>${review.purchased_size ? `Talla ${escapeHtml(review.purchased_size)}` : ''}${review.height_cm ? ` · ${Number(review.height_cm)} cm` : ''}${review.fit_feedback ? ` · ${escapeHtml(review.fit_feedback)}` : ''}</small>` : ''}</td>
             <td><span class="review-status ${escapeHtml(review.status)}">${review.status === 'published' ? 'PUBLICADA' : review.status === 'hidden' ? 'OCULTA' : 'PENDIENTE'}</span></td>
             <td>${localDateTime(review.created_at)}</td>
             <td><div class="row-actions">
@@ -518,6 +594,7 @@ function openProductForm(product = null) {
     $('#product-stock').value = product?.stock ?? 1;
     $('#product-status').value = product?.status || 'available';
     $('#product-sizes').value = (product?.sizes || []).join(', ');
+    $('#product-size-stock').value = formatSizeStock(product?.size_stock);
     $('#product-badge').value = product?.badge || 'NUEVO';
     $('#product-color').value = product?.color || '';
     $('#product-material').value = product?.material || '';
@@ -562,6 +639,24 @@ function formatMeasurementsForForm(measurements) {
         const pairs = Object.entries(values || {}).map(([name, value]) => `${name.replaceAll('_', ' ')}=${value}`);
         return `${size}: ${pairs.join(', ')}`;
     }).join('\n');
+}
+
+function formatSizeStock(sizeStock) {
+    if (!sizeStock || typeof sizeStock !== 'object') return '';
+    return Object.entries(sizeStock).map(([size,stock]) => `${size}=${stock}`).join(', ');
+}
+
+function parseSizeStock(value) {
+    const source = String(value || '').trim();
+    if (!source) return {};
+    const result = {};
+    source.split(',').map(part => part.trim()).filter(Boolean).forEach(part => {
+        const [size,rawStock] = part.split('=').map(value => value?.trim());
+        const stock = Number(rawStock);
+        if (!size || !Number.isInteger(stock) || stock < 0) throw new Error(`Revisa “${part}”. Usa el formato TALLA=STOCK, por ejemplo M=2.`);
+        result[size] = stock;
+    });
+    return result;
 }
 
 function parseMeasurementsFromForm(value) {
@@ -614,9 +709,15 @@ async function saveProduct(event) {
         const existingImages = $('#product-images').value.split('\n').map(value => value.trim()).filter(Boolean);
         const files = [...$('#product-image-files').files];
         const uploadedImages = files.length ? await uploadProductImages(files, slug) : [];
-        const status = $('#product-status').value;
+        let status = $('#product-status').value;
         const stock = status === 'sold_out' ? 0 : Number($('#product-stock').value || 0);
+        if (stock === 0 && !['preorder','archived','sold_out'].includes(status)) status = 'sold_out';
         const measurements = parseMeasurementsFromForm($('#product-measurements').value);
+        const sizeStock = parseSizeStock($('#product-size-stock').value);
+        const sizes = $('#product-sizes').value.split(',').map(value => value.trim()).filter(Boolean);
+        const sizeStockTotal = Object.values(sizeStock).reduce((sum,value)=>sum+Number(value||0),0);
+        if (Object.keys(sizeStock).length && sizeStockTotal !== stock) throw new Error(`El stock por talla suma ${sizeStockTotal}, pero el stock total indica ${stock}. Corrige uno de los dos.`);
+        if (Object.keys(sizeStock).some(size => !sizes.includes(size))) throw new Error('Todas las tallas del stock por talla deben aparecer también en el campo Tallas.');
         const payload = {
             title,
             slug,
@@ -625,7 +726,8 @@ async function saveProduct(event) {
             cost: Number($('#product-cost').value || 0),
             stock,
             status,
-            sizes: $('#product-sizes').value.split(',').map(value => value.trim()).filter(Boolean),
+            sizes,
+            size_stock: sizeStock,
             badge: $('#product-badge').value.trim() || STATUS_META[status].badge,
             color: $('#product-color').value.trim(),
             material: $('#product-material').value.trim(),
@@ -648,7 +750,7 @@ async function saveProduct(event) {
         // datos esenciales para que inventario, tallas y precios nunca fallen.
         if (error && /schema cache|column/i.test(error.message || '')) {
             const compatiblePayload = { ...payload };
-            ['color', 'material', 'fit_type', 'weight_grams', 'care_instructions', 'measurements']
+            ['color', 'material', 'fit_type', 'weight_grams', 'care_instructions', 'measurements', 'size_stock']
                 .forEach(field => delete compatiblePayload[field]);
             ({ error } = await persistProduct(compatiblePayload));
         }
@@ -677,6 +779,12 @@ async function updateProductStatus(id, status) {
 async function quickUpdateProduct(id, field, rawValue, input) {
     const value = field === 'stock' ? Math.max(0, Math.round(Number(rawValue))) : Math.max(0, Number(rawValue));
     if (!Number.isFinite(value)) return;
+    const product = state.products.find(item => String(item.id) === String(id));
+    if (field === 'stock' && product?.size_stock && Object.keys(product.size_stock).length) {
+        input.value = product.stock;
+        openProductForm(product);
+        throw new Error('Este producto controla stock por talla. Actualízalo desde Editar producto para mantener las cantidades sincronizadas.');
+    }
     input.disabled = true;
     const payload = { [field]: value };
     if (field === 'stock') payload.status = value === 0 ? 'sold_out' : value <= 2 ? 'low_stock' : 'available';
@@ -760,14 +868,25 @@ async function registerSale(event) {
         const productId = Number($('#sale-product').value);
         const quantity = Number($('#sale-quantity').value);
         if (!productId) throw new Error('Selecciona un producto.');
-        const { error } = await supabaseClient.rpc('register_sale', {
+        const size = $('#sale-size').value;
+        if (!size) throw new Error('Selecciona la talla vendida.');
+        let { error } = await supabaseClient.rpc('register_sale_with_size', {
             p_product_id: productId,
             p_quantity: quantity,
+            p_size: size,
             p_note: $('#sale-note').value.trim()
         });
+        if (error && /register_sale_with_size|schema cache|function/i.test(error.message || '')) {
+            ({ error } = await supabaseClient.rpc('register_sale', {
+                p_product_id: productId,
+                p_quantity: quantity,
+                p_note: `${$('#sale-note').value.trim()} · talla ${size}`.trim()
+            }));
+        }
         if (error) throw error;
         event.target.reset();
         $('#sale-quantity').value = 1;
+        clearSaleProductSelection();
         showToast('Venta registrada, stock descontado e ingreso creado.');
         await loadAll();
     } catch (error) {
@@ -986,6 +1105,13 @@ function bindEvents() {
         if (!control) return;
         try { await updateProductStatus(control.dataset.id, control.value); }
         catch (error) { showToast(error.message, 'error'); await loadAll(); }
+    }));
+
+    ['#orders-tbody', '#mobile-order-list'].forEach(selector => $(selector)?.addEventListener('click', async event => {
+        const confirmButton = event.target.closest('.confirm-web-order');
+        const cancelButton = event.target.closest('.cancel-web-order');
+        if (confirmButton) await processWebOrder(confirmButton.dataset.id, 'confirm', confirmButton);
+        if (cancelButton) await processWebOrder(cancelButton.dataset.id, 'cancel', cancelButton);
     }));
 
     $('#finance-tbody').addEventListener('click', async event => {

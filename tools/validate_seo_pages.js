@@ -50,10 +50,11 @@ const categoryPaths = [
     '/categoria/conjuntos'
 ];
 const sitemapCount = (sitemap.match(/<url>/g) || []).length;
-if (sitemapCount !== products.length + 2 + categoryPaths.length) {
-    errors.push(`Expected ${products.length + 2 + categoryPaths.length} sitemap URLs, found ${sitemapCount}`);
+if (sitemapCount !== products.length + 3 + categoryPaths.length) {
+    errors.push(`Expected ${products.length + 3 + categoryPaths.length} sitemap URLs, found ${sitemapCount}`);
 }
 if (!sitemap.includes('<loc>https://www.lynx.pe/guia/lynx-streetwear-peru</loc>')) errors.push('SEO guide missing from sitemap');
+if (!sitemap.includes('<loc>https://www.lynx.pe/guia/tallas</loc>')) errors.push('Size guide missing from sitemap');
 for (const categoryPath of categoryPaths) {
     if (!sitemap.includes(`<loc>https://www.lynx.pe${categoryPath}</loc>`)) {
         errors.push(`Category missing from sitemap: ${categoryPath}`);

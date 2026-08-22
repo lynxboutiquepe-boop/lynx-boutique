@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es-PE">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <meta name="theme-color" content="#080808">
+    <title>Guía de tallas para hombre | LYNX Boutique Perú</title>
+    <meta name="description" content="Guía de tallas LYNX basada en la referencia corporal de Fashion Nova Men. Aprende a medir pecho, cintura, cadera y entrepierna antes de elegir tu prenda.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://www.lynx.pe/guia/tallas">
+    <link rel="icon" type="image/png" href="/assets/favicon-lynx.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/guia-tallas.css?v=20260822-v1">
+</head>
+<body>
+    <header class="guide-header">
+        <a href="/" aria-label="Volver a LYNX"><img src="/assets/logo-transparent.png" alt="LYNX"></a>
+        <a href="/#catalog">VER CATÁLOGO →</a>
+    </header>
+    <main>
+        <section class="guide-hero">
+            <span>LYNX FIT GUIDE</span>
+            <h1>EL FIT CORRECTO<br><em>EMPIEZA MIDIENDO BIEN.</em></h1>
+            <p>Usa esta tabla como referencia corporal. Cuando una ficha muestre medidas reales de la prenda, esas medidas tienen prioridad.</p>
+            <div class="unit-switch" aria-label="Unidad de medida"><button class="active" data-unit="cm" aria-pressed="true">CENTÍMETROS</button><button data-unit="in" aria-pressed="false">PULGADAS</button></div>
+        </section>
+
+        <section class="measure-grid" aria-labelledby="how-title">
+            <div class="section-heading"><span>01 · PREPÁRATE</span><h2 id="how-title">CÓMO TOMAR TUS MEDIDAS</h2></div>
+            <article><b>1</b><h3>PECHO</h3><p>Rodea la parte más amplia del pecho. Mantén la cinta recta, paralela al piso y sin apretar.</p></article>
+            <article><b>2</b><h3>CINTURA</h3><p>Mide alrededor del punto donde realmente usarás el jean o pantalón.</p></article>
+            <article><b>3</b><h3>CADERA</h3><p>Rodea la parte más ancha de la cadera y glúteos, con los pies juntos.</p></article>
+            <article><b>4</b><h3>ENTREPIERNA</h3><p>Mide desde la unión interior de la pierna hasta el largo deseado del pantalón.</p></article>
+        </section>
+
+        <section class="guide-table-section">
+            <div class="section-heading"><span>02 · TOPS</span><h2>HOODIES, CAMISAS Y JACKETS</h2><p>Para prendas oversized, tu talla habitual conserva el volumen intencional del diseño.</p></div>
+            <div class="table-wrap"><table id="tops-table"><thead></thead><tbody></tbody></table></div>
+        </section>
+
+        <section class="guide-table-section">
+            <div class="section-heading"><span>03 · BOTTOMS</span><h2>JEANS Y PANTS</h2><p>En denim poco elástico, prioriza la medida de cadera. Si quedas entre dos tallas, elige la mayor.</p></div>
+            <div class="table-wrap"><table id="bottoms-table"><thead></thead><tbody></tbody></table></div>
+        </section>
+
+        <section class="fit-rules">
+            <div class="section-heading"><span>04 · REGLAS RÁPIDAS</span><h2>ANTES DE COMPRAR</h2></div>
+            <div><strong>OVERSIZED</strong><p>Elige tu talla habitual. Baja una talla solo si quieres reducir el volumen.</p></div>
+            <div><strong>SKINNY / FLARE</strong><p>Revisa elasticidad y cadera. En denim rígido deja margen para sentarte y moverte.</p></div>
+            <div><strong>STACKED</strong><p>El largo extra y la acumulación en el tobillo son parte del diseño, no un error de talla.</p></div>
+            <div><strong>ENTRE DOS TALLAS</strong><p>Elige la mayor y confirma con LYNX antes de pagar.</p></div>
+        </section>
+
+        <aside class="guide-help">
+            <span>¿TODAVÍA DUDAS?</span><h2>TE AYUDAMOS A ELEGIR.</h2>
+            <p>Envíanos tu pecho, cintura, cadera, estatura y la prenda que deseas. Te responderemos con una recomendación antes del pago.</p>
+            <a href="https://wa.me/51962210278?text=Hola%20LYNX%2C%20necesito%20ayuda%20con%20mi%20talla.%20Mis%20medidas%20son%3A" target="_blank" rel="noopener noreferrer">CONSULTAR POR WHATSAPP</a>
+        </aside>
+
+        <p class="source-note">Referencia corporal adaptada de la <a href="https://www.fashionnova.com/pages/size-guide?tab=men" target="_blank" rel="noopener noreferrer">guía oficial Fashion Nova Men</a>, consultada en agosto de 2026. Las medidas pueden variar según tela y modelo.</p>
+    </main>
+    <script src="/size-guide-data.js?v=20260822-v1"></script>
+    <script>
+        (() => {
+            let unit = 'cm';
+            const render = (id, guide) => {
+                const table = document.getElementById(id);
+                table.tHead.innerHTML = `<tr>${guide.columns.map(column => `<th>${column.label}</th>`).join('')}</tr>`;
+                table.tBodies[0].innerHTML = guide.rows.map(row => `<tr>${guide.columns.map((column, index) => {
+                    const value = column.key === 'size' ? row.size : LynxSizeGuide.valueForUnit(row[column.key], unit);
+                    return index ? `<td>${value} ${unit}</td>` : `<th>${value}</th>`;
+                }).join('')}</tr>`).join('');
+            };
+            const renderAll = () => { render('tops-table', LynxSizeGuide.guides.tops); render('bottoms-table', LynxSizeGuide.guides.bottoms); };
+            document.querySelectorAll('[data-unit]').forEach(button => button.addEventListener('click', () => {
+                unit = button.dataset.unit;
+                document.querySelectorAll('[data-unit]').forEach(candidate => {
+                    const active = candidate === button;
+                    candidate.classList.toggle('active', active);
+                    candidate.setAttribute('aria-pressed', String(active));
+                });
+                renderAll();
+            }));
+            renderAll();
+        })();
+    </script>
+</body>
+</html>

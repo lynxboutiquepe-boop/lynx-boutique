@@ -17,18 +17,7 @@ const sizeGuideClose = document.getElementById('size-guide-close');
 const sizeSelectionNote = document.getElementById('size-selection-note');
 const PRODUCT_IMAGE_CACHE_VERSION = '20260814-photo-fix-v1';
 
-const SIZE_GUIDES = {
-    tops: {
-        intro: 'Mide tu cuerpo sin apretar la cinta. Para un fit oversized, elige tu talla habitual; baja una talla si prefieres un resultado menos amplio.',
-        columns: ['Talla', 'Pecho', 'Cintura'],
-        rows: [['S', '89–94', '74–79'], ['M', '97–102', '81–86'], ['L', '104–109', '89–94'], ['XL', '112–117', '97–102']]
-    },
-    jeans: {
-        intro: 'Mide la cintura donde usarás el jean y la cadera en la parte más ancha. En denim ajustado o poco elástico, deja margen para moverte.',
-        columns: ['Talla', 'Cintura', 'Cadera'],
-        rows: [['30', '76–79', '91–94'], ['32', '81–84', '97–99'], ['34', '86–89', '102–104'], ['36', '91–94', '107–109'], ['38', '97–99', '112–114']]
-    }
-};
+let sizeGuideUnit = 'cm';
 
 // Vercel conserva la URL bonita en el navegador aunque sirva producto.html
 // por dentro; por eso leemos el slug tanto de la query como de la propia ruta.
@@ -109,7 +98,9 @@ function setImage(images, index) {
 }
 
 function updateQuantity() {
-    const max = currentProduct.stock || 99;
+    const sizedStock = currentProduct.status !== 'preorder' && currentProduct.size_stock && Object.prototype.hasOwnProperty.call(currentProduct.size_stock,selectedSize) ? Number(currentProduct.size_stock[selectedSize]) : null;
+    const numericStock = Number(currentProduct.stock);
+    const max = currentProduct.status === 'preorder' ? 20 : Number.isFinite(sizedStock) ? sizedStock : Number.isFinite(numericStock) ? numericStock : 99;
     selectedQuantity = Math.max(1, Math.min(selectedQuantity, max));
     quantityValue.textContent = String(selectedQuantity);
     quantityMinus.disabled = selectedQuantity <= 1;
@@ -142,19 +133,50 @@ function inferProductSpecs(product) {
     return { fit, material, color: colorMatch?.[1] || 'Según imagen', care: material === 'Cuero sintético' ? 'Paño húmedo · no secadora' : 'Lavado frío · al revés' };
 }
 
+function guideRowMatchesSizes(row, sizes) {
+    if (sizes.includes(String(row.size).toUpperCase())) return true;
+    const range = String(row.bottom?.in || '').match(/(\d+)\D+(\d+)/);
+    return range && sizes.some(size => {
+        // “30/32” es una sola talla de jean (cintura/entrepierna), no dos
+        // variantes separadas. Para ubicarla en la guía usamos la cintura 30.
+        const numeric = Number(String(size).match(/^\d+/)?.[0]);
+        return Number.isFinite(numeric) && numeric >= Number(range[1]) && numeric <= Number(range[2]);
+    });
+}
+
 function renderSizeGuide(product) {
-    const guide = product.category === 'jeans-pants' ? SIZE_GUIDES.jeans : SIZE_GUIDES.tops;
+    const data = window.LynxSizeGuide;
+    const guide = product.category === 'jeans-pants' ? data?.guides.bottoms : data?.guides.tops;
+    if (!guide) return;
     document.getElementById('size-guide-intro').textContent = guide.intro;
     const customMeasurements = product.measurements && typeof product.measurements === 'object' ? product.measurements : {};
     const customSizes = Object.keys(customMeasurements);
+    const kind = document.getElementById('size-guide-kind');
+    const disclaimer = document.getElementById('size-guide-disclaimer');
+    const source = document.getElementById('size-guide-source');
     if (customSizes.length) {
         const measurementKeys = [...new Set(customSizes.flatMap(size => Object.keys(customMeasurements[size] || {})))];
         document.getElementById('size-guide-head').innerHTML = `<tr><th scope="col">Talla</th>${measurementKeys.map(key => `<th scope="col">${text(key).replaceAll('_', ' ')}</th>`).join('')}</tr>`;
-        document.getElementById('size-guide-body').innerHTML = customSizes.map(size => `<tr><th scope="row">${size}</th>${measurementKeys.map(key => `<td>${text(customMeasurements[size]?.[key] ?? '—')}${customMeasurements[size]?.[key] !== undefined ? ' cm' : ''}</td>`).join('')}</tr>`).join('');
-        document.getElementById('size-guide-intro').textContent = 'Medidas reales registradas para este modelo. Compara con una prenda similar colocada sobre una superficie plana.';
+        document.getElementById('size-guide-body').innerHTML = customSizes.map(size => `<tr class="is-available"><th scope="row">${size}</th>${measurementKeys.map(key => {
+            const raw = customMeasurements[size]?.[key];
+            const value = raw === undefined ? '—' : sizeGuideUnit === 'in' && Number.isFinite(Number(raw)) ? (Number(raw) / 2.54).toFixed(1) : text(raw);
+            return `<td>${value}${raw !== undefined ? ` ${sizeGuideUnit}` : ''}</td>`;
+        }).join('')}</tr>`).join('');
+        document.getElementById('size-guide-intro').textContent = 'Medidas reales registradas para este modelo. Revisa si cada dato indica ancho o contorno antes de comparar.';
+        kind.textContent = 'MEDIDAS REALES DE LA PRENDA';
+        disclaimer.textContent = 'Estas medidas corresponden a la prenda, no al cuerpo, y pueden variar aproximadamente 1–2 cm. Sigue el método indicado en cada dato.';
+        source.hidden = true;
     } else {
-        document.getElementById('size-guide-head').innerHTML = `<tr>${guide.columns.map(column => `<th scope="col">${column}</th>`).join('')}</tr>`;
-        document.getElementById('size-guide-body').innerHTML = guide.rows.map(row => `<tr>${row.map((value, index) => index ? `<td>${value} cm</td>` : `<th scope="row">${value}</th>`).join('')}</tr>`).join('');
+        const sizes = (product.sizes || []).map(size => String(size).toUpperCase());
+        document.getElementById('size-guide-head').innerHTML = `<tr>${guide.columns.map(column => `<th scope="col">${column.label}</th>`).join('')}</tr>`;
+        document.getElementById('size-guide-body').innerHTML = guide.rows.map(row => `<tr class="${guideRowMatchesSizes(row, sizes) ? 'is-available' : ''}">${guide.columns.map((column, index) => {
+            const value = column.key === 'size' ? row.size : data.valueForUnit(row[column.key], sizeGuideUnit);
+            return index ? `<td>${value} ${sizeGuideUnit}</td>` : `<th scope="row">${value}</th>`;
+        }).join('')}</tr>`).join('');
+        kind.textContent = 'MEDIDAS CORPORALES · FASHION NOVA MEN';
+        disclaimer.textContent = 'Tabla corporal de referencia basada en Fashion Nova Men. No representa el ancho de la prenda extendida. El corte puede variar por modelo; las medidas reales de la prenda, cuando aparezcan, tienen prioridad.';
+        source.hidden = false;
+        source.href = data.sourceUrl;
     }
     const help = document.getElementById('size-guide-help');
     help.href = `https://wa.me/51962210278?text=${encodeURIComponent(`Hola LYNX, necesito ayuda con la talla de ${product.title}. Mis medidas son:`)}`;
@@ -174,7 +196,17 @@ function renderProduct(product) {
     if (!images.length) images.push('/assets/logo-transparent.png');
     const sizes = Array.isArray(product.sizes) && product.sizes.length ? product.sizes : ['ÚNICA'];
     const status = statusCopy(product);
-    selectedSize = sizes[0];
+    if (product.status !== 'preorder' && Number(product.stock) <= 0) {
+        status.sold = true;
+        status.badge = 'AGOTADO';
+        status.note = 'AGOTADO POR EL MOMENTO';
+    }
+    selectedSize = product.status === 'preorder' ? sizes[0] : sizes.find(size => !(product.size_stock && Object.prototype.hasOwnProperty.call(product.size_stock,size)) || Number(product.size_stock[size]) > 0) || '';
+    if (!selectedSize) {
+        status.sold = true;
+        status.badge = 'AGOTADO';
+        status.note = 'Todas las tallas están agotadas';
+    }
 
     document.title = `${text(product.title)} | LYNX`;
     document.querySelector('meta[name="description"]').content = text(product.description).slice(0, 155) || `Compra ${text(product.title)} en LYNX.`;
@@ -228,12 +260,18 @@ function renderProduct(product) {
         const button = document.createElement('button');
         button.type = 'button';
         button.textContent = size;
-        button.className = index === 0 ? 'active' : '';
+        const unavailable = product.status !== 'preorder' && product.size_stock && Object.prototype.hasOwnProperty.call(product.size_stock,size) && Number(product.size_stock[size]) <= 0;
+        button.disabled = unavailable;
+        button.className = size === selectedSize ? 'active' : '';
+        if (unavailable) button.setAttribute('aria-label', `Talla ${size} agotada`);
         button.addEventListener('click', () => {
+            if (button.disabled) return;
             selectedSize = size;
             sizeList.querySelectorAll('button').forEach(candidate => candidate.classList.toggle('active', candidate === button));
             sizeSelectionNote.textContent = `Talla seleccionada: ${size}`;
             sizeSelectionNote.classList.add('is-selected');
+            selectedQuantity = 1;
+            updateQuantity();
             updateActionLinks();
         });
         sizeList.append(button);
@@ -261,6 +299,22 @@ function renderProduct(product) {
 sizeGuideTrigger?.addEventListener('click', () => sizeGuideDialog?.showModal());
 sizeGuideClose?.addEventListener('click', () => sizeGuideDialog?.close());
 sizeGuideDialog?.addEventListener('click', event => { if (event.target === sizeGuideDialog) sizeGuideDialog.close(); });
+document.getElementById('size-unit-cm')?.addEventListener('click', () => {
+    sizeGuideUnit = 'cm';
+    document.getElementById('size-unit-cm').classList.add('active');
+    document.getElementById('size-unit-in').classList.remove('active');
+    document.getElementById('size-unit-cm').setAttribute('aria-pressed', 'true');
+    document.getElementById('size-unit-in').setAttribute('aria-pressed', 'false');
+    if (currentProduct) renderSizeGuide(currentProduct);
+});
+document.getElementById('size-unit-in')?.addEventListener('click', () => {
+    sizeGuideUnit = 'in';
+    document.getElementById('size-unit-in').classList.add('active');
+    document.getElementById('size-unit-cm').classList.remove('active');
+    document.getElementById('size-unit-in').setAttribute('aria-pressed', 'true');
+    document.getElementById('size-unit-cm').setAttribute('aria-pressed', 'false');
+    if (currentProduct) renderSizeGuide(currentProduct);
+});
 addCartButton?.addEventListener('click', () => currentProduct && window.LynxTracking?.track('add_to_cart', { product_id: currentProduct.id, product_name: currentProduct.title, size: selectedSize, quantity: selectedQuantity, value: Number(currentProduct.price || 0) * selectedQuantity }));
 buyButton?.addEventListener('click', () => currentProduct && window.LynxTracking?.track('begin_checkout', { source: 'product_page', product_id: currentProduct.id, value: Number(currentProduct.price || 0) * selectedQuantity }));
 
@@ -269,7 +323,7 @@ async function loadProduct() {
     const client = window.getLynxSupabase?.();
     if (!client) throw new Error('No se pudo conectar al catálogo');
     const baseFields = 'id,legacy_id,title,slug,category,price,stock,sizes,images,description,badge,status,fit_recommendation,sort_order';
-    const extendedFields = `${baseFields},color,material,fit_type,care_instructions,weight_grams,measurements`;
+    const extendedFields = `${baseFields},color,material,fit_type,care_instructions,weight_grams,measurements,size_stock`;
     const queryProduct = async fields => {
         const request = client.from('products').select(fields).neq('status', 'archived').limit(1);
         return productSlug

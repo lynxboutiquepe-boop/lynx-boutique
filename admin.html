@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="admin.css?v=20260822-mobile-nav-v4">
+    <link rel="stylesheet" href="admin.css?v=20260822-orders-v6">
 </head>
 <body>
     <main class="login-shell" id="login-shell">
@@ -95,6 +95,7 @@
                 <nav class="admin-tabs" aria-label="Secciones del panel">
                     <button class="admin-tab active" type="button" data-panel="dashboard-panel"><i data-lucide="layout-dashboard"></i><span>Resumen</span></button>
                     <button class="admin-tab" type="button" data-panel="products-panel"><i data-lucide="shirt"></i><span>Productos</span></button>
+                    <button class="admin-tab" type="button" data-panel="orders-panel"><i data-lucide="shopping-basket"></i><span>Pedidos web</span></button>
                     <button class="admin-tab" type="button" data-panel="sales-panel"><i data-lucide="receipt-text"></i><span>Ventas</span></button>
                     <button class="admin-tab" type="button" data-panel="customers-panel"><i data-lucide="users"></i><span>Clientes</span></button>
                     <button class="admin-tab" type="button" data-panel="reviews-panel"><i data-lucide="star"></i><span>Reseñas</span></button>
@@ -162,6 +163,19 @@
                     </div>
                 </section>
 
+                <section class="admin-panel" id="orders-panel">
+                    <div class="panel-heading">
+                        <div><span class="eyebrow">PEDIDOS DESDE LYNX.PE</span><h2>Pedidos por confirmar</h2><p class="panel-subtitle">Confirma únicamente después de hablar con el cliente. En ese momento se descuenta el stock y se registra la venta.</p></div>
+                        <button class="secondary-btn refresh-btn" type="button"><i data-lucide="refresh-cw"></i> Actualizar</button>
+                    </div>
+                    <div class="order-summary-strip" id="order-summary-strip"></div>
+                    <div class="table-shell web-orders-table-shell">
+                        <table class="data-table"><thead><tr><th>Pedido</th><th>Cliente</th><th>Productos</th><th>Entrega</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="orders-tbody"></tbody></table>
+                    </div>
+                    <div class="mobile-order-list" id="mobile-order-list"></div>
+                    <p class="customer-privacy-note" id="orders-setup-note" hidden><i data-lucide="database-zap"></i> Falta activar la migración de pedidos en Supabase. Mientras tanto, WhatsApp continúa funcionando normalmente.</p>
+                </section>
+
                 <section class="admin-panel" id="sales-panel">
                     <div class="panel-heading">
                         <div><span class="eyebrow">OPERACIÓN COMERCIAL</span><h2>Historial de ventas</h2><p class="panel-subtitle">Ventas registradas, unidades y valor generado.</p></div>
@@ -169,7 +183,7 @@
                     </div>
                     <div class="sales-summary" id="sales-summary"></div>
                     <div class="table-shell sales-table-shell">
-                        <table class="data-table"><thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Precio unitario</th><th>Total</th><th>Nota</th></tr></thead><tbody id="sales-tbody"></tbody></table>
+                        <table class="data-table"><thead><tr><th>Fecha</th><th>Producto</th><th>Talla</th><th>Cantidad</th><th>Precio unitario</th><th>Total</th><th>Nota</th></tr></thead><tbody id="sales-tbody"></tbody></table>
                     </div>
                     <div class="mobile-sales-list" id="mobile-sales-list"></div>
                 </section>
@@ -305,8 +319,9 @@
                             </div>
                             <div class="form-grid two">
                                 <label><span>Cantidad</span><input id="sale-quantity" type="number" min="1" value="1" required></label>
-                                <label><span>Nota</span><input id="sale-note" type="text" placeholder="Cliente o referencia"></label>
+                                <label><span>Talla vendida</span><select id="sale-size" required><option value="">Selecciona una prenda primero</option></select></label>
                             </div>
+                            <label><span>Nota</span><input id="sale-note" type="text" placeholder="Cliente, live o referencia"></label>
                             <p class="form-help">Al guardar, se descontará el stock y se creará el ingreso automáticamente.</p>
                             <button class="primary-btn" type="submit"><i data-lucide="badge-check"></i> Confirmar venta</button>
                         </form>
@@ -357,6 +372,7 @@
                 <label><span>Tallas</span><input id="product-sizes" type="text" placeholder="S, M, L, XL"></label>
                 <label><span>Etiqueta visible</span><input id="product-badge" type="text" placeholder="NUEVO DROP"></label>
             </div>
+            <label><span>Stock por talla</span><input id="product-size-stock" type="text" placeholder="S=1, M=2, L=0"><small>Opcional, pero recomendado. La suma debe coincidir con el stock total.</small></label>
             <div class="form-grid four">
                 <label><span>Color</span><input id="product-color" type="text" placeholder="Negro deslavado"></label>
                 <label><span>Material</span><input id="product-material" type="text" placeholder="Denim / 60% algodón"></label>
@@ -364,7 +380,7 @@
                 <label><span>Peso (gramos)</span><input id="product-weight" type="number" min="0" step="1" placeholder="850"></label>
             </div>
             <label><span>Cuidados</span><input id="product-care" type="text" placeholder="Lavar al revés con agua fría. No usar secadora."></label>
-            <label><span>Medidas por talla (cm)</span><textarea id="product-measurements" rows="4" placeholder="M: pecho=108, largo=70&#10;L: pecho=114, largo=72"></textarea><small>Una talla por línea. Ejemplo: M: pecho=108, largo=70</small></label>
+            <label><span>Medidas reales por talla (cm)</span><textarea id="product-measurements" rows="4" placeholder="M: pecho contorno=108, largo=70, manga=64&#10;34: cintura contorno=86, cadera contorno=104, entrepierna=81"></textarea><small>Una talla por línea. Indica “contorno” o “ancho” para no confundir al cliente. Mide la prenda sin estirarla.</small></label>
             <label><span>Descripción</span><textarea id="product-description" rows="4"></textarea></label>
             <label><span>URLs de imágenes</span><textarea id="product-images" rows="4" placeholder="Una dirección por línea"></textarea></label>
             <label class="upload-field"><span>Subir imágenes nuevas</span><input id="product-image-files" type="file" accept="image/png,image/jpeg,image/webp" multiple><small>PNG, JPG o WEBP. Máximo 10 MB por archivo.</small></label>
@@ -385,7 +401,7 @@
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="supabase-config.js?v=20260716-admin-v1"></script>
     <script src="product-image-overrides.js?v=20260822-mockups-v1"></script>
-    <script src="admin.js?v=20260822-mockups-responsive-v4"></script>
+    <script src="admin.js?v=20260822-orders-v8"></script>
     <script src="admin-tiktok.js?v=20260812-local-v1"></script>
 </body>
 </html>

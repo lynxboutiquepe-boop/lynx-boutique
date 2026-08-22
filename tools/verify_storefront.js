@@ -34,12 +34,43 @@ for (const required of [
     'class="trending-card-image product-detail-link"',
     'href="/cuenta"',
     'product-image-overrides.js?v=20260822-mockups-v1',
-    'app.js?v=20260822-mockups-responsive-v22',
+    'app.js?v=20260822-commerce-v27',
     'tiktok-videos.js?v=20260813-controls-fix-v3'
 ]) {
     if (!home.includes(required) && !fs.readFileSync(path.join(root, 'app.js'), 'utf8').includes(required)) {
         errors.push(`Falta referencia crítica: ${required}`);
     }
+}
+
+for (const required of [
+    'id="checkout-email"',
+    'name="payment-method"',
+    'id="checkout-review-panel"',
+    'id="review-fit"',
+    'href="/guia/tallas"'
+]) {
+    if (!home.includes(required)) errors.push(`Falta flujo comercial: ${required}`);
+}
+
+const app = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
+for (const required of ['validateCartStock', 'create_whatsapp_order', 'getAvailableProductSize']) {
+    if (!app.includes(required)) errors.push(`Falta validación de comercio: ${required}`);
+}
+
+for (const file of [
+    'size-guide-data.js',
+    'guia-tallas.css',
+    'guia/tallas.html',
+    'supabase/orders_and_stock.sql',
+    'supabase/review_fit_metadata.sql',
+    'supabase/functions/send-order-confirmation/index.ts'
+]) {
+    if (!fs.existsSync(path.join(root, file))) errors.push(`Falta archivo de actualización: ${file}`);
+}
+
+const ids = [...home.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
+for (const id of new Set(ids)) {
+    if (ids.filter(candidate => candidate === id).length > 1) errors.push(`ID duplicado en Home: ${id}`);
 }
 
 if (errors.length) {

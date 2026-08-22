@@ -924,6 +924,11 @@ const limaReserveCheckbox = document.getElementById('lima-reserve-checkbox');
 const dynamicPaymentInfo = document.getElementById('dynamic-payment-info');
 const paymentExplanationText = document.getElementById('payment-explanation-text');
 const submitOrderBtn = document.getElementById('submit-order-btn');
+const paymentRadios = document.getElementsByName('payment-method');
+const checkoutReviewPanel = document.getElementById('checkout-review-panel');
+const checkoutReviewContent = document.getElementById('checkout-review-content');
+const checkoutConfirmBtn = document.getElementById('checkout-confirm-btn');
+const checkoutEditBtn = document.getElementById('checkout-edit-btn');
 
 // Desglose de Totales
 const checkoutSubtotal = document.getElementById('checkout-subtotal');
@@ -1012,11 +1017,14 @@ async function loadCustomerProfile() {
 }
 
 function prefillCheckoutFromProfile() {
-    if (!customerProfile) return;
     const nameInput = document.getElementById('checkout-name');
     const phoneInput = document.getElementById('checkout-phone');
-    if (nameInput && !nameInput.value) nameInput.value = customerProfile.full_name || '';
-    if (phoneInput && !phoneInput.value) phoneInput.value = customerProfile.phone || '';
+    const emailInput = document.getElementById('checkout-email');
+    if (customerProfile) {
+        if (nameInput && !nameInput.value) nameInput.value = customerProfile.full_name || '';
+        if (phoneInput && !phoneInput.value) phoneInput.value = customerProfile.phone || '';
+    }
+    if (emailInput && !emailInput.value) emailInput.value = customerProfile?.email || customerUser?.email || '';
 }
 
 function showDiscountForm() {
@@ -1070,6 +1078,7 @@ async function requestWelcomeDiscountEmail() {
 function openCheckoutDrawer() {
     cartDrawer.classList.remove('active');
     checkoutDrawer.classList.add('active');
+    setCheckoutReviewMode(false);
     prefillCheckoutFromProfile();
     updateCheckoutTotals();
 }
@@ -1254,12 +1263,16 @@ async function loadPublishedReviews() {
         reviewsList.innerHTML = '<p class="reviews-empty">Las reseñas estarán disponibles pronto.</p>';
         return;
     }
-    const { data, error } = await customerSupabase
+    let { data, error } = await customerSupabase
         .from('customer_reviews')
-        .select('id, author_name, rating, comment, images, created_at')
+        .select('id, author_name, rating, comment, images, purchased_size, height_cm, fit_feedback, verified_purchase, created_at')
         .eq('status', 'published')
         .order('created_at', { ascending: false })
         .limit(6);
+
+    if (error && /column|schema cache|purchased_size/i.test(error.message || '')) {
+        ({ data, error } = await customerSupabase.from('customer_reviews').select('id, author_name, rating, comment, images, created_at').eq('status','published').order('created_at',{ascending:false}).limit(6));
+    }
 
     if (error) {
         console.warn('No se pudieron cargar las reseñas.', error.message);
@@ -1277,10 +1290,11 @@ async function loadPublishedReviews() {
     reviewsList.innerHTML = reviewsWithImages.length ? reviewsWithImages.map(review => `
         <article class="review-card">
             <div class="review-card-header">
-                <div><strong class="review-author">${escapeHtml(review.author_name)}</strong><span class="review-date"> · ${new Intl.DateTimeFormat('es-PE', { month: 'short', year: 'numeric' }).format(new Date(review.created_at))}</span></div>
+                <div><strong class="review-author">${escapeHtml(review.author_name)}</strong><span class="review-date"> · ${new Intl.DateTimeFormat('es-PE', { month: 'short', year: 'numeric' }).format(new Date(review.created_at))}</span><span class="review-verification ${review.verified_purchase ? 'is-purchase' : ''}">${review.verified_purchase ? 'Compra verificada' : 'Correo verificado'}</span></div>
                 <span class="review-stars-display" aria-label="${review.rating} de 5 estrellas">${reviewStars(review.rating)}</span>
             </div>
             <p>${escapeHtml(review.comment)}</p>
+            ${review.purchased_size || review.height_cm || review.fit_feedback ? `<div class="review-fit-meta">${review.purchased_size ? `<span>Talla ${escapeHtml(review.purchased_size)}</span>` : ''}${review.height_cm ? `<span>${Number(review.height_cm)} cm</span>` : ''}${review.fit_feedback ? `<span>${({ajustado:'Más ajustado',fiel:'Fiel a la talla',holgado:'Más holgado'})[review.fit_feedback] || escapeHtml(review.fit_feedback)}</span>` : ''}</div>` : ''}
             ${review.imageUrls.length ? `<button class="review-photo-btn" type="button" data-review-id="${review.id}"><i data-lucide="images"></i> VER ${review.imageUrls.length === 1 ? 'FOTO' : `${review.imageUrls.length} FOTOS`}</button>` : ''}
         </article>
     `).join('') : '<p class="reviews-empty">Aún no hay reseñas públicas. Sé el primero en compartir tu experiencia.</p>';
@@ -1323,6 +1337,9 @@ function setupReviewEvents() {
         const button = event.submitter;
         const rating = Number(reviewForm.querySelector('input[name="review-rating"]:checked')?.value);
         const comment = document.getElementById('review-comment').value.trim();
+        const purchasedSize = document.getElementById('review-size').value.trim();
+        const heightCm = document.getElementById('review-height').value ? Number(document.getElementById('review-height').value) : null;
+        const fitFeedback = document.getElementById('review-fit').value;
         const images = selectedReviewImages();
         if (!rating || comment.length < 10) {
             setReviewMessage('Escribe una reseña de al menos 10 caracteres.');
@@ -1339,11 +1356,17 @@ function setupReviewEvents() {
         let uploadedPaths = [];
         try {
             uploadedPaths = await uploadReviewImages(images);
-            const { error } = await customerSupabase.rpc('submit_customer_review', {
+            let { error } = await customerSupabase.rpc('submit_customer_review_with_fit', {
                 p_rating: rating,
                 p_comment: comment,
-                p_images: uploadedPaths
+                p_images: uploadedPaths,
+                p_purchased_size: purchasedSize,
+                p_height_cm: heightCm,
+                p_fit_feedback: fitFeedback
             });
+            if (error && /submit_customer_review_with_fit|schema cache|function/i.test(error.message || '')) {
+                ({ error } = await customerSupabase.rpc('submit_customer_review', { p_rating: rating, p_comment: comment, p_images: uploadedPaths }));
+            }
             if (error) throw error;
             reviewForm.reset();
             setReviewImagesNote();
@@ -1391,7 +1414,8 @@ function mapDatabaseProduct(row) {
         fitType: row.fit_type || '',
         careInstructions: row.care_instructions || '',
         weightGrams: row.weight_grams ?? null,
-        measurements: row.measurements || {}
+        measurements: row.measurements || {},
+        sizeStock: row.size_stock || {}
     };
 }
 
@@ -1428,7 +1452,8 @@ function restoreCart() {
             const product = PRODUCTS.find(candidate => String(candidate.id) === String(item.productId));
             if (!product || product.status === 'sold_out') return null;
             const sizes = Array.isArray(product.sizes) && product.sizes.length ? product.sizes : ['ÚNICA'];
-            const size = sizes.includes(item.size) ? item.size : sizes[0];
+            const size = getAvailableProductSize(product, item.size);
+            if (!size) return null;
             const stock = Number(product.stock);
             const max = Number.isFinite(stock) && stock > 0 ? stock : Number.MAX_SAFE_INTEGER;
             const qty = Math.max(1, Math.min(Number(item.qty) || 1, max));
@@ -1445,7 +1470,7 @@ async function loadDatabaseCatalog() {
     if (!client) return null;
 
     const baseFields = 'id,legacy_id,title,slug,category,price,stock,sizes,images,description,badge,status,fit_recommendation,sort_order';
-    const extendedFields = `${baseFields},color,material,fit_type,care_instructions,weight_grams,measurements`;
+    const extendedFields = `${baseFields},color,material,fit_type,care_instructions,weight_grams,measurements,size_stock`;
     const queryCatalog = fields => client
         .from('products')
         .select(fields)
@@ -1546,6 +1571,16 @@ function productUrl(product) {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '') || product.databaseId || product.id;
     return `/producto/${encodeURIComponent(String(identifier))}`;
+}
+
+function getAvailableProductSize(product, preferredSize = '') {
+    const sizes = Array.isArray(product?.sizes) && product.sizes.length ? product.sizes : ['ÚNICA'];
+    if (product?.status === 'preorder') return preferredSize && sizes.includes(preferredSize) ? preferredSize : sizes[0];
+    if (Number(product?.stock) <= 0) return '';
+    const sizeStock = product?.sizeStock || {};
+    const isAvailable = size => !Object.prototype.hasOwnProperty.call(sizeStock, size) || Number(sizeStock[size]) > 0;
+    if (preferredSize && sizes.includes(preferredSize) && isAvailable(preferredSize)) return preferredSize;
+    return sizes.find(isAvailable) || '';
 }
 
 let modalMainImageRequestId = 0;
@@ -1739,8 +1774,8 @@ function renderProducts() {
         <article class="product-card" id="product-${product.id}">
             <a class="product-card-img-wrapper product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}" aria-label="Ver detalles de ${escapeHtml(product.title)}">
                 <span class="product-card-badge ${product.badge.toLowerCase().includes('stock') || product.badge.toLowerCase().includes('limit') || product.badge.toLowerCase().includes('última') ? 'limited' : ''}">${product.badge}</span>
-                <img class="product-card-primary-img" src="${product.image}" alt="${product.title}" loading="eager" decoding="async" fetchpriority="${productIndex < 3 ? 'high' : 'low'}" width="1200" height="1600" style="pointer-events:none;">
-                ${supportsProductHover && product.images?.[1] ? `<img class="product-card-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="eager" decoding="async" style="pointer-events:none;">` : ''}
+                <img class="product-card-primary-img" src="${product.image}" alt="${product.title}" loading="${productIndex < 3 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="${productIndex < 2 ? 'high' : 'low'}" width="1200" height="1600" style="pointer-events:none;">
+                ${supportsProductHover && product.images?.[1] ? `<img class="product-card-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="lazy" decoding="async" style="pointer-events:none;">` : ''}
             </a>
             <div class="product-card-content">
                 <span class="product-card-category">${CATALOG_CATEGORY_META[product.category]?.label || product.category}</span>
@@ -1782,8 +1817,8 @@ function renderTrendingProducts() {
         <article class="trending-card" ${isDuplicate ? 'aria-hidden="true"' : ''}>
             <a class="trending-card-image product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}" aria-label="Ver detalles de ${escapeHtml(product.title)}" ${isDuplicate ? 'tabindex="-1"' : ''}>
                 <span class="trending-card-badge">${product.badge}</span>
-                <img class="trending-primary-img" src="${product.image}" alt="${isDuplicate ? '' : product.title}" loading="eager" decoding="async" ${!isDuplicate && productIndex < 2 ? 'fetchpriority="high"' : 'fetchpriority="auto"'}>
-                ${supportsProductHover && product.images?.[1] ? `<img class="trending-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="eager" decoding="async">` : ''}
+                <img class="trending-primary-img" src="${product.image}" alt="${isDuplicate ? '' : product.title}" loading="${!isDuplicate && productIndex < 2 ? 'eager' : 'lazy'}" decoding="async" ${!isDuplicate && productIndex < 2 ? 'fetchpriority="high"' : 'fetchpriority="low"'}>
+                ${supportsProductHover && product.images?.[1] ? `<img class="trending-secondary-img" src="${product.images[1]}" alt="" aria-hidden="true" loading="lazy" decoding="async">` : ''}
             </a>
             <a class="trending-card-title product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}" ${isDuplicate ? 'tabindex="-1"' : ''}>${product.title}</a>
             <span class="trending-card-price">S/. ${product.price.toFixed(2)}</span>
@@ -2278,10 +2313,29 @@ function updateCheckoutTotals() {
     if (shippingMethod === 'lima') {
         shipping = 15.00;
         limaPaymentConditionBox.classList.remove('hidden');
+        document.getElementById('checkout-dni-group')?.classList.add('hidden');
+        document.getElementById('checkout-dni')?.removeAttribute('required');
+        document.getElementById('checkout-address-label').textContent = 'Dirección de entrega y referencia *';
+        document.getElementById('payment-cash-card')?.classList.remove('is-disabled');
     } else {
         shipping = 0.00;
         limaPaymentConditionBox.classList.add('hidden');
+        document.getElementById('checkout-dni-group')?.classList.remove('hidden');
+        document.getElementById('checkout-dni')?.setAttribute('required', '');
+        document.getElementById('checkout-address-label').textContent = 'Agencia Shalom donde recogerás *';
+        const cashCard = document.getElementById('payment-cash-card');
+        cashCard?.classList.add('is-disabled');
+        const cashRadio = cashCard?.querySelector('input');
+        if (cashRadio?.checked) {
+            const fallback = document.querySelector('input[name="payment-method"][value="yape-plin"]');
+            if (fallback) fallback.checked = true;
+        }
     }
+
+    document.querySelectorAll('.payment-option-card').forEach(card => {
+        const radio = card.querySelector('input[type="radio"]');
+        card.classList.toggle('active', Boolean(radio?.checked));
+    });
 
     const total = subtotal + shipping;
 
@@ -2638,7 +2692,11 @@ function setupEventListeners() {
         if (!button || button.disabled) return;
         const product = PRODUCTS.find(item => String(item.id) === button.dataset.productId);
         if (!product) return;
-        const size = product.sizes?.length ? product.sizes[0] : 'ÚNICA';
+        const size = getAvailableProductSize(product);
+        if (!size) {
+            alert('Todas las tallas de esta prenda están agotadas por el momento.');
+            return;
+        }
         if (!addToCart(product, size, 1)) return;
         closeAllDrawers();
         cartDrawer.classList.add('active');
@@ -2785,7 +2843,7 @@ function setupEventListeners() {
     // Tallas en el Modal
     modalSizeContainer.addEventListener('click', (e) => {
         const btn = e.target.closest('.size-btn');
-        if (!btn) return;
+        if (!btn || btn.disabled) return;
         modalSizeContainer.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
     });
@@ -2804,7 +2862,12 @@ function setupEventListeners() {
 
     // Agregar al Carrito desde el Modal
     modalAddToCartBtn.addEventListener('click', () => {
-        const size = modalSizeContainer.querySelector('.size-btn.active').getAttribute('data-size');
+        const activeSize = modalSizeContainer.querySelector('.size-btn.active:not(:disabled)');
+        if (!activeSize) {
+            alert('No hay tallas disponibles para esta prenda.');
+            return;
+        }
+        const size = activeSize.getAttribute('data-size');
         const qty = parseInt(modalQtyInput.value);
         
         const wasAdded = addToCart(currentProduct, size, qty);
@@ -2842,14 +2905,24 @@ function setupEventListeners() {
         });
     });
 
+    paymentRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            document.querySelectorAll('.payment-option-card').forEach(card => {
+                card.classList.toggle('active', card.contains(radio));
+            });
+        });
+    });
+
     limaReserveCheckbox.addEventListener('change', () => {
         updateCheckoutTotals();
     });
 
     // Enviar pedido por WhatsApp
     submitOrderBtn.addEventListener('click', async () => {
-        await submitOrder();
+        await submitOrder(false);
     });
+    checkoutConfirmBtn?.addEventListener('click', async () => { await submitOrder(true); });
+    checkoutEditBtn?.addEventListener('click', () => setCheckoutReviewMode(false));
 }
 
 function setMobileMenuOpen(isOpen) {
@@ -2978,7 +3051,8 @@ function openProductDetails(id, { syncUrl = true } = {}) {
     modalProductPrice.textContent = `S/. ${product.price.toFixed(2)}`;
     modalProductDesc.textContent = product.description;
     modalProductBadge.textContent = product.badge;
-    const isSoldOut = product.status === 'sold_out';
+    const selectedAvailableSize = getAvailableProductSize(product);
+    const isSoldOut = product.status === 'sold_out' || !selectedAvailableSize;
     modalAddToCartBtn.disabled = isSoldOut;
     modalAddToCartBtn.innerHTML = isSoldOut
         ? '<i data-lucide="ban"></i> PRODUCTO AGOTADO'
@@ -3017,8 +3091,10 @@ function openProductDetails(id, { syncUrl = true } = {}) {
     modalQtyInput.max = product.stock || '';
     const availableSizes = product.sizes || ['S', 'M', 'L', 'XL'];
     modalSizeContainer.innerHTML = availableSizes.map((size, idx) => `
-        <button class="size-btn ${idx === 0 ? 'active' : ''}" data-size="${size}">${size}</button>
+        <button class="size-btn ${idx === 0 ? 'active' : ''}" data-size="${size}" ${product.status !== 'preorder' && product.sizeStock && Object.prototype.hasOwnProperty.call(product.sizeStock,size) && Number(product.sizeStock[size]) <= 0 ? 'disabled' : ''}>${size}</button>
     `).join('');
+    const firstEnabledSize = modalSizeContainer.querySelector('.size-btn:not(:disabled)');
+    modalSizeContainer.querySelectorAll('.size-btn').forEach(button => button.classList.toggle('active', button === firstEnabledSize));
 
     productModal.classList.add('active');
     if (syncUrl) {
@@ -3060,7 +3136,11 @@ function openProductFromUrl() {
     if (params.get('comprar') === '1' || params.get('agregar') === '1') {
         const availableSizes = product.sizes?.length ? product.sizes : ['ÚNICA'];
         const requestedSize = params.get('talla');
-        const size = availableSizes.includes(requestedSize) ? requestedSize : availableSizes[0];
+        const size = getAvailableProductSize(product, availableSizes.includes(requestedSize) ? requestedSize : '');
+        if (!size) {
+            alert('Todas las tallas de esta prenda están agotadas por el momento.');
+            return;
+        }
         const requestedQty = Math.max(1, Number(params.get('cantidad')) || 1);
         const wasAdded = addToCart(product, size, requestedQty);
         if (wasAdded || cart.length) {
@@ -3080,14 +3160,19 @@ function addToCart(product, size, qty) {
     }
 
     // Buscar si el producto de esa talla ya está en el carrito
+    const requestedQty = Math.max(1, Math.min(20, Number(qty) || 1));
     const existingIndex = cart.findIndex(item => item.product.id === product.id && item.size === size);
     const currentProductQty = cart
         .filter(item => item.product.id === product.id)
         .reduce((total, item) => total + item.qty, 0);
-    const availableToAdd = product.stock
-        ? Math.max(0, product.stock - currentProductQty)
-        : qty;
-    const qtyToAdd = Math.min(qty, availableToAdd);
+    const sizedStock = product.status !== 'preorder' && product.sizeStock && Object.prototype.hasOwnProperty.call(product.sizeStock, size) ? Number(product.sizeStock[size]) : null;
+    const sizeQtyInCart = cart.filter(item => item.product.id === product.id && item.size === size).reduce((total,item)=>total+item.qty,0);
+    const stockLimit = Number.isFinite(sizedStock) ? sizedStock : product.stock;
+    const numericStockLimit = Number(stockLimit);
+    const availableToAdd = product.status === 'preorder' || !Number.isFinite(numericStockLimit)
+        ? requestedQty
+        : Math.max(0, numericStockLimit - (Number.isFinite(sizedStock) ? sizeQtyInCart : currentProductQty));
+    const qtyToAdd = Math.min(requestedQty, availableToAdd);
 
     if (qtyToAdd <= 0) {
         alert('Ya agregaste todas las unidades disponibles de esta prenda.');
@@ -3108,7 +3193,10 @@ function addToCart(product, size, qty) {
 
 function updateCartQty(index, delta) {
     if (cart[index]) {
-        const maxStock = cart[index].product.stock || Number.MAX_SAFE_INTEGER;
+        const item = cart[index];
+        const sizedStock = item.product.status !== 'preorder' && item.product.sizeStock && Object.prototype.hasOwnProperty.call(item.product.sizeStock,item.size) ? Number(item.product.sizeStock[item.size]) : null;
+        const numericStock = Number(item.product.stock);
+        const maxStock = item.product.status === 'preorder' ? 20 : Number.isFinite(sizedStock) ? sizedStock : Number.isFinite(numericStock) ? numericStock : Number.MAX_SAFE_INTEGER;
         cart[index].qty = Math.min(cart[index].qty + delta, maxStock);
         if (cart[index].qty <= 0) {
             removeFromCart(index);
@@ -3133,18 +3221,107 @@ function closeAllDrawers() {
 }
 
 // 8. FINALIZACIÓN Y ENVÍO A WHATSAPP
-async function submitOrder() {
+function setCheckoutReviewMode(enabled) {
+    checkoutDrawer?.classList.toggle('checkout-review-mode', enabled);
+    if (checkoutReviewPanel) checkoutReviewPanel.hidden = !enabled;
+    document.getElementById('checkout-progress-delivery')?.classList.toggle('is-active', !enabled);
+    document.getElementById('checkout-progress-delivery')?.classList.toggle('is-complete', enabled);
+    document.getElementById('checkout-progress-confirmation')?.classList.toggle('is-active', enabled);
+    if (enabled) checkoutReviewPanel?.scrollIntoView({ block: 'start' });
+}
+
+async function validateCartStock() {
+    const client = window.getLynxSupabase?.();
+    if (!client || !cart.length) return true;
+    const databaseIds = [...new Set(cart.map(item => Number(item.product.databaseId)).filter(Number.isFinite))];
+    const legacyIds = [...new Set(cart.map(item => Number(item.product.id)).filter(id => Number.isFinite(id) && id < 1000000))];
+    const rows = [];
+    try {
+        if (databaseIds.length) {
+            const { data, error } = await client.from('products').select('id,legacy_id,title,price,stock,status,size_stock').in('id', databaseIds);
+            if (error) throw error;
+            rows.push(...(data || []));
+        }
+        if (legacyIds.length) {
+            const { data, error } = await client.from('products').select('id,legacy_id,title,price,stock,status,size_stock').in('legacy_id', legacyIds);
+            if (error) throw error;
+            rows.push(...(data || []));
+        }
+    } catch (error) {
+        console.warn('No se pudo revalidar el stock en línea.', error.message);
+        return true;
+    }
+
+    const unavailable = [];
+    cart.forEach(item => {
+        const row = rows.find(candidate => Number(candidate.id) === Number(item.product.databaseId)
+            || Number(candidate.legacy_id) === Number(item.product.id));
+        if (!row) return;
+        item.product.stock = Number(row.stock || 0);
+        item.product.status = row.status;
+        item.product.price = Number(row.price || item.product.price);
+        item.product.sizeStock = row.size_stock || {};
+        const sizeAvailable = row.size_stock && Object.prototype.hasOwnProperty.call(row.size_stock,item.size) ? Number(row.size_stock[item.size]) : Number(row.stock || 0);
+        if (['sold_out', 'archived'].includes(row.status) || (row.status !== 'preorder' && (Number(row.stock || 0) < item.qty || sizeAvailable < item.qty))) unavailable.push(`${item.product.title} (${item.size})`);
+    });
+    if (unavailable.length) {
+        persistCart();
+        renderCart();
+        alert(`El stock cambió para: ${unavailable.join(', ')}. Ajusta el carrito antes de continuar.`);
+        return false;
+    }
+    return true;
+}
+
+async function createPendingWebOrder(details) {
+    const client = window.getLynxSupabase?.();
+    if (!client) return '';
+    const items = cart.map(item => ({
+        product_id: item.product.databaseId,
+        size: item.size,
+        quantity: item.qty
+    })).filter(item => Number.isFinite(Number(item.product_id)));
+    if (items.length !== cart.length) return '';
+    try {
+        const { data, error } = await client.rpc('create_whatsapp_order', {
+            p_customer_name: details.name,
+            p_customer_phone: details.phone,
+            p_customer_email: details.email,
+            p_customer_dni: details.dni,
+            p_city: details.city,
+            p_delivery_address: details.address,
+            p_shipping_method: details.shippingMethod,
+            p_payment_method: details.paymentMethod,
+            p_discount_code: details.discountCode,
+            p_items: items
+        });
+        if (error) throw error;
+        return Array.isArray(data) ? data[0]?.order_code || '' : data?.order_code || '';
+    } catch (error) {
+        // El pedido por WhatsApp sigue funcionando aunque la migración de
+        // pedidos todavía no esté activa en Supabase.
+        console.warn('Pedido no registrado aún en el panel:', error.message);
+        return '';
+    }
+}
+
+async function submitOrder(confirmed = false) {
     // Validar formulario manualmente
     const name = document.getElementById('checkout-name').value.trim();
     const phone = document.getElementById('checkout-phone').value.trim();
+    const email = document.getElementById('checkout-email').value.trim();
     const city = document.getElementById('checkout-city').value.trim();
     const address = document.getElementById('checkout-address').value.trim();
+    const shippingMethod = document.querySelector('input[name="shipping-method"]:checked').value;
+    const dni = document.getElementById('checkout-dni').value.trim();
 
     const fields = [
         { id: 'checkout-name', error: 'checkout-name-error', valid: name.length >= 3, message: 'Escribe tu nombre y apellido.' },
         { id: 'checkout-phone', error: 'checkout-phone-error', valid: /^[0-9 +()-]{9,15}$/.test(phone), message: 'Escribe un WhatsApp válido de 9 a 15 dígitos.' },
+        { id: 'checkout-email', error: 'checkout-email-error', valid: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email), message: 'Escribe un correo válido para recibir la confirmación.' },
         { id: 'checkout-city', error: 'checkout-city-error', valid: city.length >= 3, message: 'Indica tu ciudad o departamento.' },
-        { id: 'checkout-address', error: 'checkout-address-error', valid: address.length >= 6, message: 'Completa la dirección y una referencia.' }
+        { id: 'checkout-address', error: 'checkout-address-error', valid: address.length >= 6, message: shippingMethod === 'shalom' ? 'Indica la agencia Shalom donde recogerás.' : 'Completa la dirección y una referencia.' },
+        { id: 'checkout-dni', error: 'checkout-dni-error', valid: shippingMethod !== 'shalom' || /^\d{8}$/.test(dni), message: 'Escribe los 8 dígitos del DNI de quien recogerá.' }
     ];
     fields.forEach(field => {
         const input = document.getElementById(field.id);
@@ -3159,9 +3336,17 @@ async function submitOrder() {
         return;
     }
 
-    const shippingMethod = document.querySelector('input[name="shipping-method"]:checked').value;
     const reserveLima = limaReserveCheckbox.checked;
     const discountCode = document.getElementById('checkout-discount-code')?.value.trim().toUpperCase() || '';
+    const paymentMethod = document.querySelector('input[name="payment-method"]:checked')?.value || 'yape-plin';
+    const paymentLabels = {
+        'yape-plin': 'Yape o Plin',
+        transferencia: 'Transferencia BCP / BBVA',
+        'tarjeta-link': 'Tarjeta mediante link de pago',
+        contraentrega: 'Contraentrega en Lima'
+    };
+
+    if (!confirmed && !(await validateCartStock())) return;
 
     // Calcular montos
     const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.qty), 0);
@@ -3173,6 +3358,29 @@ async function submitOrder() {
     cart.forEach(item => {
         productsText += `• ${item.qty}x ${item.product.title} (Talla: ${item.size}) - S/. ${(item.product.price * item.qty).toFixed(2)}\n`;
     });
+
+    if (!confirmed) {
+        checkoutReviewContent.innerHTML = `
+            <div class="checkout-review-items">${cart.map(item => `<div class="checkout-review-item"><img src="${escapeHtml(item.product.image)}" alt=""><div><strong>${escapeHtml(item.product.title)}</strong><span>${item.qty} und. · Talla ${escapeHtml(item.size)}</span></div><b>S/. ${(item.product.price * item.qty).toFixed(2)}</b></div>`).join('')}</div>
+            <div class="checkout-review-row"><span>Cliente</span><strong>${escapeHtml(name)}</strong></div>
+            <div class="checkout-review-row"><span>Contacto</span><strong>${escapeHtml(phone)}<br>${escapeHtml(email)}</strong></div>
+            <div class="checkout-review-row"><span>Entrega</span><strong>${shippingMethod === 'shalom' ? 'Shalom · flete en agencia' : 'Motorizado Lima'}<br>${escapeHtml(city)} · ${escapeHtml(address)}</strong></div>
+            <div class="checkout-review-row"><span>Pago preferido</span><strong>${escapeHtml(paymentLabels[paymentMethod])}</strong></div>
+            <div class="checkout-review-row"><span>Total de prendas y delivery</span><strong>S/. ${total.toFixed(2)}${shippingMethod === 'shalom' ? ' + flete Shalom' : ''}</strong></div>`;
+        setCheckoutReviewMode(true);
+        lucide.createIcons();
+        return;
+    }
+
+    // Entre la pantalla de revisión y el clic final puede cambiar el stock.
+    // Se comprueba una segunda vez para no prometer una talla que ya se vendió.
+    if (!(await validateCartStock())) {
+        setCheckoutReviewMode(false);
+        return;
+    }
+    checkoutConfirmBtn.disabled = true;
+    checkoutConfirmBtn.textContent = 'PREPARANDO PEDIDO...';
+    const orderCode = await createPendingWebOrder({ name, phone, email, dni, city, address, shippingMethod, paymentMethod, discountCode });
 
     // Formatear Detalles de Pago en el mensaje
     let paymentDetailText = '';
@@ -3189,12 +3397,16 @@ async function submitOrder() {
 
     // Mensaje final para WhatsApp
     const message = `🔥 *NUEVO PEDIDO - LYNX STREETWEAR* 🔥\n\n` +
+                    `${orderCode ? `🧾 *CÓDIGO:* ${orderCode}\n\n` : ''}` +
                     `👤 *DATOS DEL CLIENTE:*\n` +
                     `- *Nombre:* ${name}\n` +
                     `${customerUser?.email ? `- *Cuenta:* ${customerUser.email}\n` : ''}` +
+                    `- *Correo:* ${email}\n` +
                     `- *Celular:* ${phone}\n` +
                     `- *Ciudad:* ${city}\n` +
                     `- *Dirección:* ${address}\n` +
+                    `${shippingMethod === 'shalom' ? `- *DNI para recojo:* ${dni}\n` : ''}` +
+                    `- *Pago preferido:* ${paymentLabels[paymentMethod]}\n` +
                     `${discountCode ? `- *Código de descuento:* ${discountCode} (por validar)\n` : ''}\n` +
                     `🛒 *PRODUCTOS DEL PEDIDO:*\n${productsText}\n` +
                     `${paymentDetailText}\n\n` +
