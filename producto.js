@@ -43,6 +43,19 @@ const productSlug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(productReference) ? produc
 let selectedSize = '';
 let selectedQuantity = 1;
 let currentProduct = null;
+let fallbackCatalogPromise = null;
+
+function loadFallbackCatalog() {
+    if (!fallbackCatalogPromise) {
+        fallbackCatalogPromise = fetch('/catalog-seed.json', { cache: 'no-store' })
+            .then(response => {
+                if (!response.ok) throw new Error('No se pudo cargar el catálogo de respaldo');
+                return response.json();
+            })
+            .then(data => Array.isArray(data) ? data : []);
+    }
+    return fallbackCatalogPromise;
+}
 
 function favoriteSlugs() {
     try {
@@ -148,10 +161,94 @@ function productCategoryUrl(category) {
     return `/categoria/${file}`;
 }
 
-function relatedCategoryPriority(category) {
-    if (category === 'jeans-pants') return ['hoodies-jackets', 't-shirts', 'conjuntos'];
-    if (category === 't-shirts' || category === 'hoodies-jackets') return ['jeans-pants', 'conjuntos', 't-shirts', 'hoodies-jackets'];
-    return ['jeans-pants', 'hoodies-jackets', 't-shirts'];
+function lookText(product) {
+    return [product.title, product.description, product.color, product.material, product.fit_type]
+        .map(value => text(value).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))
+        .join(' ');
+}
+
+function lookProfile(product) {
+    const content = lookText(product);
+    const colorRules = [
+        ['black', /negro|black/], ['white', /blanco|white|off white|hueso|cream|crema/],
+        ['grey', /gris|grey|gray|charcoal/], ['blue', /azul|blue|navy|celeste|royal|denim|medium wash|light wash|dark wash/],
+        ['brown', /marron|cafe|brown|taupe|beige|arena|camel/], ['red', /rojo|red|burgundy|vino/],
+        ['pink', /rosa|pink/], ['purple', /morado|purple|lila/], ['olive', /verde|green|olive|camo|camuflaje/],
+        ['yellow', /amarillo|yellow|mostaza/], ['multi', /multicolor|multi-color|combinado|combo/]
+    ];
+    const color = colorRules.find(([, pattern]) => pattern.test(content))?.[0] || 'unknown';
+    const styleRules = {
+        camo: /camo|camuflaje/, paisley: /paisley/, tapestry: /tapestry|tapiz/, leather: /leather|cuero/,
+        varsity: /varsity|campus|college/, graphic: /printed|print|grafico|applique|embroidered|bordado|monster|rhinestone|jewel|iced out/,
+        knit: /knit|tejido|crochet|sweater/, cargo: /cargo|utility/, distressed: /ripped|fray|distressed|deshilachado/,
+        sport: /lakers|bulls|cowboys|49ers|lions|saints|players club/, denim: /denim|jean|wash/
+    };
+    const styles = Object.entries(styleRules).filter(([, pattern]) => pattern.test(content)).map(([name]) => name);
+    const fit = /oversized|holgad|ampli/.test(content) ? 'oversized'
+        : /baggy|wide/.test(content) ? 'baggy'
+            : /flare|acampanad|stacked/.test(content) ? 'flare'
+                : /skinny|slim/.test(content) ? 'skinny'
+                    : /cropped|crop/.test(content) ? 'cropped' : 'regular';
+    const kind = product.category === 'jeans-pants' ? 'bottom'
+        : product.category === 't-shirts' ? 'tee'
+            : product.category === 'conjuntos' ? 'set'
+                : /jacket|bomber|parka|shacket|trucker|aviator/.test(content) ? 'outerwear' : 'hoodie';
+    const busy = styles.some(style => ['camo', 'paisley', 'tapestry', 'graphic', 'varsity', 'distressed'].includes(style)) || color === 'multi';
+    return { color, styles, fit, kind, busy };
+}
+
+function lookSlots(profile) {
+    if (profile.kind === 'bottom') return ['hoodies-jackets', 't-shirts', 'hoodies-jackets'];
+    if (profile.kind === 'tee') return ['jeans-pants', 'hoodies-jackets', 'jeans-pants'];
+    if (profile.kind === 'outerwear') return ['t-shirts', 'jeans-pants', 'jeans-pants'];
+    if (profile.kind === 'hoodie') return ['jeans-pants', 't-shirts', 'jeans-pants'];
+    return ['t-shirts', 'hoodies-jackets', 'jeans-pants'];
+}
+
+function colorMatchScore(source, candidate) {
+    if (source === 'unknown' || candidate === 'unknown') return 2;
+    const neutrals = new Set(['black', 'white', 'grey']);
+    if (source === candidate) return neutrals.has(source) ? 13 : 5;
+    if (neutrals.has(source) || neutrals.has(candidate)) return 16;
+    const matches = {
+        blue: ['brown', 'olive', 'red', 'pink'], brown: ['blue', 'olive'], olive: ['brown', 'blue'],
+        red: ['blue'], pink: ['blue'], purple: ['grey'], yellow: ['blue', 'brown'], multi: ['black', 'white', 'grey']
+    };
+    return matches[source]?.includes(candidate) || matches[candidate]?.includes(source) ? 12 : -4;
+}
+
+function lookMatchScore(sourceProduct, candidate, slotIndex) {
+    const source = lookProfile(sourceProduct);
+    const match = lookProfile(candidate);
+    let score = colorMatchScore(source.color, match.color);
+    if (source.busy && !match.busy) score += 18;
+    if (source.busy && match.busy) score -= 24;
+    if (!source.busy && match.busy) score += 3;
+    if (source.styles.includes('leather') && ['black', 'grey', 'blue', 'white'].includes(match.color)) score += 10;
+    if (source.kind === 'outerwear' && match.kind === 'tee' && match.styles.includes('leather')) score -= 22;
+    if (source.styles.includes('camo') && ['black', 'white', 'brown'].includes(match.color)) score += 12;
+    if (source.styles.includes('denim') && match.styles.includes('denim') && source.color === match.color) score -= 10;
+    if (source.kind === 'bottom' && match.kind === 'hoodie') score += 7;
+    if (source.kind === 'bottom' && source.styles.includes('denim') && match.kind === 'outerwear' && match.styles.includes('denim')) score -= 9;
+    if (source.fit === 'oversized' && ['flare', 'skinny', 'baggy'].includes(match.fit)) score += 10;
+    if (source.fit === 'cropped' && ['baggy', 'flare'].includes(match.fit)) score += 12;
+    if (source.kind === 'bottom' && source.fit === 'flare' && ['cropped', 'regular', 'oversized'].includes(match.fit)) score += 9;
+    if (source.kind === 'bottom' && source.fit === 'baggy' && ['cropped', 'regular'].includes(match.fit)) score += 10;
+    if (match.styles.includes('cargo') && source.kind !== 'bottom') score += 5;
+    if (source.styles.some(style => match.styles.includes(style)) && !source.busy) score += 5;
+    score += Math.max(0, 3 - slotIndex);
+    score += (Number(candidate.sort_order || candidate.id || 0) % 17) / 20;
+    return score;
+}
+
+function lookMatchReason(sourceProduct, candidate) {
+    const source = lookProfile(sourceProduct);
+    const match = lookProfile(candidate);
+    if (source.busy && !match.busy) return 'EQUILIBRA EL LOOK';
+    if ((source.fit === 'oversized' && ['flare', 'skinny', 'baggy'].includes(match.fit)) || (source.fit === 'cropped' && ['baggy', 'flare'].includes(match.fit))) return 'BALANCEA EL FIT';
+    if (colorMatchScore(source.color, match.color) >= 12) return 'PALETA QUE COMBINA';
+    if (source.styles.some(style => match.styles.includes(style))) return 'MISMO MOOD';
+    return 'MATCH SELECCIONADO';
 }
 
 function storefrontProductUrl(product) {
@@ -161,21 +258,26 @@ function storefrontProductUrl(product) {
 async function loadCompleteLook(product) {
     if (!completeLook || !completeLookGrid) return;
     const client = window.getLynxSupabase?.();
-    if (!client) return;
-    const fields = 'id,legacy_id,title,slug,category,price,stock,sizes,images,badge,status,sort_order';
-    const { data, error } = await client.from('products').select(fields).neq('status', 'archived').neq('status', 'sold_out').gt('stock', 0).limit(120);
-    if (error || !data?.length) return;
-    const priorities = relatedCategoryPriority(product.category);
-    const candidates = data
-        .filter(candidate => candidate.slug !== product.slug)
-        .sort((a, b) => priorities.indexOf(a.category) - priorities.indexOf(b.category) || Number(b.sort_order || b.id) - Number(a.sort_order || a.id));
-    const picked = [];
-    for (const category of priorities) {
-        const candidate = candidates.find(item => item.category === category && !picked.includes(item));
-        if (candidate) picked.push(candidate);
-        if (picked.length === 3) break;
+    const fields = 'id,legacy_id,title,slug,category,price,stock,sizes,images,description,badge,status,sort_order,color,material,fit_type';
+    let data = [];
+    if (client) {
+        const result = await client.from('products').select(fields).neq('status', 'archived').neq('status', 'sold_out').gt('stock', 0).limit(120);
+        if (!result.error && result.data?.length) data = result.data;
     }
-    for (const candidate of candidates) {
+    if (!data.length) {
+        data = (await loadFallbackCatalog()).filter(item => item.status !== 'archived' && item.status !== 'sold_out' && Number(item.stock || 0) > 0);
+    }
+    if (!data.length) return;
+    const slots = lookSlots(lookProfile(product));
+    const candidates = data.filter(candidate => candidate.slug !== product.slug);
+    const picked = [];
+    for (const [slotIndex, category] of slots.entries()) {
+        const candidate = candidates
+            .filter(item => item.category === category && !picked.includes(item))
+            .sort((a, b) => lookMatchScore(product, b, slotIndex) - lookMatchScore(product, a, slotIndex))[0];
+        if (candidate) picked.push(candidate);
+    }
+    for (const candidate of [...candidates].sort((a, b) => lookMatchScore(product, b, 3) - lookMatchScore(product, a, 3))) {
         if (picked.length === 3) break;
         if (!picked.includes(candidate)) picked.push(candidate);
     }
@@ -184,7 +286,7 @@ async function loadCompleteLook(product) {
         const sources = window.LynxProductImages?.withMockup(candidate.slug, candidate.images || []) || candidate.images || [];
         return `<a class="complete-look-card" href="${storefrontProductUrl(candidate)}" data-related-slug="${escapeHtml(candidate.slug)}">
             <img src="${escapeHtml(productImageUrl(sources[0]))}" alt="${escapeHtml(candidate.title)}" loading="lazy" decoding="async">
-            <span>${escapeHtml(text(candidate.category).replaceAll('-', ' ').toUpperCase())}</span>
+            <span>MATCH LYNX · ${escapeHtml(lookMatchReason(product, candidate))}</span>
             <strong>${escapeHtml(candidate.title)}</strong><b>S/. ${Number(candidate.price || 0).toFixed(2)}</b>
         </a>`;
     }).join('');
@@ -508,7 +610,12 @@ restockWhatsapp?.addEventListener('click', () => currentProduct && window.LynxTr
 async function loadProduct() {
     if ((!Number.isInteger(productId) || productId < 1) && !productSlug) throw new Error('Producto inválido');
     const client = window.getLynxSupabase?.();
-    if (!client) throw new Error('No se pudo conectar al catálogo');
+    if (!client) {
+        const fallback = await loadFallbackCatalog();
+        const product = fallback.find(item => productSlug ? item.slug === productSlug : Number(item.id) === productId || Number(item.legacy_id) === productId);
+        if (!product) throw new Error('Producto no encontrado');
+        return product;
+    }
     const baseFields = 'id,legacy_id,title,slug,category,price,stock,sizes,images,description,badge,status,fit_recommendation,sort_order,size_stock';
     const queryProduct = async fields => {
         const request = client.from('products').select(fields).neq('status', 'archived').limit(1);
@@ -521,8 +628,13 @@ async function loadProduct() {
         const compatibleFields = baseFields.replace(',size_stock', '');
         ({ data, error } = await queryProduct(compatibleFields));
     }
-    if (error) throw error;
-    if (!data) throw new Error('Producto no encontrado');
+    if (error || !data) {
+        const fallback = await loadFallbackCatalog();
+        const product = fallback.find(item => productSlug ? item.slug === productSlug : Number(item.id) === productId || Number(item.legacy_id) === productId);
+        if (product) return product;
+        if (error) throw error;
+        throw new Error('Producto no encontrado');
+    }
     const technicalFields = 'color,material,fit_type,care_instructions,weight_grams,measurements';
     const { data: technicalData } = await client.from('products').select(technicalFields).eq('id', data.id).maybeSingle();
     if (technicalData) data = { ...data, ...technicalData };

@@ -31,6 +31,38 @@
     --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Beneficio de envío gratis · máxima visibilidad sin tapar el catálogo */
+.free-shipping-spotlight {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    min-height: 62px;
+    padding: 10px clamp(20px, 6vw, 88px);
+    border-block: 1px solid #f0cd4c;
+    background: linear-gradient(105deg, #c89f16 0%, #f0cd4c 48%, #d3aa20 100%);
+    color: #080808;
+    text-decoration: none;
+    box-shadow: 0 12px 32px rgba(0,0,0,.24);
+}
+.free-shipping-spotlight-icon { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid rgba(0,0,0,.28); border-radius: 50%; }
+.free-shipping-spotlight-icon svg { width: 19px; }
+.free-shipping-spotlight > span:nth-child(2) { display: grid; gap: 2px; }
+.free-shipping-spotlight small { font: 800 .58rem/1 var(--font-main); letter-spacing: .18em; }
+.free-shipping-spotlight strong { font: 900 clamp(.9rem,1.25vw,1.08rem)/1.15 var(--font-main); letter-spacing: .055em; }
+.free-shipping-spotlight > b { display: inline-flex; align-items: center; gap: 8px; margin-left: 22px; font: 900 .64rem/1 var(--font-main); letter-spacing: .1em; }
+.free-shipping-spotlight > b svg { width: 17px; transition: transform .2s ease; }
+.free-shipping-spotlight:hover > b svg { transform: translateX(4px); }
+
+@media (max-width: 700px) {
+    .free-shipping-spotlight { justify-content: flex-start; gap: 10px; min-height: 56px; padding: 9px 15px; }
+    .free-shipping-spotlight-icon { width: 34px; height: 34px; flex: 0 0 auto; }
+    .free-shipping-spotlight small { font-size: .52rem; }
+    .free-shipping-spotlight strong { font-size: .78rem; letter-spacing: .035em; }
+    .free-shipping-spotlight > b { margin-left: auto; font-size: 0; }
+    .free-shipping-spotlight > b svg { width: 20px; }
+}
+
 /* Conversion upgrades · favoritos, carga conectada y envío gratis */
 .catalog-favorites-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 42px; padding: 0 13px; border: 1px solid #37342d; border-radius: 8px; background: #101010; color: #c7c3ba; font: 800 .62rem/1 var(--font-main); letter-spacing: .08em; cursor: pointer; }
 .catalog-favorites-toggle svg { width: 16px; }
@@ -6183,3 +6215,14 @@ body {
     .review-card { padding: 20px; }
     .review-compose { padding: 24px; }
 }
+
+/* El progreso del carrito debe conservar el contraste en todos los temas. */
+.free-shipping-progress {
+    padding: 16px;
+    border-color: rgba(225,187,56,.65);
+    background: linear-gradient(135deg,rgba(225,187,56,.15),rgba(225,187,56,.045));
+    box-shadow: inset 0 0 0 1px rgba(225,187,56,.08);
+}
+.free-shipping-progress > div { align-items: center; color: #fff; font-weight: 700; }
+.free-shipping-progress strong { padding: 5px 8px; border-radius: 4px; background: #e1bb38; color: #080808; font-weight: 900; }
+.free-shipping-progress > i { height: 7px; }

@@ -229,3 +229,16 @@ body {
     .image-frame { width: min(82vw, 300px); }
     .product-copy h1 { font-size: 1.38rem; }
 }
+
+.product-proof-row .product-free-shipping {
+    flex-basis: 100%;
+    width: fit-content;
+    margin-top: 4px;
+    padding: 9px 12px;
+    border: 1px solid rgba(225,187,56,.62);
+    border-radius: 5px;
+    background: rgba(225,187,56,.12);
+    color: #e1bb38;
+    font-weight: 800;
+}
+.product-proof-row .product-free-shipping svg { color: currentColor; }
