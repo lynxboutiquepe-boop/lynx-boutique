@@ -6226,3 +6226,28 @@ body {
 .free-shipping-progress > div { align-items: center; color: #fff; font-weight: 700; }
 .free-shipping-progress strong { padding: 5px 8px; border-radius: 4px; background: #e1bb38; color: #080808; font-weight: 900; }
 .free-shipping-progress > i { height: 7px; }
+
+/* UX guardrail: promoción y hero son bloques independientes en escritorio. */
+@media (min-width: 769px) {
+    .free-shipping-spotlight {
+        position: relative;
+        z-index: 3;
+        min-height: 64px;
+        padding-block: 8px;
+    }
+
+    .hero-section {
+        z-index: 1;
+        align-items: center;
+        min-height: 500px;
+        height: clamp(500px, 60vh, 600px);
+        max-height: 600px;
+        overflow: hidden;
+    }
+
+    .hero-content {
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-block: 30px;
+    }
+}
