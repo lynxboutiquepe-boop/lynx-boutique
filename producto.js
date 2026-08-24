@@ -15,7 +15,21 @@ const sizeGuideDialog = document.getElementById('size-guide-dialog');
 const sizeGuideTrigger = document.getElementById('size-guide-trigger');
 const sizeGuideClose = document.getElementById('size-guide-close');
 const sizeSelectionNote = document.getElementById('size-selection-note');
+const favoriteButton = document.getElementById('product-favorite-button');
+const restockRequest = document.getElementById('restock-request');
+const restockForm = document.getElementById('restock-form');
+const restockSize = document.getElementById('restock-size');
+const restockEmail = document.getElementById('restock-email');
+const restockMessage = document.getElementById('restock-message');
+const restockWhatsapp = document.getElementById('restock-whatsapp');
+const completeLook = document.getElementById('complete-look');
+const completeLookGrid = document.getElementById('complete-look-grid');
+const mobilePurchaseBar = document.getElementById('mobile-purchase-bar');
+const mobilePurchaseLabel = document.getElementById('mobile-purchase-label');
+const mobilePurchasePrice = document.getElementById('mobile-purchase-price');
+const mobilePurchaseAction = document.getElementById('mobile-purchase-action');
 const PRODUCT_IMAGE_CACHE_VERSION = '20260814-photo-fix-v1';
+const FAVORITES_STORAGE_KEY = 'lynx_favorites_v1';
 
 let sizeGuideUnit = 'cm';
 
@@ -30,8 +44,52 @@ let selectedSize = '';
 let selectedQuantity = 1;
 let currentProduct = null;
 
+function favoriteSlugs() {
+    try {
+        const values = JSON.parse(localStorage.getItem(FAVORITES_STORAGE_KEY) || '[]');
+        return new Set(Array.isArray(values) ? values.map(String) : []);
+    } catch (_) {
+        return new Set();
+    }
+}
+
+function syncFavoriteButton() {
+    if (!favoriteButton || !currentProduct) return;
+    const active = favoriteSlugs().has(String(currentProduct.slug));
+    favoriteButton.classList.toggle('is-favorite', active);
+    favoriteButton.setAttribute('aria-pressed', String(active));
+    favoriteButton.querySelector('span').textContent = active ? 'GUARDADO EN FAVORITOS' : 'GUARDAR EN FAVORITOS';
+}
+
+function addBusinessDays(date, days) {
+    const result = new Date(date);
+    let remaining = days;
+    while (remaining > 0) {
+        result.setDate(result.getDate() + 1);
+        if (result.getDay() !== 0) remaining -= 1;
+    }
+    return result;
+}
+
+function deliveryDateLabel(date) {
+    return new Intl.DateTimeFormat('es-PE', { weekday: 'short', day: 'numeric', month: 'short' }).format(date).replace('.', '');
+}
+
+function renderDeliveryEstimate() {
+    const target = document.getElementById('delivery-estimate-copy');
+    if (!target) return;
+    const now = new Date();
+    target.textContent = `Lima: ${deliveryDateLabel(addBusinessDays(now, 1))}–${deliveryDateLabel(addBusinessDays(now, 2))} · Provincias: 2–3 días hábiles por Shalom.`;
+}
+
 function text(value = '') {
     return String(value ?? '');
+}
+
+function escapeHtml(value = '') {
+    return text(value).replace(/[&<>'"]/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    })[character]);
 }
 
 function productImageUrl(source) {
@@ -76,6 +134,7 @@ function statusCopy(product) {
 function productCategoryUrl(category) {
     const file = ({
         'hoodies-jackets': 'hoodies.html',
+        't-shirts': null,
         'jeans-pants': 'jeans-y-pants.html',
         'conjuntos': 'conjuntos.html'
     })[category];
@@ -87,6 +146,77 @@ function productCategoryUrl(category) {
             : `categoria/${file}`;
     }
     return `/categoria/${file}`;
+}
+
+function relatedCategoryPriority(category) {
+    if (category === 'jeans-pants') return ['hoodies-jackets', 't-shirts', 'conjuntos'];
+    if (category === 't-shirts' || category === 'hoodies-jackets') return ['jeans-pants', 'conjuntos', 't-shirts', 'hoodies-jackets'];
+    return ['jeans-pants', 'hoodies-jackets', 't-shirts'];
+}
+
+function storefrontProductUrl(product) {
+    return `/producto/${encodeURIComponent(String(product.slug || product.legacy_id || product.id))}`;
+}
+
+async function loadCompleteLook(product) {
+    if (!completeLook || !completeLookGrid) return;
+    const client = window.getLynxSupabase?.();
+    if (!client) return;
+    const fields = 'id,legacy_id,title,slug,category,price,stock,sizes,images,badge,status,sort_order';
+    const { data, error } = await client.from('products').select(fields).neq('status', 'archived').neq('status', 'sold_out').gt('stock', 0).limit(120);
+    if (error || !data?.length) return;
+    const priorities = relatedCategoryPriority(product.category);
+    const candidates = data
+        .filter(candidate => candidate.slug !== product.slug)
+        .sort((a, b) => priorities.indexOf(a.category) - priorities.indexOf(b.category) || Number(b.sort_order || b.id) - Number(a.sort_order || a.id));
+    const picked = [];
+    for (const category of priorities) {
+        const candidate = candidates.find(item => item.category === category && !picked.includes(item));
+        if (candidate) picked.push(candidate);
+        if (picked.length === 3) break;
+    }
+    for (const candidate of candidates) {
+        if (picked.length === 3) break;
+        if (!picked.includes(candidate)) picked.push(candidate);
+    }
+    if (!picked.length) return;
+    completeLookGrid.innerHTML = picked.map(candidate => {
+        const sources = window.LynxProductImages?.withMockup(candidate.slug, candidate.images || []) || candidate.images || [];
+        return `<a class="complete-look-card" href="${storefrontProductUrl(candidate)}" data-related-slug="${escapeHtml(candidate.slug)}">
+            <img src="${escapeHtml(productImageUrl(sources[0]))}" alt="${escapeHtml(candidate.title)}" loading="lazy" decoding="async">
+            <span>${escapeHtml(text(candidate.category).replaceAll('-', ' ').toUpperCase())}</span>
+            <strong>${escapeHtml(candidate.title)}</strong><b>S/. ${Number(candidate.price || 0).toFixed(2)}</b>
+        </a>`;
+    }).join('');
+    completeLook.hidden = false;
+    completeLookGrid.querySelectorAll('img').forEach(setProductImageFallback);
+    completeLookGrid.querySelectorAll('.complete-look-card').forEach(card => card.addEventListener('click', () => {
+        window.LynxTracking?.track('select_related', { product_id: product.id, related_slug: card.dataset.relatedSlug });
+    }));
+    window.LynxTracking?.track('view_related', { product_id: product.id, items: picked.length });
+}
+
+function syncRestockRequest(product, sizes, sold) {
+    if (!restockRequest) return;
+    restockRequest.hidden = !sold;
+    if (!sold) return;
+    if (restockSize) restockSize.innerHTML = sizes.map(size => `<option value="${escapeHtml(size)}">${escapeHtml(size)}</option>`).join('');
+    if (restockWhatsapp) restockWhatsapp.href = `https://wa.me/51962210278?text=${encodeURIComponent(`Hola LYNX, avísenme cuando vuelva ${product.title}, talla ${sizes[0] || 'por confirmar'}.`)}`;
+    if (location.hash === '#restock') requestAnimationFrame(() => restockRequest.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+}
+
+function syncMobilePurchase(product, sold) {
+    if (!mobilePurchaseBar) return;
+    mobilePurchaseBar.hidden = false;
+    mobilePurchaseLabel.textContent = product.title;
+    mobilePurchasePrice.textContent = `S/. ${Number(product.price || 0).toFixed(2)}`;
+    if (sold) {
+        mobilePurchaseAction.textContent = 'AVÍSAME';
+        mobilePurchaseAction.href = '#restock';
+    } else {
+        mobilePurchaseAction.textContent = selectedSize ? 'AGREGAR AL CARRITO' : 'ELEGIR TALLA';
+        mobilePurchaseAction.href = selectedSize ? addCartButton.href : '#product-options';
+    }
 }
 
 function setImage(images, index) {
@@ -123,6 +253,10 @@ function updateActionLinks() {
     params.delete('comprar');
     params.set('agregar', '1');
     addCartButton.href = `/?${params.toString()}`;
+    if (mobilePurchaseAction) {
+        mobilePurchaseAction.textContent = selectedSize ? 'AGREGAR AL CARRITO' : 'ELEGIR TALLA';
+        mobilePurchaseAction.href = selectedSize ? addCartButton.href : '#product-options';
+    }
 }
 
 function inferProductSpecs(product) {
@@ -290,6 +424,12 @@ function renderProduct(product) {
         updateActionLinks();
     }
 
+    syncFavoriteButton();
+    renderDeliveryEstimate();
+    syncRestockRequest(product, sizes, Boolean(status.sold));
+    syncMobilePurchase(product, Boolean(status.sold));
+    loadCompleteLook(product);
+
     productLoading.hidden = true;
     productView.hidden = false;
     window.LynxTracking?.track('view_item', { product_id: product.id, product_name: product.title, category: product.category, value: Number(product.price || 0) });
@@ -317,25 +457,75 @@ document.getElementById('size-unit-in')?.addEventListener('click', () => {
 });
 addCartButton?.addEventListener('click', () => currentProduct && window.LynxTracking?.track('add_to_cart', { product_id: currentProduct.id, product_name: currentProduct.title, size: selectedSize, quantity: selectedQuantity, value: Number(currentProduct.price || 0) * selectedQuantity }));
 buyButton?.addEventListener('click', () => currentProduct && window.LynxTracking?.track('begin_checkout', { source: 'product_page', product_id: currentProduct.id, value: Number(currentProduct.price || 0) * selectedQuantity }));
+favoriteButton?.addEventListener('click', () => {
+    if (!currentProduct?.slug) return;
+    const favorites = favoriteSlugs();
+    const slug = String(currentProduct.slug);
+    const adding = !favorites.has(slug);
+    if (adding) favorites.add(slug); else favorites.delete(slug);
+    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify([...favorites]));
+    syncFavoriteButton();
+    window.LynxTracking?.track(adding ? 'favorite_added' : 'favorite_removed', { product_id: currentProduct.id, product_slug: slug });
+});
+restockSize?.addEventListener('change', () => {
+    if (!currentProduct || !restockWhatsapp) return;
+    restockWhatsapp.href = `https://wa.me/51962210278?text=${encodeURIComponent(`Hola LYNX, avísenme cuando vuelva ${currentProduct.title}, talla ${restockSize.value}.`)}`;
+});
+restockForm?.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (!currentProduct || !restockEmail?.value) return;
+    const button = event.submitter;
+    button.disabled = true;
+    restockMessage.classList.remove('success');
+    restockMessage.textContent = 'Guardando tu aviso…';
+    const requestedSize = restockSize.value;
+    try {
+        const client = window.getLynxSupabase?.();
+        if (!client) throw new Error('Sin conexión');
+        const { error } = await client.from('restock_requests').insert({
+            product_id: currentProduct.id,
+            product_slug: currentProduct.slug,
+            product_title: currentProduct.title,
+            requested_size: requestedSize,
+            email: restockEmail.value.trim().toLowerCase(),
+            channel: 'email'
+        });
+        if (error) throw error;
+        restockMessage.textContent = 'Listo. Te escribiremos apenas vuelva esa talla.';
+        restockMessage.classList.add('success');
+        restockForm.reset();
+        window.LynxTracking?.track('restock_requested', { product_id: currentProduct.id, size: requestedSize, channel: 'email' });
+    } catch (error) {
+        restockMessage.textContent = error?.code === '23505'
+            ? 'Tu correo ya está registrado para esta talla. Te avisaremos apenas vuelva.'
+            : 'No pudimos guardar el correo. Usa el botón de WhatsApp y te registramos manualmente.';
+    } finally {
+        button.disabled = false;
+    }
+});
+restockWhatsapp?.addEventListener('click', () => currentProduct && window.LynxTracking?.track('restock_requested', { product_id: currentProduct.id, size: restockSize?.value || '', channel: 'whatsapp' }));
 
 async function loadProduct() {
     if ((!Number.isInteger(productId) || productId < 1) && !productSlug) throw new Error('Producto inválido');
     const client = window.getLynxSupabase?.();
     if (!client) throw new Error('No se pudo conectar al catálogo');
-    const baseFields = 'id,legacy_id,title,slug,category,price,stock,sizes,images,description,badge,status,fit_recommendation,sort_order';
-    const extendedFields = `${baseFields},color,material,fit_type,care_instructions,weight_grams,measurements,size_stock`;
+    const baseFields = 'id,legacy_id,title,slug,category,price,stock,sizes,images,description,badge,status,fit_recommendation,sort_order,size_stock';
     const queryProduct = async fields => {
         const request = client.from('products').select(fields).neq('status', 'archived').limit(1);
         return productSlug
             ? request.eq('slug', productSlug).maybeSingle()
             : request.or(`id.eq.${productId},legacy_id.eq.${productId}`).maybeSingle();
     };
-    let { data, error } = await queryProduct(extendedFields);
-    if (error && /column|schema cache|color|material|measurements/i.test(error.message || '')) {
-        ({ data, error } = await queryProduct(baseFields));
+    let { data, error } = await queryProduct(baseFields);
+    if (error && /size_stock|column|schema cache/i.test(error.message || '')) {
+        const compatibleFields = baseFields.replace(',size_stock', '');
+        ({ data, error } = await queryProduct(compatibleFields));
     }
     if (error) throw error;
     if (!data) throw new Error('Producto no encontrado');
+    const technicalFields = 'color,material,fit_type,care_instructions,weight_grams,measurements';
+    const { data: technicalData } = await client.from('products').select(technicalFields).eq('id', data.id).maybeSingle();
+    if (technicalData) data = { ...data, ...technicalData };
     return data;
 }
 

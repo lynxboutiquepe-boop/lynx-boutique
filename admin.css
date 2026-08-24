@@ -597,3 +597,13 @@ input, select, textarea, .quick-edit input { background: #fff; color: var(--ink)
 .conversion-funnel strong { color: #fff; }
 @media (max-width: 600px) { .conversion-funnel > div { grid-template-columns: 1fr auto; } .conversion-funnel i { grid-column: 1 / -1; } }
 .order-discount { display:block; margin-top:5px; color:#b8942a; font-size:.64rem; line-height:1.35; }
+.restock-admin-list { display:grid; gap:10px; }
+.restock-admin-item { display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:14px; padding:16px; border:1px solid var(--line); border-radius:12px; background:#fff; }
+.restock-admin-item.is-complete { opacity:.62; }
+.restock-admin-copy { min-width:0; display:grid; gap:4px; }
+.restock-admin-copy span { overflow:hidden; color:var(--muted); font-size:.67rem; text-overflow:ellipsis; white-space:nowrap; }
+.restock-admin-copy strong { font-size:.82rem; }
+.restock-admin-copy small { color:var(--muted); font-size:.65rem; }
+.restock-admin-status { padding:6px 9px; border-radius:999px; background:var(--warning-soft); color:#9a6410; font-size:.58rem; font-weight:800; letter-spacing:.08em; }
+.restock-admin-item.is-complete .restock-admin-status { background:var(--success-soft); color:var(--success); }
+@media (max-width:760px) { .restock-admin-item { grid-template-columns:minmax(0,1fr) auto; } .restock-admin-item .primary-btn { grid-column:1/-1; } }

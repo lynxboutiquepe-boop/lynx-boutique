@@ -34,7 +34,7 @@ for (const required of [
     'class="trending-card-image product-detail-link"',
     'href="/cuenta"',
     'product-image-overrides.js?v=20260822-mockups-v1',
-    'app.js?v=20260822-responsive-v30',
+    'app.js?v=20260824-conversion-v31',
     'tiktok-videos.js?v=20260813-controls-fix-v3'
 ]) {
     if (!home.includes(required) && !fs.readFileSync(path.join(root, 'app.js'), 'utf8').includes(required)) {

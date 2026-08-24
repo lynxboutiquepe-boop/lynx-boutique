@@ -839,14 +839,18 @@ let PRODUCTS = [];
 let cart = [];
 let productModalReturnUrl = null;
 const CART_STORAGE_KEY = 'lynx_cart_v2';
+const FAVORITES_STORAGE_KEY = 'lynx_favorites_v1';
+const FREE_SHIPPING_THRESHOLD = 349.90;
 let selectedCategory = 'all';
 let searchQuery = '';
 let catalogSort = 'featured';
 let catalogInStockOnly = false;
+let catalogFavoritesOnly = false;
 const CATALOG_PAGE_SIZE = 24;
 const HOME_PRODUCTS_PER_CATEGORY = 6;
 let catalogVisibleLimit = CATALOG_PAGE_SIZE;
 let catalogExpanded = false;
+let lastTrackedItemListKey = '';
 let currentProduct = null; // Para ver detalles
 let catalogScrollFrame = null;
 let customerUser = null;
@@ -900,6 +904,8 @@ const catalogCountText = document.getElementById('catalog-count-text');
 const catalogLoadMore = document.getElementById('catalog-load-more');
 const catalogSortSelect = document.getElementById('catalog-sort');
 const catalogInStockToggle = document.getElementById('catalog-in-stock');
+const catalogFavoritesToggle = document.getElementById('catalog-favorites-toggle');
+const favoritesCount = document.getElementById('favorites-count');
 const trendingTrack = document.getElementById('trending-track');
 const trendingViewport = document.getElementById('trending-viewport');
 const trendingPrevBtn = document.getElementById('trending-prev');
@@ -921,7 +927,7 @@ const TRENDING_PRODUCT_IDS = [93, 90, 73, 89, 92, 64, 97, 94, 80];
 const CATALOG_CATEGORY_ORDER = ['hoodies-jackets', 't-shirts', 'jeans-pants', 'conjuntos'];
 const CATALOG_CATEGORY_META = {
     'hoodies-jackets': { label: 'HOODIES & JACKETS', moreLabel: 'HOODIES', navId: 'nav-hoodies' },
-    't-shirts': { label: 'T-SHIRTS', navId: 'nav-tshirts' },
+    't-shirts': { label: 'T-SHIRTS', moreLabel: 'T-SHIRTS', navId: 'nav-tshirts' },
     'jeans-pants': { label: 'JEANS & PANTS', moreLabel: 'JEANS', navId: 'nav-jeans' },
     'conjuntos': { label: 'CONJUNTOS', moreLabel: 'CONJUNTOS', navId: 'nav-conjuntos' }
 };
@@ -951,6 +957,9 @@ const cartTotal = document.getElementById('cart-total');
 const checkoutDiscount = document.getElementById('checkout-discount');
 const checkoutDiscountRow = document.getElementById('checkout-discount-row');
 const cartItemsContainer = document.getElementById('cart-items-container');
+const freeShippingMessage = document.getElementById('free-shipping-message');
+const freeShippingProgressBar = document.getElementById('free-shipping-progress-bar');
+const limaShippingPrice = document.getElementById('lima-shipping-price');
 
 // Modal de Detalles
 const modalProductImg = document.getElementById('modal-product-img');
@@ -1473,6 +1482,36 @@ function prepareProducts(products) {
     });
 }
 
+function favoriteProductSlugs() {
+    try {
+        const values = JSON.parse(localStorage.getItem(FAVORITES_STORAGE_KEY) || '[]');
+        return new Set(Array.isArray(values) ? values.map(String) : []);
+    } catch (_) {
+        return new Set();
+    }
+}
+
+function syncFavoritesControl() {
+    const count = favoriteProductSlugs().size;
+    if (favoritesCount) favoritesCount.textContent = String(count);
+    if (catalogFavoritesToggle) {
+        catalogFavoritesToggle.classList.toggle('active', catalogFavoritesOnly);
+        catalogFavoritesToggle.setAttribute('aria-pressed', String(catalogFavoritesOnly));
+    }
+}
+
+function toggleProductFavorite(product) {
+    if (!product?.slug) return;
+    const favorites = favoriteProductSlugs();
+    const slug = String(product.slug);
+    const adding = !favorites.has(slug);
+    if (adding) favorites.add(slug); else favorites.delete(slug);
+    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify([...favorites]));
+    syncFavoritesControl();
+    renderProducts();
+    window.LynxTracking?.track(adding ? 'favorite_added' : 'favorite_removed', { product_id: product.id, product_slug: slug });
+}
+
 function persistCart() {
     try {
         localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart.map(item => ({
@@ -1510,20 +1549,19 @@ async function loadDatabaseCatalog() {
     const client = window.getLynxSupabase?.();
     if (!client) return null;
 
-    const baseFields = 'id,legacy_id,title,slug,category,price,stock,sizes,images,description,badge,status,fit_recommendation,sort_order';
-    const extendedFields = `${baseFields},color,material,fit_type,care_instructions,weight_grams,measurements,size_stock`;
+    // La portada necesita solo campos que existen en todas las instalaciones.
+    // Así evitamos dos consultas y nunca mostramos enlaces del catálogo viejo
+    // mientras la base conectada termina de responder.
+    const baseFields = 'id,legacy_id,title,slug,category,price,stock,sizes,images,description,badge,status,fit_recommendation,sort_order,size_stock';
     const queryCatalog = fields => client
         .from('products')
         .select(fields)
         .neq('status', 'archived')
         .order('sort_order', { ascending: true })
         .order('id', { ascending: true });
-    let { data, error } = await queryCatalog(extendedFields);
-
-    // Mantiene la tienda operativa mientras se ejecuta la migración de las
-    // nuevas especificaciones de producto en Supabase.
-    if (error && /column|schema cache|color|material|measurements/i.test(error.message || '')) {
-        ({ data, error } = await queryCatalog(baseFields));
+    let { data, error } = await queryCatalog(baseFields);
+    if (error && /size_stock|column|schema cache/i.test(error.message || '')) {
+        ({ data, error } = await queryCatalog(baseFields.replace(',size_stock', '')));
     }
 
     if (error) {
@@ -1552,9 +1590,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         PRODUCTS = prepareProducts(DEFAULT_PRODUCTS);
     }
     restoreCart();
-    renderProducts();
-    renderTrendingProducts();
     renderCart();
+    syncFavoritesControl();
+    productsGrid.innerHTML = '<div class="catalog-loading-state"><span></span><strong>CARGANDO STOCK ACTUAL…</strong></div>';
+    if (trendingTrack) trendingTrack.innerHTML = '<div class="trending-loading-state">ACTUALIZANDO EL NUEVO DROP…</div>';
 
     // Los antiguos resultados de Google usaban rutas /c/CODIGO.
     // Vercel los trae al catálogo mediante ?legacy=CODIGO para evitar un 404.
@@ -1725,13 +1764,15 @@ function imageFallback(image) {
 
 function renderProducts() {
     const supportsProductHover = window.innerWidth > 768 && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const favoriteSlugs = favoriteProductSlugs();
     // Filtrar productos
     let filtered = PRODUCTS.filter(product => {
         const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
         const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                               product.description.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesStock = !catalogInStockOnly || (product.status !== 'sold_out' && (product.status === 'preorder' || Number(product.stock || 0) > 0));
-        return matchesCategory && matchesSearch && matchesStock;
+        const matchesFavorite = !catalogFavoritesOnly || favoriteSlugs.has(String(product.slug));
+        return matchesCategory && matchesSearch && matchesStock && matchesFavorite;
     });
 
     filtered.sort((a, b) => {
@@ -1773,11 +1814,12 @@ function renderProducts() {
 
     if (filtered.length === 0) {
         const isEmptyTshirts = selectedCategory === 't-shirts';
+        const emptyFavorites = catalogFavoritesOnly;
         productsGrid.innerHTML = `
             <div class="no-products-state" style="grid-column: 1/-1; text-align: center; padding: 48px; color: var(--text-muted);">
                 <i data-lucide="${isEmptyTshirts ? 'sparkles' : 'frown'}" style="width: 48px; height: 48px; margin-bottom: 16px; color: var(--accent);"></i>
-                <p style="font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">${isEmptyTshirts ? 'PRÓXIMAMENTE' : 'No encontramos prendas'}</p>
-                <p>${isEmptyTshirts ? 'Estamos preparando el primer drop de polos LYNX.' : 'Intenta buscando con otra palabra o limpiando filtros.'}</p>
+                <p style="font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">${emptyFavorites ? 'AÚN NO GUARDAS FAVORITOS' : isEmptyTshirts ? 'PRÓXIMAMENTE' : 'No encontramos prendas'}</p>
+                <p>${emptyFavorites ? 'Toca el corazón de una prenda para encontrarla aquí después.' : isEmptyTshirts ? 'Estamos preparando el primer drop de polos LYNX.' : 'Intenta buscando con otra palabra o limpiando filtros.'}</p>
             </div>
         `;
         lucide.createIcons();
@@ -1813,6 +1855,7 @@ function renderProducts() {
 
         return `${categoryHeading}
         <article class="product-card" id="product-${product.id}">
+            <button class="product-card-favorite ${favoriteSlugs.has(String(product.slug)) ? 'is-favorite' : ''}" type="button" data-product-id="${product.id}" aria-label="${favoriteSlugs.has(String(product.slug)) ? 'Quitar' : 'Guardar'} ${escapeHtml(product.title)} de favoritos" aria-pressed="${favoriteSlugs.has(String(product.slug))}"><i data-lucide="heart"></i></button>
             <a class="product-card-img-wrapper product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}" aria-label="Ver detalles de ${escapeHtml(product.title)}">
                 <span class="product-card-badge ${product.badge.toLowerCase().includes('stock') || product.badge.toLowerCase().includes('limit') || product.badge.toLowerCase().includes('última') ? 'limited' : ''}">${product.badge}</span>
                 <img class="product-card-primary-img" src="${product.image}" alt="${product.title}" loading="${productIndex < 3 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="${productIndex < 2 ? 'high' : 'low'}" width="1200" height="1600" style="pointer-events:none;">
@@ -1823,9 +1866,9 @@ function renderProducts() {
                 <a class="product-card-title product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}">${product.title}</a>
                 <span class="product-card-price">S/. ${product.price.toFixed(2)}</span>
                 <div class="product-card-footer">
-                    <button class="btn btn-primary btn-block product-card-add" type="button" data-product-id="${product.id}" ${product.status === 'sold_out' ? 'disabled' : ''}>
-                        ${product.status === 'sold_out' ? 'AGOTADO' : 'AGREGAR AL CARRITO'}
-                    </button>
+                    ${product.status === 'sold_out'
+                        ? `<a class="btn btn-primary btn-block product-card-restock" href="${productUrl(product)}#restock">AVÍSAME</a>`
+                        : `<button class="btn btn-primary btn-block product-card-add" type="button" data-product-id="${product.id}">AGREGAR AL CARRITO</button>`}
                     <a class="btn btn-secondary btn-block product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}">VER DETALLES</a>
                 </div>
             </div>
@@ -1836,6 +1879,17 @@ function renderProducts() {
     // Si una foto se elimina o se renombra desde administración, la tarjeta
     // conserva una presentación limpia en vez de mostrar un espacio roto.
     productsGrid.querySelectorAll('img').forEach(imageFallback);
+
+    const trackedListKey = `${selectedCategory}|${searchQuery.trim().toLowerCase()}|${catalogFavoritesOnly}|${visibleProducts.map(product => product.id).join(',')}`;
+    if (trackedListKey !== lastTrackedItemListKey) {
+        lastTrackedItemListKey = trackedListKey;
+        window.LynxTracking?.track('view_item_list', {
+            category: selectedCategory,
+            search_term: searchQuery.trim(),
+            favorites_only: catalogFavoritesOnly,
+            items: visibleProducts.length
+        });
+    }
 
     requestAnimationFrame(updateCatalogNavOnScroll);
 }
@@ -2272,6 +2326,27 @@ function discountAmountFor(subtotal) {
     return appliedDiscount.percent === 10 ? Math.round(subtotal * 10) / 100 : 0;
 }
 
+function discountedMerchandiseTotal(subtotal) {
+    return Math.max(0, subtotal - discountAmountFor(subtotal));
+}
+
+function limaShippingCost(subtotal) {
+    return discountedMerchandiseTotal(subtotal) >= FREE_SHIPPING_THRESHOLD ? 0 : 15;
+}
+
+function updateFreeShippingProgress(subtotal) {
+    const merchandise = discountedMerchandiseTotal(subtotal);
+    const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - merchandise);
+    const progress = Math.min(100, merchandise / FREE_SHIPPING_THRESHOLD * 100);
+    if (freeShippingProgressBar) freeShippingProgressBar.style.width = `${progress}%`;
+    if (freeShippingMessage) freeShippingMessage.textContent = remaining <= 0
+        ? '¡Envío gratis en Lima desbloqueado!'
+        : `Te faltan S/. ${remaining.toFixed(2)} para envío gratis en Lima.`;
+    if (limaShippingPrice) limaShippingPrice.textContent = remaining <= 0
+        ? 'GRATIS · beneficio desbloqueado'
+        : '+ S/. 15.00 · gratis desde S/ 349.90';
+}
+
 function setDiscountMessage(target, message = '', state = '') {
     const element = document.getElementById(target);
     if (!element) return;
@@ -2439,6 +2514,7 @@ function renderCart() {
     if (cartDiscount) cartDiscount.textContent = `- S/. ${discount.toFixed(2)}`;
     if (cartDiscountRow) cartDiscountRow.hidden = discount <= 0;
     if (cartTotal) cartTotal.textContent = `S/. ${(subtotal - discount).toFixed(2)}`;
+    updateFreeShippingProgress(subtotal);
     syncDiscountInputs();
     
     lucide.createIcons();
@@ -2452,7 +2528,7 @@ function updateCheckoutTotals() {
     const shippingMethod = document.querySelector('input[name="shipping-method"]:checked').value;
     
     if (shippingMethod === 'lima') {
-        shipping = 15.00;
+        shipping = limaShippingCost(subtotal);
         limaPaymentConditionBox.classList.remove('hidden');
         document.getElementById('checkout-dni-group')?.classList.add('hidden');
         document.getElementById('checkout-dni')?.removeAttribute('required');
@@ -2476,7 +2552,9 @@ function updateCheckoutTotals() {
     checkoutSubtotal.textContent = `S/. ${subtotal.toFixed(2)}`;
     if (checkoutDiscount) checkoutDiscount.textContent = `- S/. ${discount.toFixed(2)}`;
     if (checkoutDiscountRow) checkoutDiscountRow.hidden = discount <= 0;
-    checkoutShipping.textContent = shipping === 0 ? 'FLETE POR PAGAR' : `S/. ${shipping.toFixed(2)}`;
+    checkoutShipping.textContent = shippingMethod === 'shalom'
+        ? 'FLETE POR PAGAR'
+        : shipping === 0 ? 'GRATIS' : `S/. ${shipping.toFixed(2)}`;
     checkoutTotal.textContent = `S/. ${total.toFixed(2)}`;
 
     // Explicación de pago dinámica
@@ -2484,8 +2562,9 @@ function updateCheckoutTotals() {
         paymentExplanationText.innerHTML = `<strong>Envío Shalom a Provincias:</strong> El envío se realiza por pagar. Recogerás tu pedido en la agencia Shalom de tu ciudad en 2 a 3 días hábiles y pagarás el flete del transporte ahí mismo. El valor de las prendas se deposita previamente.`;
     } else if (shippingMethod === 'lima') {
         const balance = Math.max(total - 50.00, 0);
-        paymentExplanationText.innerHTML = `<strong>Separación obligatoria en Lima:</strong> Abonas <strong>S/. 50.00</strong> por Yape, Plin o transferencia para reservar el stock. El saldo (<strong>S/. ${balance.toFixed(2)}</strong>) también se cancela por Yape, Plin o transferencia antes o al momento de la entrega. <strong>No aceptamos efectivo.</strong>`;
+        paymentExplanationText.innerHTML = `<strong>${shipping === 0 ? 'Envío gratis desbloqueado. ' : ''}Separación obligatoria en Lima:</strong> Abonas <strong>S/. 50.00</strong> por Yape, Plin o transferencia para reservar el stock. El saldo (<strong>S/. ${balance.toFixed(2)}</strong>) también se cancela por Yape, Plin o transferencia antes o al momento de la entrega. <strong>No aceptamos efectivo.</strong>`;
     }
+    updateFreeShippingProgress(subtotal);
 }
 
 /* Legacy password-account flow retained temporarily for reference only.
@@ -2845,6 +2924,15 @@ function setupEventListeners() {
     });
 
     productsGrid.addEventListener('click', event => {
+        const favoriteButton = event.target.closest('.product-card-favorite');
+        if (favoriteButton) {
+            event.preventDefault();
+            event.stopPropagation();
+            const product = PRODUCTS.find(item => String(item.id) === favoriteButton.dataset.productId);
+            if (product) toggleProductFavorite(product);
+            return;
+        }
+
         const categoryMoreButton = event.target.closest('.catalog-category-more');
         if (categoryMoreButton) {
             const category = categoryMoreButton.dataset.category;
@@ -2878,6 +2966,13 @@ function setupEventListeners() {
         const link = event.target.closest('.product-detail-link');
         if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
         event.preventDefault();
+        const product = PRODUCTS.find(item => String(item.id) === link.dataset.productId);
+        if (product) window.LynxTracking?.track('select_item', {
+            product_id: product.id,
+            product_name: product.title,
+            category: product.category,
+            source: link.closest('.trending-card') ? 'trending' : 'catalog'
+        });
         window.location.assign(link.href);
     };
     // Tanto el catálogo como el carrusel abren la ficha individual completa.
@@ -2996,6 +3091,15 @@ function setupEventListeners() {
         catalogVisibleLimit = CATALOG_PAGE_SIZE;
         catalogExpanded = false;
         renderProducts();
+    });
+
+    catalogFavoritesToggle?.addEventListener('click', () => {
+        catalogFavoritesOnly = !catalogFavoritesOnly;
+        catalogVisibleLimit = CATALOG_PAGE_SIZE;
+        catalogExpanded = false;
+        syncFavoritesControl();
+        renderProducts();
+        window.LynxTracking?.track('favorites_filter', { active: catalogFavoritesOnly, count: favoriteProductSlugs().size });
     });
 
     catalogLoadMore?.addEventListener('click', () => {
@@ -3549,7 +3653,7 @@ async function submitOrder(confirmed = false) {
 
     // Calcular montos
     const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.qty), 0);
-    const shippingCost = shippingMethod === 'lima' ? 15.00 : 0.00;
+    const shippingCost = shippingMethod === 'lima' ? limaShippingCost(subtotal) : 0.00;
     const discountAmount = discountAmountFor(subtotal);
     const total = subtotal - discountAmount + shippingCost;
 
@@ -3564,7 +3668,7 @@ async function submitOrder(confirmed = false) {
             <div class="checkout-review-items">${cart.map(item => `<div class="checkout-review-item"><img src="${escapeHtml(item.product.image)}" alt=""><div><strong>${escapeHtml(item.product.title)}</strong><span>${item.qty} und. · Talla ${escapeHtml(item.size)}</span></div><b>S/. ${(item.product.price * item.qty).toFixed(2)}</b></div>`).join('')}</div>
             <div class="checkout-review-row"><span>Cliente</span><strong>${escapeHtml(name)}</strong></div>
             <div class="checkout-review-row"><span>Contacto</span><strong>${escapeHtml(phone)}<br>${escapeHtml(email)}</strong></div>
-            <div class="checkout-review-row"><span>Entrega</span><strong>${shippingMethod === 'shalom' ? 'Shalom · flete en agencia' : 'Motorizado Lima'}<br>${escapeHtml(city)} · ${escapeHtml(address)}</strong></div>
+            <div class="checkout-review-row"><span>Entrega</span><strong>${shippingMethod === 'shalom' ? 'Shalom · flete en agencia' : `Motorizado Lima${shippingCost === 0 ? ' · GRATIS' : ''}`}<br>${escapeHtml(city)} · ${escapeHtml(address)}</strong></div>
             <div class="checkout-review-row"><span>Pago preferido</span><strong>${escapeHtml(paymentLabels[paymentMethod])}</strong></div>
             ${discountCode ? `<div class="checkout-review-row"><span>Código 10% aplicado</span><strong>${escapeHtml(discountCode)} · - S/. ${discountAmount.toFixed(2)}</strong></div>` : ''}
             ${shippingMethod === 'lima' ? `<div class="checkout-review-row"><span>Separación obligatoria</span><strong>S/. 50.00 · saldo digital S/. ${Math.max(total - 50, 0).toFixed(2)}</strong></div>` : ''}
@@ -3601,7 +3705,7 @@ async function submitOrder(confirmed = false) {
         paymentDetailText = `📦 *ENVÍO A PROVINCIA (SHALOM):*\n- Flete de envío se cancela al recoger en agencia.\n- Depósito de prendas requerido para el despacho.\n- *Total Prendas: S/. ${(subtotal - discountAmount).toFixed(2)}*`;
     } else { // Lima
         const balance = Math.max(total - 50.00, 0);
-        paymentDetailText = `🛵 *DELIVERY MOTORIZADO LIMA:*\n- Separación obligatoria: *S/. 50.00*\n- Saldo digital por Yape, Plin o transferencia: *S/. ${balance.toFixed(2)}*\n- No se acepta efectivo.\n- *Total del Pedido: S/. ${total.toFixed(2)}*`;
+        paymentDetailText = `🛵 *DELIVERY MOTORIZADO LIMA:*\n${shippingCost === 0 ? '- *ENVÍO GRATIS* por compra desde S/. 349.90\n' : '- Delivery: *S/. 15.00*\n'}- Separación obligatoria: *S/. 50.00*\n- Saldo digital por Yape, Plin o transferencia: *S/. ${balance.toFixed(2)}*\n- No se acepta efectivo.\n- *Total del Pedido: S/. ${total.toFixed(2)}*`;
     }
 
     // Mensaje final para WhatsApp
@@ -3627,7 +3731,8 @@ async function submitOrder(confirmed = false) {
     
     const whatsappUrl = `https://wa.me/${shopWhatsappNumber}?text=${encodedMessage}`;
 
-    window.LynxTracking?.track('generate_lead', { channel: 'whatsapp', shipping_method: shippingMethod, reserve_lima: reserveLima, discount_code_entered: Boolean(discountCode), items: cart.reduce((sum, item) => sum + item.qty, 0), value: total });
+    if (shippingMethod === 'lima' && shippingCost === 0) window.LynxTracking?.track('free_shipping_reached', { threshold: FREE_SHIPPING_THRESHOLD, value: subtotal - discountAmount });
+    window.LynxTracking?.track('generate_lead', { channel: 'whatsapp', shipping_method: shippingMethod, reserve_lima: reserveLima, free_shipping: shippingMethod === 'lima' && shippingCost === 0, discount_code_entered: Boolean(discountCode), items: cart.reduce((sum, item) => sum + item.qty, 0), value: total });
     // Navegación directa: evita bloqueos de pestañas emergentes en celulares.
     location.href = whatsappUrl;
 }

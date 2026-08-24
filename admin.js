@@ -19,7 +19,8 @@ const state = {
     customers: [],
     reviews: [],
     events: [],
-    orders: []
+    orders: [],
+    restockRequests: []
 };
 
 const $ = selector => document.querySelector(selector);
@@ -151,14 +152,15 @@ async function initialize() {
 
 async function loadAll() {
     const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    const [{ data: products, error: productError }, { data: sales, error: salesError }, { data: finances, error: financeError }, { data: customers, error: customerError }, { data: reviews, error: reviewError }, { data: events, error: eventsError }, { data: orders, error: ordersError }] = await Promise.all([
+    const [{ data: products, error: productError }, { data: sales, error: salesError }, { data: finances, error: financeError }, { data: customers, error: customerError }, { data: reviews, error: reviewError }, { data: events, error: eventsError }, { data: orders, error: ordersError }, { data: restockRequests, error: restockError }] = await Promise.all([
         supabaseClient.rpc('get_admin_products'),
         supabaseClient.from('sales').select('*, products(title)').order('created_at', { ascending: false }).limit(1000),
         supabaseClient.from('finance_entries').select('*').order('entry_date', { ascending: false }).order('created_at', { ascending: false }).limit(500),
         supabaseClient.from('customer_profiles').select('*').order('created_at', { ascending: false }).limit(2000),
         supabaseClient.from('customer_reviews').select('*').order('created_at', { ascending: false }).limit(500),
         supabaseClient.from('commerce_events').select('event_name,session_id,device_type,payload,created_at').gte('created_at', since).order('created_at', { ascending: false }).limit(10000),
-        supabaseClient.from('orders').select('*,order_items(*)').order('created_at', { ascending: false }).limit(500)
+        supabaseClient.from('orders').select('*,order_items(*)').order('created_at', { ascending: false }).limit(500),
+        supabaseClient.from('restock_requests').select('*').order('created_at', { ascending: false }).limit(1000)
     ]);
 
     if (productError) throw productError;
@@ -168,6 +170,7 @@ async function loadAll() {
     if (reviewError) throw reviewError;
     if (eventsError) console.warn('Métricas todavía no disponibles:', eventsError.message);
     if (ordersError) console.warn('Pedidos web todavía no disponibles:', ordersError.message);
+    if (restockError) console.warn('Avisos de reposición todavía no disponibles:', restockError.message);
 
     state.products = products || [];
     state.sales = sales || [];
@@ -176,7 +179,9 @@ async function loadAll() {
     state.reviews = reviews || [];
     state.events = events || [];
     state.orders = orders || [];
+    state.restockRequests = restockRequests || [];
     $('#orders-setup-note').hidden = !ordersError;
+    $('#restock-setup-note').hidden = !restockError;
     renderEverything();
 }
 
@@ -190,6 +195,7 @@ function renderEverything() {
     renderReviews();
     renderOrders();
     renderConversion();
+    renderRestockRequests();
     renderSaleProducts();
     renderAttention();
     lucide.createIcons();
@@ -210,6 +216,8 @@ function renderConversion() {
     $('#metric-add-cart').textContent = steps[2][1];
     $('#metric-checkout').textContent = steps[3][1];
     $('#metric-leads').textContent = steps[4][1];
+    $('#metric-favorites').textContent = count('favorite_added');
+    $('#metric-restock').textContent = count('restock_requested');
     $('#metric-conversion').textContent = visits ? `${(steps[4][1] / visits * 100).toFixed(1)}%` : '0%';
     const max = Math.max(1, ...steps.map(([, value]) => value));
     $('#conversion-funnel').innerHTML = steps.map(([label, value]) => `<div><span>${escapeHtml(label)}</span><i style="width:${Math.max(4, value / max * 100)}%"></i><strong>${value}</strong></div>`).join('');
@@ -218,6 +226,40 @@ function renderConversion() {
         return result;
     }, {});
     $('#conversion-devices').innerHTML = Object.entries(deviceCounts).length ? Object.entries(deviceCounts).map(([device, value]) => `<div class="mini-item"><div><strong>${escapeHtml(device)}</strong><span>Visitas</span></div><b>${value}</b></div>`).join('') : '<p class="empty-state">Aún no hay visitas registradas.</p>';
+}
+
+function renderRestockRequests() {
+    const container = $('#restock-admin-list');
+    if (!container) return;
+    const pending = state.restockRequests.filter(item => item.status === 'pending');
+    const notified = state.restockRequests.filter(item => item.status === 'notified');
+    $('#restock-summary').innerHTML = `
+        <div><span>PENDIENTES</span><strong>${pending.length}</strong></div>
+        <div><span>YA AVISADOS</span><strong>${notified.length}</strong></div>
+        <div><span>TOTAL REGISTRADOS</span><strong>${state.restockRequests.length}</strong></div>`;
+    if (!state.restockRequests.length) {
+        container.innerHTML = '<div class="tiktok-admin-empty"><i data-lucide="bell"></i><strong>No hay clientes esperando stock</strong><span>Los avisos aparecerán aquí automáticamente.</span></div>';
+        return;
+    }
+    container.innerHTML = state.restockRequests.map(item => `
+        <article class="restock-admin-item ${item.status !== 'pending' ? 'is-complete' : ''}">
+            <div class="restock-admin-copy"><span>${escapeHtml(item.product_title)}</span><strong>Talla ${escapeHtml(item.requested_size)}</strong><small>${escapeHtml(item.email)} · ${localDateTime(item.created_at)}</small></div>
+            <span class="restock-admin-status">${item.status === 'pending' ? 'ESPERANDO' : item.status === 'notified' ? 'AVISADO' : 'CANCELADO'}</span>
+            ${item.status === 'pending' ? `<button class="primary-btn notify-restock" type="button" data-product-id="${item.product_id}"><i data-lucide="send"></i> Notificar</button>` : ''}
+        </article>`).join('');
+}
+
+async function notifyRestockForProduct(productId, { quiet = false } = {}) {
+    const product = state.products.find(item => String(item.id) === String(productId));
+    const pending = state.restockRequests.filter(item => String(item.product_id) === String(productId) && item.status === 'pending').length;
+    if (!pending) return { sent: 0 };
+    const { data, error } = await supabaseClient.functions.invoke('notify-restock', { body: { productId: Number(productId) } });
+    if (error || data?.error) {
+        if (!quiet) showToast(error?.message || data?.error || 'No se pudieron enviar los avisos.', 'error');
+        return { sent: 0, error: error || data?.error };
+    }
+    if (!quiet) showToast(`${data.sent || 0} ${data.sent === 1 ? 'cliente avisado' : 'clientes avisados'} por ${product?.title || 'esta prenda'}.`);
+    return data || { sent: 0 };
 }
 
 function currentMonthEntries() {
@@ -756,6 +798,9 @@ async function saveProduct(event) {
         }
         if (error) throw error;
 
+        const shouldNotifyRestock = Boolean(id && Number(existingProduct?.stock || 0) < 1 && Number(payload.stock || 0) > 0);
+        if (shouldNotifyRestock) await notifyRestockForProduct(id, { quiet: true });
+
         closeProductForm();
         showToast(id ? 'Producto actualizado.' : 'Producto añadido al catálogo.');
         await loadAll();
@@ -772,6 +817,9 @@ async function updateProductStatus(id, status) {
     if (status === 'sold_out') payload.stock = 0;
     const { error } = await supabaseClient.from('products').update(payload).eq('id', id);
     if (error) throw error;
+    if (field === 'stock' && Number(product?.stock || 0) < 1 && value > 0) {
+        await notifyRestockForProduct(id, { quiet: true });
+    }
     showToast(`Estado cambiado a ${STATUS_META[status].label}.`);
     await loadAll();
 }
@@ -1113,6 +1161,21 @@ function bindEvents() {
         if (confirmButton) await processWebOrder(confirmButton.dataset.id, 'confirm', confirmButton);
         if (cancelButton) await processWebOrder(cancelButton.dataset.id, 'cancel', cancelButton);
     }));
+
+    $('#restock-admin-list')?.addEventListener('click', async event => {
+        const button = event.target.closest('.notify-restock');
+        if (!button) return;
+        setButtonLoading(button, true, 'Enviando...');
+        try {
+            await notifyRestockForProduct(button.dataset.productId);
+            await loadAll();
+        } catch (error) {
+            showToast(error.message, 'error');
+        } finally {
+            setButtonLoading(button, false);
+            lucide.createIcons();
+        }
+    });
 
     $('#finance-tbody').addEventListener('click', async event => {
         const button = event.target.closest('.delete-finance');

@@ -175,7 +175,9 @@ begin
     v_discount_amount := round(v_subtotal * v_discount_percent / 100.0, 2);
   end if;
 
-  if p_shipping_method = 'lima' then v_shipping := 15; end if;
+  if p_shipping_method = 'lima' then
+    v_shipping := case when (v_subtotal - v_discount_amount) >= 349.90 then 0 else 15 end;
+  end if;
   insert into public.orders (
     customer_name,customer_phone,customer_email,customer_dni,city,delivery_address,
     shipping_method,payment_method,discount_code,discount_percent,discount_amount,

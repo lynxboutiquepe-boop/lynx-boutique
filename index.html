@@ -60,7 +60,7 @@
     <!-- Lucide Icons (CDN) -->
     <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260822-responsive-v16">
+    <link rel="stylesheet" href="styles.css?v=20260824-conversion-v17">
 </head>
 <body>
     <div class="page-scroll-progress" id="page-scroll-progress" aria-hidden="true"></div>
@@ -158,6 +158,10 @@
         <div class="info-item">
             <i data-lucide="shield-check"></i>
             <span><strong>Reserva en Lima:</strong> Separa con S/ 50 y paga el saldo al recibir</span>
+        </div>
+        <div class="info-item info-item-highlight">
+            <i data-lucide="gift"></i>
+            <span><strong>Envío gratis en Lima:</strong> Desde S/ 349.90</span>
         </div>
     </section>
 
@@ -260,6 +264,9 @@
                         </select>
                     </label>
                     <label class="catalog-stock-toggle"><input id="catalog-in-stock" type="checkbox"><span>Solo disponibles</span></label>
+                    <button class="catalog-favorites-toggle" id="catalog-favorites-toggle" type="button" aria-pressed="false">
+                        <i data-lucide="heart"></i><span>MIS FAVORITOS</span><b id="favorites-count">0</b>
+                    </button>
                 </div>
             </div>
 
@@ -373,7 +380,7 @@
                 </details>
                 <details class="faq-item">
                     <summary>¿Realizan entregas en Lima?</summary>
-                    <p>Sí. En Lima trabajamos con motorizado. Puedes separar tu pedido con S/. 50 y pagar el saldo al momento de recibirlo.</p>
+                    <p>Sí. En Lima trabajamos con motorizado. Puedes separar tu pedido con S/. 50 y pagar el saldo al recibir por Yape, Plin o transferencia; no aceptamos efectivo. Desde S/. 349.90, el envío por motorizado es gratis.</p>
                 </details>
                 <details class="faq-item">
                     <summary>¿Hacen envíos a provincias?</summary>
@@ -561,6 +568,10 @@
                     <span>Total prendas:</span>
                     <span class="summary-price" id="cart-total">S/. 0.00</span>
                 </div>
+                <div class="free-shipping-progress" id="free-shipping-progress" aria-live="polite">
+                    <div><span id="free-shipping-message">Agrega prendas para obtener envío gratis en Lima.</span><strong>S/ 349.90</strong></div>
+                    <i><span id="free-shipping-progress-bar"></span></i>
+                </div>
                 <p class="summary-disclaimer">Los costos de envío y reservas se calculan al finalizar pedido.</p>
                 <button class="btn btn-primary btn-block" id="go-to-checkout-btn">
                     PROCEDER AL PEDIDO <i data-lucide="arrow-right"></i>
@@ -649,7 +660,7 @@
                                 <input type="radio" name="shipping-method" value="lima">
                                 <div class="option-details">
                                     <span class="option-title">Motorizado Express (Lima)</span>
-                                    <span class="option-price">+ S/. 15.00</span>
+                                    <span class="option-price" id="lima-shipping-price">+ S/. 15.00 · gratis desde S/ 349.90</span>
                                     <span class="option-time">Entrega directa a tu puerta en 24-48 horas.</span>
                                 </div>
                             </label>
@@ -781,9 +792,9 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="supabase-config.js?v=20260716-admin-v1" defer></script>
-    <script src="commerce-tracking.js?v=20260813-cro-v1" defer></script>
+    <script src="commerce-tracking.js?v=20260824-conversion-v2" defer></script>
     <script src="product-image-overrides.js?v=20260822-mockups-v1" defer></script>
-    <script src="app.js?v=20260822-responsive-v30" defer></script>
+    <script src="app.js?v=20260824-conversion-v31" defer></script>
     <script src="tiktok-videos.js?v=20260813-controls-fix-v3" defer></script>
 </body>
 </html>

@@ -95,6 +95,7 @@
                 <nav class="admin-tabs" aria-label="Secciones del panel">
                     <button class="admin-tab active" type="button" data-panel="dashboard-panel"><i data-lucide="layout-dashboard"></i><span>Resumen</span></button>
                     <button class="admin-tab" type="button" data-panel="products-panel"><i data-lucide="shirt"></i><span>Productos</span></button>
+                    <button class="admin-tab" type="button" data-panel="restock-panel"><i data-lucide="bell-ring"></i><span>Reposici&oacute;n</span></button>
                     <button class="admin-tab" type="button" data-panel="orders-panel"><i data-lucide="shopping-basket"></i><span>Pedidos web</span></button>
                     <button class="admin-tab" type="button" data-panel="sales-panel"><i data-lucide="receipt-text"></i><span>Ventas</span></button>
                     <button class="admin-tab" type="button" data-panel="customers-panel"><i data-lucide="users"></i><span>Clientes</span></button>
@@ -216,6 +217,16 @@
                     <div class="mobile-product-list" id="mobile-product-list"></div>
                 </section>
 
+                <section class="admin-panel" id="restock-panel">
+                    <div class="panel-heading">
+                        <div><span class="eyebrow">CLIENTES ESPERANDO STOCK</span><h2>Avisos de reposici&oacute;n</h2><p class="panel-subtitle">Cuando una talla vuelva, pulsa Notificar. El cliente recibir&aacute; un correo de LYNX.</p></div>
+                        <button class="secondary-btn refresh-btn" type="button"><i data-lucide="refresh-cw"></i> Actualizar</button>
+                    </div>
+                    <div class="order-summary-strip" id="restock-summary"></div>
+                    <div class="restock-admin-list" id="restock-admin-list"></div>
+                    <p class="customer-privacy-note" id="restock-setup-note" hidden><i data-lucide="database-zap"></i> Falta activar la migraci&oacute;n de reposici&oacute;n en Supabase.</p>
+                </section>
+
                 <section class="admin-panel" id="customers-panel">
                     <div class="panel-heading">
                         <div><span class="eyebrow">COMUNIDAD LYNX</span><h2>Clientes registrados</h2></div>
@@ -269,6 +280,8 @@
                         <article class="stat-card"><span>Agregar al carrito</span><strong id="metric-add-cart">0</strong><small>intención de compra</small></article>
                         <article class="stat-card"><span>Checkout iniciado</span><strong id="metric-checkout">0</strong><small>datos de entrega</small></article>
                         <article class="stat-card income"><span>Pedidos a WhatsApp</span><strong id="metric-leads">0</strong><small>leads generados</small></article>
+                        <article class="stat-card"><span>Favoritos guardados</span><strong id="metric-favorites">0</strong><small>se&ntilde;al de intenci&oacute;n</small></article>
+                        <article class="stat-card warning"><span>Avisos de reposici&oacute;n</span><strong id="metric-restock">0</strong><small>demanda recuperable</small></article>
                         <article class="stat-card account-balance"><span>CONVERSIÓN A WHATSAPP</span><strong id="metric-conversion">0%</strong><small>pedidos / visitas</small></article>
                     </div>
                     <div class="dashboard-grid">
@@ -401,7 +414,7 @@
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="supabase-config.js?v=20260716-admin-v1"></script>
     <script src="product-image-overrides.js?v=20260822-mockups-v1"></script>
-    <script src="admin.js?v=20260822-orders-v9"></script>
+    <script src="admin.js?v=20260824-conversion-v10"></script>
     <script src="admin-tiktok.js?v=20260812-local-v1"></script>
 </body>
 </html>

@@ -28,7 +28,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/producto.css?v=20260822-responsive-v13">
+    <link rel="stylesheet" href="/producto.css?v=20260824-conversion-v14">
 </head>
 <body>
     <header class="product-header">
@@ -82,10 +82,12 @@
 
             <div class="product-copy">
                 <a class="eyebrow" id="product-category" href="../categoria/jeans-y-pants.html">JEANS Y PANTALONES</a>
+                <button class="product-favorite-button" id="product-favorite-button" type="button" aria-pressed="false"><i data-lucide="heart"></i><span>GUARDAR EN FAVORITOS</span></button>
                 <h1 id="product-title">Carried Cargo Stacked Skinny Flared Jeans - Negro</h1>
                 <p class="product-price" id="product-price">S/. 219.90</p>
                 <p class="stock-note " id="stock-note">ÚLTIMAS UNIDADES DISPONIBLES</p>
                 <div class="product-proof-row" aria-label="Beneficios de compra"><span><i data-lucide="badge-check"></i> Prenda original</span><span><i data-lucide="truck"></i> Envíos a todo el Perú</span></div>
+                <div class="delivery-estimate" id="delivery-estimate"><i data-lucide="calendar-check"></i><div><strong>RECÍBELO PRONTO</strong><span id="delivery-estimate-copy">Calculando fechas de entrega…</span></div></div>
                 <p class="product-description" id="product-description">Jean cargo negro con corte skinny apilado, pierna acampanada y bolsillos utilitarios que aportan un look urbano. Disponible en talla 36.</p>
                 <div class="product-benefit-copy"><strong>POR QUÉ TE VA A GUSTAR</strong><p id="product-benefit">Su silueta alarga visualmente las piernas y marca el outfit sin esfuerzo. Úsalo con un hoodie o jacket LYNX para construir un look completo.</p></div>
                 <div class="product-specs" id="product-specs" aria-label="Características de la prenda"><div><span>FIT</span><strong id="product-fit">Skinny</strong></div><div><span>MATERIAL</span><strong id="product-material">Denim</strong></div><div><span>COLOR</span><strong id="product-color">Negro</strong></div><div><span>CUIDADO</span><strong id="product-care">Lavado frío · al revés</strong></div><div id="product-weight-row" hidden><span>PESO</span><strong id="product-weight"></strong></div></div>
@@ -102,18 +104,26 @@
                     <a class="primary-button" id="add-cart-button" href="/?producto=5&amp;agregar=1&amp;talla=36&amp;cantidad=1" >AGREGAR AL CARRITO</a>
                     <a class="secondary-button" id="buy-button" href="/?producto=5&amp;comprar=1&amp;talla=36&amp;cantidad=1" >COMPRAR · COMPLETAR ENTREGA</a>
                 </div>
+                <section class="restock-request" id="restock-request" hidden>
+                    <span class="eyebrow">TE AVISAMOS PRIMERO</span><h2>Avísame cuando vuelva</h2>
+                    <p>Elige una talla y deja tu correo. También puedes pedir el aviso directamente por WhatsApp.</p>
+                    <form id="restock-form"><label><span>Talla</span><select id="restock-size" required><option value="36">36</option></select></label><label><span>Correo</span><input id="restock-email" type="email" autocomplete="email" required placeholder="tu@correo.com"></label><button class="primary-button" type="submit">AVÍSAME POR CORREO</button><p id="restock-message" aria-live="polite"></p></form>
+                    <a class="restock-whatsapp" id="restock-whatsapp" href="https://wa.me/51962210278?text=Hola%20LYNX%2C%20av%C3%ADsenme%20cuando%20vuelva%20Carried%20Cargo%20Stacked%20Skinny%20Flared%20Jeans%20-%20Negro." target="_blank" rel="noopener noreferrer"><i data-lucide="message-circle"></i> PEDIR AVISO POR WHATSAPP</a>
+                </section>
                 <p class="purchase-note"><i data-lucide="shield-check"></i> No necesitas crear una cuenta. Confirmamos stock, talla y total por WhatsApp antes de cualquier pago.</p>
                 <div class="product-trust-accordion"><details open><summary>Envíos y tiempos</summary><p><strong>Lima:</strong> motorizado, normalmente en 24–48 horas. <strong>Provincias:</strong> Shalom, normalmente en 2–3 días hábiles; el flete se paga en agencia.</p></details><details><summary>Reserva y medios de pago</summary><p>En Lima puedes separar con S/ 50. Aceptamos Yape y transferencias BCP o BBVA; compartimos las cuentas oficiales durante la confirmación.</p></details><details><summary>Cambios y condición de la prenda</summary><p>Confirma las condiciones y el plazo de cambio con nuestro equipo antes de pagar. La prenda debe conservar etiquetas y no presentar uso, lavado, manchas ni daños.</p></details></div>
             </div>
         </article>
+        <section class="complete-look" id="complete-look" hidden aria-labelledby="complete-look-title"><span class="eyebrow">COMPLETA EL FIT</span><h2 id="complete-look-title">PRENDAS QUE LE QUEDAN BIEN</h2><div class="complete-look-grid" id="complete-look-grid"></div></section>
     </main>
+    <div class="mobile-purchase-bar" id="mobile-purchase-bar" hidden><div><small id="mobile-purchase-label">TU PRENDA</small><strong id="mobile-purchase-price">S/. 0.00</strong></div><a id="mobile-purchase-action" href="#product-options">ELEGIR TALLA</a></div>
     <dialog class="size-guide-dialog" id="size-guide-dialog" aria-labelledby="size-guide-title"><div class="size-guide-card"><button class="size-guide-close" id="size-guide-close" type="button" aria-label="Cerrar guía">×</button><span class="eyebrow">ELIGE CON SEGURIDAD</span><h2 id="size-guide-title">GUÍA DE TALLAS</h2><p class="size-guide-intro" id="size-guide-intro">Mide tu cuerpo sin apretar la cinta y compara el resultado con la tabla.</p><div class="size-guide-toolbar" aria-label="Unidad de medida"><strong id="size-guide-kind">MEDIDAS CORPORALES</strong><div><button class="active" id="size-unit-cm" type="button" aria-pressed="true">CM</button><button id="size-unit-in" type="button" aria-pressed="false">IN</button></div></div><div class="size-howto"><span><b>1</b> Pecho: rodea la parte más amplia</span><span><b>2</b> Cintura: donde usarás el jean</span><span><b>3</b> Cadera: mide la parte más ancha</span></div><div class="size-table-wrap"><table><thead id="size-guide-head"></thead><tbody id="size-guide-body"></tbody></table></div><p class="size-guide-disclaimer" id="size-guide-disclaimer">Tabla corporal de referencia basada en Fashion Nova Men. No representa el ancho de la prenda extendida. El corte puede variar por modelo; las medidas reales de la prenda, cuando aparezcan, tienen prioridad.</p><a class="size-guide-source" id="size-guide-source" href="https://www.fashionnova.com/pages/size-guide?tab=men" target="_blank" rel="noopener noreferrer">Ver referencia original de Fashion Nova ↗</a><a class="size-guide-help" id="size-guide-help" href="https://wa.me/51962210278?text=Hola%20LYNX%2C%20necesito%20ayuda%20para%20elegir%20mi%20talla." target="_blank" rel="noopener noreferrer">NECESITO AYUDA CON MI TALLA</a></div></dialog>
     <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="/supabase-config.js?v=20260716-admin-v1" defer></script>
-    <script src="/commerce-tracking.js?v=20260813-cro-v1" defer></script>
+    <script src="/commerce-tracking.js?v=20260824-conversion-v2" defer></script>
     <script src="/product-image-overrides.js?v=20260822-mockups-v1" defer></script>
     <script src="/size-guide-data.js?v=20260822-v1" defer></script>
-    <script src="/producto.js?v=20260822-commerce-v9" defer></script>
+    <script src="/producto.js?v=20260824-conversion-v10" defer></script>
 </body>
 </html>
