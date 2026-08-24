@@ -173,7 +173,10 @@ body {
 @media (max-width: 760px) {
     .product-header-actions { gap: 13px; }
     .account-link { font-size: .62rem; }
-    .product-header { min-height: 64px; padding: 0 20px; }
+    .product-header {
+        min-height: calc(64px + env(safe-area-inset-top));
+        padding: env(safe-area-inset-top) max(20px, env(safe-area-inset-right)) 0 max(20px, env(safe-area-inset-left));
+    }
     .product-logo img { width: 52px; }
     .back-link { font-size: .62rem; }
     .product-page { padding: 16px 18px 48px; }
@@ -220,6 +223,12 @@ body {
     .product-specs > div { padding: 12px; }
     .size-howto { grid-template-columns: 1fr; }
     .size-guide-card { padding: 28px 18px 22px; }
+}
+
+@media (max-width: 520px) {
+    .account-link { display: none; }
+    .product-header-actions { min-width: 0; }
+    .back-link { white-space: nowrap; }
 }
 
 @media (max-width: 380px) {
