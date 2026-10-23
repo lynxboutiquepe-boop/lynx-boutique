@@ -17,6 +17,13 @@
         preorder: 'PREVENTA',
         outlet: 'OUTLET'
     };
+    const PRODUCT_CATEGORY_LABELS = {
+        'hoodies-jackets': 'Hoodies & Jackets',
+        't-shirts': 'T-Shirts',
+        'jeans-pants': 'Jeans & Pants',
+        conjuntos: 'Conjuntos',
+        preorder: 'Preventa'
+    };
     let categoryProducts = [];
     const pendingUnits = product => Object.values(product?.preorder_stock || {}).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0);
 
@@ -73,9 +80,10 @@
         return node.innerHTML;
     }
 
-    function productBadge(product) {
+    function productBadge(product, category) {
         const stock = Number(product.stock || 0);
         if (product.status === 'sold_out' || (product.status !== 'preorder' && stock <= 0)) return 'AGOTADO';
+        if (category === 'outlet' && productDiscountInfo(product)) return 'OUTLET';
         if (product.status === 'preorder' || pendingUnits(product) > 0) return 'PREVENTA';
         if (productDiscountInfo(product)) return 'OUTLET';
         if (product.status === 'low_stock') return stock === 1 ? 'ÚLTIMA UNIDAD' : `ÚLTIMAS ${stock} UNIDADES`;
@@ -114,15 +122,16 @@
         const secondaryImage = images[1] ? normalizeImageUrl(images[1]) : '';
         const slug = encodeURIComponent(product.slug || '');
         const discount = productDiscountInfo(product);
+        const originalCategory = PRODUCT_CATEGORY_LABELS[product.category] || product.category || CATEGORY_LABELS[category] || category;
         return `
             <a class="category-product${soldOut ? ' is-sold-out' : ''}" href="/producto/${slug}" ${soldOut ? 'aria-label="Agotado: ' + escapeHtml(product.title) + '"' : ''}>
                 <figure>
-                    <span>${escapeHtml(productBadge(product))}</span>
+                    <span>${escapeHtml(productBadge(product, category))}</span>
                     ${discount ? `<b class="category-product-discount" aria-label="${discount.percent}% de descuento">-${discount.percent}%</b>` : ''}
                     <img class="category-product-primary-img" src="${escapeHtml(image)}" alt="${escapeHtml(product.title)}" loading="lazy" decoding="async" width="640" height="800">
                     ${secondaryImage ? `<img class="category-product-secondary-img" src="${escapeHtml(secondaryImage)}" alt="" aria-hidden="true" loading="lazy" decoding="async" width="640" height="800">` : ''}
                 </figure>
-                <p>${escapeHtml(CATEGORY_LABELS[category] || category)}</p>
+                <p>${escapeHtml(originalCategory)}</p>
                 <h2>${escapeHtml(product.title)}</h2>
                 <div class="category-product-pricing">${discount ? `<del>Antes S/. ${discount.previous.toFixed(2)}</del>` : ''}<strong>Ahora S/. ${Number(product.price || 0).toFixed(2)}</strong></div>
                 ${pendingUnits(product) > 0 ? `<small class="category-preorder-stock">${Number(product.stock || 0)} en stock · ${pendingUnits(product)} en preventa</small>` : ''}
@@ -144,7 +153,7 @@
                 .order('id', { ascending: true });
 
             if (category === 'preorder') return query.neq('status', 'archived');
-            if (category === 'outlet') return query.neq('status', 'archived').neq('status', 'preorder');
+            if (category === 'outlet') return query.neq('status', 'archived');
             return query.eq('category', category).neq('status', 'archived').neq('status', 'preorder');
         };
         let { data, error } = await loadProducts(true);
