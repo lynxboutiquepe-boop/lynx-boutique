@@ -191,10 +191,22 @@ a {
 }
 
 .category-product img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.45s ease;
+}
+
+.category-product figure .category-product-secondary-img {
+    opacity: 0;
+    transition: opacity 0.35s ease, transform 0.45s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .category-product.has-secondary-image:hover figure .category-product-primary-img { opacity: 0; }
+    .category-product.has-secondary-image:hover figure .category-product-secondary-img { opacity: 1; }
 }
 
 .category-product.is-sold-out figure::after {
@@ -240,6 +252,14 @@ a {
     color: var(--cream);
     font-family: var(--title);
     font-size: 1.08rem;
+}
+.category-preorder-stock {
+    display: block;
+    margin-top: 5px;
+    color: #d6c58b;
+    font-size: .68rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
 }
 
 .category-empty {
@@ -416,4 +436,84 @@ a {
         display: grid;
         gap: 28px;
     }
+}
+
+/* Responsive system v3 · category pages */
+img { max-width: 100%; }
+.category-header nav { min-width: 0; }
+.category-grid, .category-toolbar { box-sizing: border-box; }
+.category-product { min-width: 0; }
+.category-product h2 { overflow-wrap: anywhere; }
+
+@media (min-width: 1200px) {
+    .category-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); width: min(100%, 1600px); }
+}
+
+@media (min-width: 769px) and (max-width: 1199px) {
+    .category-header { padding-inline: 24px; }
+    .category-header nav { gap: 18px; }
+    .category-header nav a { font-size: .7rem; }
+    .category-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); padding-inline: 24px; }
+    .category-toolbar { width: calc(100% - 48px); }
+}
+
+@media (max-width: 768px) {
+    body { min-width: 320px; overflow-x: hidden; }
+    .category-header { position: sticky; top: 0; grid-template-columns: auto minmax(0, 1fr); min-height: calc(64px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 16px 0; }
+    .category-logo img { width: 64px; height: 40px; }
+    .category-header nav { justify-self: end; max-width: 100%; gap: 14px; overflow-x: auto; scrollbar-width: none; }
+    .category-header nav::-webkit-scrollbar { display: none; }
+    .category-header nav a { flex: 0 0 auto; padding-block: 8px; font-size: .62rem; }
+    .category-hero { min-height: 270px; padding: 58px 18px 44px; }
+    .category-hero h1 { font-size: clamp(2.35rem, 11vw, 3.4rem); overflow-wrap: anywhere; }
+    .category-hero > span { font-size: .9rem; line-height: 1.6; }
+    .category-toolbar { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; width: 100%; margin: 22px 0 0; padding: 0 16px; }
+    .category-toolbar > label:first-child { grid-column: 1; }
+    .category-toolbar input[type="search"], .category-toolbar select, .category-stock-filter { width: 100%; min-height: 46px; }
+    .category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 10px; width: 100%; padding: 32px 14px 64px; }
+    .category-product figure { aspect-ratio: 4 / 5.25; margin-bottom: 10px; border-radius: 12px; }
+    .category-product figure span { top: 8px; left: 8px; max-width: calc(100% - 16px); padding: 6px 8px; font-size: .5rem; }
+    .category-product > p { margin-bottom: 5px; font-size: .56rem; }
+    .category-product h2 { min-height: 2.55em; margin-bottom: 6px; font-size: .8rem; line-height: 1.27; }
+    .category-product strong { font-size: .9rem; }
+    .category-empty { padding: 44px 18px; }
+    .category-footer { grid-template-columns: 1fr; gap: 28px; padding: 42px 18px; }
+    .category-footer > div { grid-column: auto; }
+}
+
+@media (max-width: 380px) {
+    .category-header { padding-inline: 10px; }
+    .category-header nav { gap: 10px; }
+    .category-header nav a { font-size: .57rem; }
+    .category-grid { padding-inline: 10px; column-gap: 8px; }
+    .category-product h2 { font-size: .74rem; }
+    .category-product strong { font-size: .83rem; }
+}
+
+/* Precio de oferta calculado desde el precio anterior y el precio actual. */
+.category-product figure { position: relative; }
+.category-product figure .category-product-discount {
+    position: absolute;
+    z-index: 2;
+    top: 14px;
+    right: 14px;
+    left: auto;
+    display: grid;
+    place-items: center;
+    min-height: 32px;
+    padding: 6px 10px;
+    border: 1px solid rgba(224, 185, 55, .75);
+    border-radius: 999px;
+    background: #090909;
+    color: var(--cream);
+    font: 800 .68rem/1 var(--title);
+    box-shadow: 0 5px 16px rgba(0, 0, 0, .3);
+}
+.category-product-pricing { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.category-product-pricing del { color: var(--muted); font-size: .74rem; }
+.category-product-pricing strong { color: var(--cream); }
+@media (max-width: 768px) {
+    .category-product figure .category-product-discount { top: 8px; right: 8px; min-height: 27px; padding: 5px 8px; font-size: .6rem; }
+    .category-product-pricing { gap: 3px 6px; }
+    .category-product-pricing del { font-size: .64rem; }
 }

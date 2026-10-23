@@ -60,7 +60,7 @@
     <!-- Lucide Icons (CDN) -->
     <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260824-responsive-v20">
+    <link rel="stylesheet" href="styles.css?v=20261009-product-discounts-v1">
 </head>
 <body>
     <div class="page-scroll-progress" id="page-scroll-progress" aria-hidden="true"></div>
@@ -72,13 +72,15 @@
             <a href="/" class="brand-logo" id="logo-link" aria-label="Ir al inicio de LYNX">
                 <img src="assets/logo-transparent.png" alt="LYNX" class="logo-img">
             </a>
-            
+
             <nav class="desktop-nav">
                 <button class="nav-link active" id="nav-all" type="button">Catálogo</button>
                 <button class="nav-link" id="nav-hoodies" type="button">Hoodies</button>
                 <button class="nav-link" id="nav-tshirts" type="button">T-Shirts</button>
                 <button class="nav-link" id="nav-jeans" type="button">Jeans & Pants</button>
                 <button class="nav-link" id="nav-conjuntos" type="button">Conjuntos</button>
+                <a class="nav-link nav-link-anchor nav-link-preorder" href="#preventa">PREVENTA</a>
+                <a class="nav-link nav-link-anchor nav-link-outlet" href="/categoria/outlet">OUTLET</a>
                 <a class="nav-link nav-link-anchor" href="#lynx-tiktok">Videos</a>
             </nav>
 
@@ -105,6 +107,8 @@
                 <button class="mobile-nav-link" type="button" data-category="t-shirts">T-Shirts</button>
                 <button class="mobile-nav-link" type="button" data-category="jeans-pants">Jeans & Pants</button>
                 <button class="mobile-nav-link" type="button" data-category="conjuntos">Conjuntos</button>
+                <a class="mobile-nav-link mobile-nav-anchor mobile-nav-preorder" href="#preventa"><span>PREVENTA</span><small>PRÓXIMO DROP</small></a>
+                <a class="mobile-nav-link mobile-nav-anchor mobile-nav-outlet" href="/categoria/outlet"><span>OUTLET</span><small>PRECIOS ESPECIALES</small></a>
                 <a class="mobile-nav-link mobile-nav-anchor" href="#lynx-tiktok">Videos</a>
                 <a class="mobile-nav-link mobile-account-link" id="mobile-account-btn" href="/cuenta"><i data-lucide="user-round"></i><span id="mobile-account-btn-label">Ingresar a mi cuenta</span></a>
             </nav>
@@ -169,6 +173,10 @@
             <i data-lucide="gift"></i>
             <span><strong>Envío gratis en Lima:</strong> Desde S/ 349.90</span>
         </div>
+        <a class="info-item info-item-appointment" href="https://wa.me/51962210278?text=Hola%20LYNX%2C%20quiero%20agendar%20una%20visita%20en%20la%20boutique." target="_blank" rel="noopener noreferrer">
+            <i data-lucide="calendar-check"></i>
+            <span><strong>Visita la boutique:</strong> Agenda por WhatsApp</span>
+        </a>
     </section>
 
     <!-- Trending Carousel -->
@@ -189,6 +197,21 @@
         </div>
         <div class="trending-viewport" id="trending-viewport" tabindex="0" aria-label="Productos destacados">
             <div class="trending-track" id="trending-track"></div>
+        </div>
+    </section>
+
+    <!-- Selección editorial: se activa desde la etiqueta visible del producto -->
+    <section class="hot-section" id="en-fuego" aria-labelledby="hot-title" hidden>
+        <div class="hot-container">
+            <div class="hot-heading">
+                <div>
+                    <span class="hot-kicker"><i data-lucide="flame"></i> SELECCIÓN LYNX</span>
+                    <h2 id="hot-title">EN FUEGO</h2>
+                    <p>Las prendas que están marcando el drop. Stock real, tallas confirmadas y unidades limitadas.</p>
+                </div>
+                <a class="hot-link" href="#catalog">VER TODO EL CATÁLOGO <i data-lucide="arrow-up-right"></i></a>
+            </div>
+            <div class="hot-products-grid products-grid" id="hot-products-grid" aria-live="polite"></div>
         </div>
     </section>
 
@@ -253,7 +276,7 @@
                     <h2 class="section-title">NUESTRAS PRENDAS</h2>
                     <p class="section-subtitle" id="catalog-count-text">Mostrando todos los productos</p>
                 </div>
-                
+
                 <!-- Search & Filters -->
                 <div class="filter-controls">
                     <div class="search-box">
@@ -292,6 +315,31 @@
             <button class="catalog-load-more" id="catalog-load-more" type="button" hidden>VER MÁS PRENDAS</button>
         </div>
     </main>
+
+    <!-- Preventa: separada del inventario con entrega inmediata -->
+    <section class="preorder-section" id="preventa" aria-labelledby="preorder-title">
+        <div class="preorder-container">
+            <div class="preorder-header">
+                <div class="preorder-title-group">
+                    <span class="preorder-kicker"><i data-lucide="sparkles"></i> PRÓXIMO DROP</span>
+                    <h2 id="preorder-title">PREVENTA</h2>
+                    <p>Estas prendas están en camino a LYNX. Resérvalas antes de que lleguen a Perú y te confirmaremos la fecha estimada por WhatsApp.</p>
+                </div>
+                <div class="preorder-info" aria-label="Cómo funciona la preventa">
+                    <span><i data-lucide="bookmark-check"></i><b>1.</b> Elige tu talla</span>
+                    <span><i data-lucide="message-circle"></i><b>2.</b> Confirmamos la fecha</span>
+                    <span><i data-lucide="package-check"></i><b>3.</b> Reservamos tu prenda</span>
+                </div>
+            </div>
+            <div class="preorder-summary">
+                <span id="preorder-count-text">Cargando preventas…</span>
+                <a href="/categoria/preventa" aria-label="Abrir el catálogo completo de preventa">VER PREVENTA <i data-lucide="arrow-up-right"></i></a>
+            </div>
+            <div class="products-grid preorder-products-grid" id="preorder-products-grid" aria-live="polite"></div>
+            <button class="catalog-load-more preorder-load-more" id="preorder-load-more" type="button" hidden>VER TODOS LOS PEDIDOS</button>
+            <p class="preorder-note"><i data-lucide="info"></i> La fecha estimada de entrega se confirma por WhatsApp antes de realizar el pago.</p>
+        </div>
+    </section>
 
     <!-- Videos de TikTok -->
     <section class="tiktok-showcase" id="lynx-tiktok" aria-labelledby="tiktok-showcase-title">
@@ -432,6 +480,7 @@
                     <li><button class="footer-category-button" type="button" data-category="t-shirts"><i data-lucide="arrow-right"></i> T-Shirts</button></li>
                     <li><button class="footer-category-button" type="button" data-category="jeans-pants"><i data-lucide="arrow-right"></i> Jeans & Pants</button></li>
                     <li><button class="footer-category-button" type="button" data-category="conjuntos"><i data-lucide="arrow-right"></i> Conjuntos</button></li>
+                    <li><a class="footer-category-button" href="/categoria/outlet"><i data-lucide="arrow-right"></i> Outlet</a></li>
                     <li><a class="footer-whatsapp-link" href="https://wa.me/51962210278?text=Hola%20LYNX%2C%20quiero%20informaci%C3%B3n%20sobre%20sus%20prendas." target="_blank" rel="noopener noreferrer" aria-label="Escribir a LYNX por WhatsApp al 962 210 278"><i data-lucide="phone"></i><span>Soporte WhatsApp: +51 962 210 278</span></a></li>
                     <li><a href="#preguntas-frecuentes"><i data-lucide="shield-check"></i> Envíos, pagos y cambios</a></li>
                 </ul>
@@ -501,7 +550,7 @@
                             <p class="fit-example"><strong>¿Sigues con dudas?</strong> Envíanos tus medidas por WhatsApp y confirmamos contigo antes del pago.</p>
                         </div>
                     </aside>
-                    
+
                     <!-- Size Selector -->
                     <div class="detail-options">
                         <span class="option-label">Selecciona tu Talla:</span>
@@ -517,9 +566,9 @@
                     <div class="detail-quantity">
                         <span class="option-label">Cantidad:</span>
                         <div class="qty-selector">
-                            <button type="button" class="qty-btn" id="modal-qty-minus"><i data-lucide="minus"></i></button>
-                            <input type="number" id="modal-qty-input" value="1" min="1" readonly>
-                            <button type="button" class="qty-btn" id="modal-qty-plus"><i data-lucide="plus"></i></button>
+                            <button type="button" class="qty-btn" id="modal-qty-minus" aria-label="Disminuir cantidad"><i data-lucide="minus" aria-hidden="true"></i></button>
+                            <label class="sr-only" for="modal-qty-input">Cantidad</label><input type="number" id="modal-qty-input" value="1" min="1" readonly aria-label="Cantidad">
+                            <button type="button" class="qty-btn" id="modal-qty-plus" aria-label="Aumentar cantidad"><i data-lucide="plus" aria-hidden="true"></i></button>
                         </div>
                     </div>
 
@@ -541,7 +590,7 @@
                     <i data-lucide="x"></i>
                 </button>
             </div>
-            
+
             <!-- Cart Items Container -->
             <div class="drawer-body" id="cart-items-container">
                 <!-- Cart items will be loaded dynamically -->
@@ -599,7 +648,7 @@
                 </button>
             </div>
             <div class="checkout-progress" aria-label="Proceso de pedido"><span class="is-complete">1 · Carrito</span><span class="is-active" id="checkout-progress-delivery">2 · Entrega</span><span id="checkout-progress-confirmation">3 · Confirmación</span></div>
-            
+
             <div class="drawer-body">
                 <form id="checkout-form" class="checkout-form-container">
                     <div class="form-group">
@@ -607,7 +656,7 @@
                         <input type="text" id="checkout-name" required minlength="3" autocomplete="name" placeholder="Ejemplo: Sebastián Torres">
                         <small class="field-error" id="checkout-name-error"></small>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="checkout-phone">Número de WhatsApp *</label>
                         <input type="tel" id="checkout-phone" required inputmode="numeric" autocomplete="tel" pattern="[0-9 +()-]{9,15}" placeholder="Ejemplo: 987654321">
@@ -695,12 +744,10 @@
                                 <input type="radio" name="payment-method" value="transferencia">
                                 <span><strong>Transferencia BCP / BBVA</strong><small>Recibirás los datos oficiales por WhatsApp.</small></span>
                             </label>
-                            <label class="payment-option-card">
-                                <input type="radio" name="payment-method" value="tarjeta-link">
-                                <span><strong>Tarjeta mediante link</strong><small>Solicita un enlace de pago seguro al confirmar.</small></span>
-                            </label>
                         </div>
                     </div>
+                    <label class="checkout-terms-check"><input type="checkbox" id="checkout-terms" required><span>Acepto los <a href="/guia/lynx-streetwear-peru" target="_blank" rel="noopener">términos de compra</a>, la política de cambios y el uso de mis datos para gestionar este pedido.</span></label>
+                    <small class="field-error" id="checkout-terms-error"></small>
                 </form>
 
                 <!-- Order Totals Box -->
@@ -719,7 +766,7 @@
                         <span id="checkout-shipping">S/. 0.00</span>
                     </div>
                     <hr class="totals-divider">
-                    
+
                     <div class="total-row main-total">
                         <span>Total de Compra:</span>
                         <span id="checkout-total">S/. 0.00</span>
@@ -799,8 +846,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="supabase-config.js?v=20260716-admin-v1" defer></script>
     <script src="commerce-tracking.js?v=20260824-conversion-v2" defer></script>
-    <script src="product-image-overrides.js?v=20260822-mockups-v1" defer></script>
-    <script src="app.js?v=20260824-conversion-v31" defer></script>
-    <script src="tiktok-videos.js?v=20260813-controls-fix-v3" defer></script>
+    <script src="product-image-overrides.js?v=20260916-mockups-v7" defer></script>
+    <script src="app.js?v=20261009-product-discounts-v1" defer></script>
+    <script src="tiktok-videos.js?v=20261005-muted-autoplay-v1" defer></script>
 </body>
 </html>
