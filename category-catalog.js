@@ -143,7 +143,13 @@
         const category = CATEGORY_BY_PATH[path];
         const grid = document.querySelector('.category-grid');
         const client = window.getLynxSupabase?.();
-        if (!category || !grid || !client) return;
+        if (!category || !grid) return;
+        if (!client) {
+            if (category === 'outlet') {
+                grid.innerHTML = '<div class="category-empty"><h2>No se pudo cargar Outlet</h2><p>Actualiza la página para volver a consultar los descuentos.</p></div>';
+            }
+            return;
+        }
 
         const loadProducts = async includeDiscount => {
             let query = client
@@ -161,6 +167,11 @@
 
         if (error) {
             console.warn('No se pudo actualizar la categoría; se conserva el catálogo de respaldo.', error.message);
+            if (category === 'outlet') {
+                const count = document.querySelector('.category-hero small');
+                if (count) count.textContent = 'No se pudieron consultar los descuentos';
+                grid.innerHTML = '<div class="category-empty"><h2>No se pudo cargar Outlet</h2><p>Actualiza la página para volver a consultar los descuentos.</p></div>';
+            }
             return;
         }
 
