@@ -132,7 +132,14 @@
         const mockup = mockupFor(slug);
         if (!mockup) return originals;
         const normalizedMockup = mockup.replace(/^\//, '');
-        const imagePath = value => String(value).replace(/^\//, '').split(/[?#]/, 1)[0];
+        const imagePath = value => {
+            const rawValue = String(value).trim();
+            try {
+                return new URL(rawValue, location.href).pathname.replace(/^\/+/, '').split(/[?#]/, 1)[0];
+            } catch (_) {
+                return rawValue.replace(/^\/+/, '').split(/[?#]/, 1)[0];
+            }
+        };
         const mockupFamily = imagePath(normalizedMockup).replace(/\.(?:png|webp)$/i, '');
         const isSameMockupFamily = image => {
             const normalizedImage = imagePath(image);
