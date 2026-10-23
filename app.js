@@ -1148,8 +1148,6 @@ async function initializeCustomerAccount() {
             showDiscountSent(customerUser.email, true, delivery.ok ? 'sent' : 'failed');
             if (!accountDialog.open) accountDialog.showModal();
         }
-    } else if (!sessionStorage.getItem(DISCOUNT_POPUP_SESSION_KEY)) {
-        window.setTimeout(() => openAccountDialog(), 1800);
     }
     customerSupabase.auth.onAuthStateChange((event, nextSession) => {
         window.setTimeout(async () => {
