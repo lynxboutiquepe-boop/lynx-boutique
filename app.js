@@ -2994,6 +2994,7 @@ function setupEventListeners() {
 
     navLinks.forEach(link => {
         link.addEventListener('click', event => {
+            if (link.classList.contains('nav-link-anchor')) return;
             event.preventDefault();
             const anchorTarget = link.getAttribute('href');
             if (anchorTarget?.startsWith('#')) {
@@ -3041,6 +3042,7 @@ function setupEventListeners() {
 
     mobileNavLinks.forEach(link => {
         link.addEventListener('click', event => {
+            if (link.classList.contains('mobile-nav-anchor') || link.classList.contains('mobile-account-link')) return;
             event.preventDefault();
             const anchorTarget = link.getAttribute('href');
             if (anchorTarget?.startsWith('#')) {
