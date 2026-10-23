@@ -132,7 +132,13 @@
         const mockup = mockupFor(slug);
         if (!mockup) return originals;
         const normalizedMockup = mockup.replace(/^\//, '');
-        return [mockup, ...originals.filter(image => String(image).replace(/^\//, '') !== normalizedMockup)];
+        const mockupFamily = normalizedMockup.replace(/\.(?:png|webp)$/i, '');
+        const isSameMockupFamily = image => {
+            const normalizedImage = String(image).replace(/^\//, '');
+            return normalizedImage === normalizedMockup
+                || normalizedImage.replace(/\.(?:png|webp)$/i, '') === mockupFamily;
+        };
+        return [mockup, ...originals.filter(image => !isSameMockupFamily(image))];
     }
 
     window.LynxProductImages = Object.freeze({ mockupFor, withMockup });
