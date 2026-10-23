@@ -6325,3 +6325,12 @@ body {
         line-height: 1.2;
     }
 }
+
+/* Catálogo compacto en escritorio: más producto visible por fila sin tocar
+   la cuadrícula táctil de dos columnas en teléfonos. */
+@media (min-width: 769px) {
+    .products-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 36px 24px;
+    }
+}
