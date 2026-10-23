@@ -132,10 +132,11 @@
         const mockup = mockupFor(slug);
         if (!mockup) return originals;
         const normalizedMockup = mockup.replace(/^\//, '');
-        const mockupFamily = normalizedMockup.replace(/\.(?:png|webp)$/i, '');
+        const imagePath = value => String(value).replace(/^\//, '').split(/[?#]/, 1)[0];
+        const mockupFamily = imagePath(normalizedMockup).replace(/\.(?:png|webp)$/i, '');
         const isSameMockupFamily = image => {
-            const normalizedImage = String(image).replace(/^\//, '');
-            return normalizedImage === normalizedMockup
+            const normalizedImage = imagePath(image);
+            return normalizedImage === imagePath(normalizedMockup)
                 || normalizedImage.replace(/\.(?:png|webp)$/i, '') === mockupFamily;
         };
         return [mockup, ...originals.filter(image => !isSameMockupFamily(image))];
