@@ -2625,7 +2625,7 @@ function updateCheckoutTotals() {
         : `S/. ${paymentBalance.toFixed(2)}`;
     if (checkoutFulfillmentSummary) {
         const parts = [];
-        if (physicalUnits) parts.push(`${physicalUnits} ${physicalUnits === 1 ? 'prenda' : 'prendas'} listas para entrega`);
+        if (physicalUnits) parts.push(`${physicalUnits} ${physicalUnits === 1 ? 'prenda lista' : 'prendas listas'} para entrega`);
         if (preorderUnits) parts.push(`${preorderUnits} ${preorderUnits === 1 ? 'prenda' : 'prendas'} en preventa`);
         checkoutFulfillmentSummary.textContent = parts.join(' · ') || 'Selecciona una prenda para continuar.';
     }
