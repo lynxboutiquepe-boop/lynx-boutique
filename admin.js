@@ -284,7 +284,10 @@ function currentMonthEntries() {
 }
 
 function renderStats() {
-    const visibleProducts = state.products.filter(product => product.status !== 'archived');
+    // El resumen del inventario debe incluir todas las fichas guardadas,
+    // incluso agotadas y archivadas. La tabla pública puede ocultarlas,
+    // pero el panel administrativo debe conservar su valor histórico.
+    const visibleProducts = state.products;
     const sellableProducts = visibleProducts.filter(product => Number(product.stock || 0) > 0);
     const costedProducts = sellableProducts.filter(product => Number(product.cost || 0) > 0);
     const entries = currentMonthEntries();
