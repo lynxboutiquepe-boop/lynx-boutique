@@ -47,6 +47,21 @@ function money(value) {
     return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(Number(value || 0));
 }
 
+function preorderUnits(product) {
+    return Object.values(product?.preorder_stock || {}).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0);
+}
+
+function physicalUnitsForSize(product, size) {
+    const sizeStock = product?.size_stock || {};
+    return Object.prototype.hasOwnProperty.call(sizeStock, size)
+        ? Math.max(0, Number(sizeStock[size]) || 0)
+        : Math.max(0, Number(product?.stock) || 0);
+}
+
+function preorderUnitsForSize(product, size) {
+    return Math.max(0, Number((product?.preorder_stock || {})[size]) || 0);
+}
+
 function localDate(value) {
     if (!value) return '—';
     return new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -280,6 +295,8 @@ function renderStats() {
         0
     );
     const inventoryUnits = sellableProducts.reduce((sum, product) => sum + Number(product.stock || 0), 0);
+    const preorderProducts = visibleProducts.filter(product => preorderUnits(product) > 0);
+    const preorderInventoryUnits = preorderProducts.reduce((sum, product) => sum + preorderUnits(product), 0);
     const inventoryValue = sellableProducts.reduce(
         (sum, product) => sum + (Number(product.price || 0) * Number(product.stock || 0)),
         0
@@ -296,7 +313,8 @@ function renderStats() {
 
     $('#stat-products').textContent = visibleProducts.length;
     $('#stat-stock').textContent = inventoryUnits;
-    $('#stat-preorder').textContent = visibleProducts.filter(product => product.status === 'preorder').length;
+    $('#stat-preorder').textContent = preorderInventoryUnits;
+    $('#stat-preorder-meta').textContent = `${preorderProducts.length} ${preorderProducts.length === 1 ? 'ficha' : 'fichas'} · unidades por llegar`;
     $('#stat-soldout').textContent = visibleProducts.filter(product => product.status === 'sold_out').length;
     $('#stat-income').textContent = money(income);
     $('#stat-expense').textContent = money(expense);
@@ -428,7 +446,7 @@ function renderAttention() {
     $('#attention-list').innerHTML = attention.length ? attention.map(product => `
         <div class="attention-item">
             <div><strong>${escapeHtml(product.title)}</strong><span>${STATUS_META[product.status].label}</span></div>
-            <b>${product.status === 'preorder' ? '—' : `${product.stock} und.`}</b>
+            <b>${preorderUnits(product) > 0 ? `${preorderUnits(product)} prev.` : `${product.stock} físico`}</b>
         </div>
     `).join('') : '<p class="empty-state">El inventario no requiere atención.</p>';
 }
@@ -453,13 +471,16 @@ function renderProducts() {
     const products = filteredProducts();
     const rows = products.map(product => {
         const image = safeImageUrl(productPreviewImages(product)[0]);
+        const sizes = Array.isArray(product.sizes) && product.sizes.length ? product.sizes : ['ÚNICA'];
+        const sizeBreakdown = sizes.map(size => `<span><b>${escapeHtml(size)}</b> F ${physicalUnitsForSize(product, size)} · P ${preorderUnitsForSize(product, size)}</span>`).join('');
+        const preorderTotal = preorderUnits(product);
         return `
             <tr>
                 <td><div class="product-cell"><img src="${escapeHtml(image)}" alt=""><div><strong>${escapeHtml(product.title)}</strong><span>${escapeHtml(product.category)}</span></div></div></td>
                 <td><select class="status-select product-status-control" data-id="${product.id}">${productStatusOptions(product.status)}</select></td>
                 <td><label class="quick-edit"><span>S/</span><input class="quick-product-value" data-id="${product.id}" data-field="price" type="number" min="0" step="0.01" value="${Number(product.price || 0)}" aria-label="Precio de ${escapeHtml(product.title)}"></label></td>
-                <td><label class="quick-edit stock"><input class="quick-product-value" data-id="${product.id}" data-field="stock" type="number" min="0" step="1" value="${Number(product.stock || 0)}" aria-label="Stock de ${escapeHtml(product.title)}"><span>und.</span></label></td>
-                <td>${escapeHtml((product.sizes || []).join(', ') || '—')}</td>
+                <td><div class="stock-breakdown"><label class="quick-edit stock"><input class="quick-product-value" data-id="${product.id}" data-field="stock" type="number" min="0" step="1" value="${Number(product.stock || 0)}" aria-label="Stock físico de ${escapeHtml(product.title)}"><span>físico</span></label><small>Preventa: <strong>${preorderTotal}</strong></small></div></td>
+                <td><div class="size-stock-breakdown">${sizeBreakdown || '—'}</div></td>
                 <td><div class="row-actions"><button class="row-action edit-product" data-id="${product.id}" title="Editar"><i data-lucide="pencil"></i></button><button class="row-action delete delete-product" data-id="${product.id}" title="Eliminar"><i data-lucide="trash-2"></i></button></div></td>
             </tr>`;
     }).join('');
@@ -467,7 +488,7 @@ function renderProducts() {
     $('#products-tbody').innerHTML = rows || '<tr><td class="empty-state" colspan="6">No se encontraron productos.</td></tr>';
     $('#mobile-product-list').innerHTML = products.length ? products.map(product => `
         <article class="mobile-product-card">
-            <div class="mobile-product-head"><img src="${escapeHtml(safeImageUrl(productPreviewImages(product)[0]))}" alt=""><div class="mobile-product-copy"><strong>${escapeHtml(product.title)}</strong><span>${money(product.price)} · Stock ${product.stock}</span><span>${escapeHtml((product.sizes || []).join(', ') || 'Sin tallas')}</span></div></div>
+            <div class="mobile-product-head"><img src="${escapeHtml(safeImageUrl(productPreviewImages(product)[0]))}" alt=""><div class="mobile-product-copy"><strong>${escapeHtml(product.title)}</strong><span>${money(product.price)} · Físico ${product.stock} · Preventa ${preorderUnits(product)}</span><span>${escapeHtml((product.sizes || []).join(', ') || 'Sin tallas')}</span></div></div>
             <div class="mobile-product-actions"><select class="status-select product-status-control" data-id="${product.id}">${productStatusOptions(product.status)}</select><button class="row-action edit-product" data-id="${product.id}" aria-label="Editar"><i data-lucide="pencil"></i></button><button class="row-action delete delete-product" data-id="${product.id}" aria-label="Eliminar"><i data-lucide="trash-2"></i></button></div>
         </article>
     `).join('') : '<p class="empty-state">No se encontraron productos.</p>';
