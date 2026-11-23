@@ -15,6 +15,7 @@ const sizeGuideDialog = document.getElementById('size-guide-dialog');
 const sizeGuideTrigger = document.getElementById('size-guide-trigger');
 const sizeGuideClose = document.getElementById('size-guide-close');
 const sizeSelectionNote = document.getElementById('size-selection-note');
+const fulfillmentOptions = document.getElementById('fulfillment-options');
 const favoriteButton = document.getElementById('product-favorite-button');
 const restockRequest = document.getElementById('restock-request');
 const restockForm = document.getElementById('restock-form');
@@ -42,6 +43,7 @@ const productId = /^\d+$/.test(productReference) ? Number(productReference) : nu
 const productSlug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(productReference) ? productReference : '';
 let selectedSize = '';
 let selectedQuantity = 1;
+let selectedFulfillmentMode = 'physical';
 let currentProduct = null;
 let fallbackCatalogPromise = null;
 
@@ -138,10 +140,39 @@ function setProductImageFallback(image) {
 }
 
 function statusCopy(product) {
-    if (product.status === 'sold_out') return { badge: 'AGOTADO', note: 'AGOTADO POR EL MOMENTO', sold: true };
-    if (product.status === 'preorder') return { badge: 'PREVENTA', note: 'PREVENTA · RESERVA TU PRENDA' };
+    const physical = Object.values(product.size_stock || product.sizeStock || {}).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0) || Number(product.stock || 0);
+    const preorder = Object.values(product.preorder_stock || product.preorderStock || {}).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0);
+    if (product.status === 'sold_out' && preorder <= 0) return { badge: 'AGOTADO', note: 'AGOTADO POR EL MOMENTO', sold: true };
+    if (preorder > 0 && physical <= 0) return { badge: 'PREVENTA', note: 'PREVENTA · RESERVA TU PRENDA' };
+    if (preorder > 0 && physical > 0) return { badge: 'STOCK + PREVENTA', note: `Compra inmediata: ${physical} · Preventa: ${preorder}` };
     if (product.status === 'low_stock') return { badge: product.badge || 'ÚLTIMAS UNIDADES', note: 'ÚLTIMAS UNIDADES DISPONIBLES' };
     return { badge: product.badge || 'NUEVO DROP', note: product.stock ? `${product.stock} ${product.stock === 1 ? 'UNIDAD DISPONIBLE' : 'UNIDADES DISPONIBLES'}` : '' };
+}
+
+function quantityForMode(product, size, mode = selectedFulfillmentMode) {
+    const source = mode === 'preorder' ? (product.preorder_stock || product.preorderStock || {}) : (product.size_stock || product.sizeStock || {});
+    if (Object.prototype.hasOwnProperty.call(source, size)) return Math.max(0, Number(source[size]) || 0);
+    return mode === 'preorder' ? 0 : Math.max(0, Number(product.stock) || 0);
+}
+
+function renderFulfillmentOptions() {
+    if (!fulfillmentOptions || !currentProduct || !selectedSize) return;
+    const physical = quantityForMode(currentProduct, selectedSize, 'physical');
+    const preorder = quantityForMode(currentProduct, selectedSize, 'preorder');
+    if (selectedFulfillmentMode === 'physical' && physical <= 0 && preorder > 0) selectedFulfillmentMode = 'preorder';
+    if (selectedFulfillmentMode === 'preorder' && preorder <= 0 && physical > 0) selectedFulfillmentMode = 'physical';
+    fulfillmentOptions.innerHTML = [
+        { mode: 'physical', title: 'Comprar ahora', note: physical > 0 ? 'Entrega inmediata · stock físico' : 'No disponible en esta talla', qty: physical },
+        { mode: 'preorder', title: 'Separar en preventa', note: preorder > 0 ? 'Reserva tu talla · llega con el próximo pedido' : 'No disponible en esta talla', qty: preorder }
+    ].map(option => `<button type="button" class="fulfillment-option ${selectedFulfillmentMode === option.mode ? 'active' : ''}" data-mode="${option.mode}" ${option.qty <= 0 ? 'disabled' : ''}><input type="radio" tabindex="-1" ${selectedFulfillmentMode === option.mode ? 'checked' : ''} aria-label="${option.title}"><span><strong>${option.title}</strong><small>${option.note}</small></span><b>${option.qty > 0 ? `${option.qty} DISP.` : 'AGOTADO'}</b></button>`).join('');
+    fulfillmentOptions.querySelectorAll('.fulfillment-option').forEach(button => button.addEventListener('click', () => {
+        if (button.disabled) return;
+        selectedFulfillmentMode = button.dataset.mode === 'preorder' ? 'preorder' : 'physical';
+        selectedQuantity = 1;
+        renderFulfillmentOptions();
+        updateQuantity();
+        updateActionLinks();
+    }));
 }
 
 function productCategoryUrl(category) {
@@ -316,7 +347,7 @@ function syncMobilePurchase(product, sold) {
         mobilePurchaseAction.textContent = 'AVÍSAME';
         mobilePurchaseAction.href = '#restock';
     } else {
-        mobilePurchaseAction.textContent = selectedSize ? 'AGREGAR AL CARRITO' : 'ELEGIR TALLA';
+        mobilePurchaseAction.textContent = selectedSize ? (selectedFulfillmentMode === 'preorder' ? 'SEPARAR EN PREVENTA' : 'AGREGAR AL CARRITO') : 'ELEGIR TALLA';
         mobilePurchaseAction.href = selectedSize ? addCartButton.href : '#product-options';
     }
 }
@@ -330,13 +361,11 @@ function setImage(images, index) {
 }
 
 function updateQuantity() {
-    const sizedStock = currentProduct.status !== 'preorder' && currentProduct.size_stock && Object.prototype.hasOwnProperty.call(currentProduct.size_stock,selectedSize) ? Number(currentProduct.size_stock[selectedSize]) : null;
-    const numericStock = Number(currentProduct.stock);
-    const max = currentProduct.status === 'preorder' ? 20 : Number.isFinite(sizedStock) ? sizedStock : Number.isFinite(numericStock) ? numericStock : 99;
+    const max = quantityForMode(currentProduct, selectedSize) || 0;
     selectedQuantity = Math.max(1, Math.min(selectedQuantity, max));
     quantityValue.textContent = String(selectedQuantity);
     quantityMinus.disabled = selectedQuantity <= 1;
-    quantityPlus.disabled = selectedQuantity >= max;
+    quantityPlus.disabled = max <= 0 || selectedQuantity >= max;
     updateActionLinks();
 }
 
@@ -351,12 +380,13 @@ function updateActionLinks() {
         talla: selectedSize,
         cantidad: String(selectedQuantity)
     });
+    params.set('modo', selectedFulfillmentMode);
     buyButton.href = `/?${params.toString()}`;
     params.delete('comprar');
     params.set('agregar', '1');
     addCartButton.href = `/?${params.toString()}`;
     if (mobilePurchaseAction) {
-        mobilePurchaseAction.textContent = selectedSize ? 'AGREGAR AL CARRITO' : 'ELEGIR TALLA';
+        mobilePurchaseAction.textContent = selectedSize ? (selectedFulfillmentMode === 'preorder' ? 'SEPARAR EN PREVENTA' : 'AGREGAR AL CARRITO') : 'ELEGIR TALLA';
         mobilePurchaseAction.href = selectedSize ? addCartButton.href : '#product-options';
     }
 }
@@ -432,12 +462,15 @@ function renderProduct(product) {
     if (!images.length) images.push('/assets/logo-transparent.png');
     const sizes = Array.isArray(product.sizes) && product.sizes.length ? product.sizes : ['ÚNICA'];
     const status = statusCopy(product);
-    if (product.status !== 'preorder' && Number(product.stock) <= 0) {
+    const hasPhysicalStock = sizes.some(size => quantityForMode(product, size, 'physical') > 0);
+    const hasPreorderStock = sizes.some(size => quantityForMode(product, size, 'preorder') > 0);
+    if (!hasPhysicalStock && !hasPreorderStock) {
         status.sold = true;
         status.badge = 'AGOTADO';
         status.note = 'AGOTADO POR EL MOMENTO';
     }
-    selectedSize = product.status === 'preorder' ? sizes[0] : sizes.find(size => !(product.size_stock && Object.prototype.hasOwnProperty.call(product.size_stock,size)) || Number(product.size_stock[size]) > 0) || '';
+    selectedSize = sizes.find(size => quantityForMode(product, size, 'physical') > 0) || sizes.find(size => quantityForMode(product, size, 'preorder') > 0) || '';
+    selectedFulfillmentMode = quantityForMode(product, selectedSize, 'physical') > 0 ? 'physical' : 'preorder';
     if (!selectedSize) {
         status.sold = true;
         status.badge = 'AGOTADO';
@@ -495,23 +528,26 @@ function renderProduct(product) {
     sizes.forEach((size, index) => {
         const button = document.createElement('button');
         button.type = 'button';
-        button.textContent = size;
-        const unavailable = product.status !== 'preorder' && product.size_stock && Object.prototype.hasOwnProperty.call(product.size_stock,size) && Number(product.size_stock[size]) <= 0;
+        button.innerHTML = `<span>${escapeHtml(size)}</span><small>${quantityForMode(product, size, 'physical') > 0 ? `F ${quantityForMode(product, size, 'physical')}` : ''}${quantityForMode(product, size, 'physical') > 0 && quantityForMode(product, size, 'preorder') > 0 ? ' · ' : ''}${quantityForMode(product, size, 'preorder') > 0 ? `P ${quantityForMode(product, size, 'preorder')}` : ''}</small>`;
+        const unavailable = quantityForMode(product, size, 'physical') <= 0 && quantityForMode(product, size, 'preorder') <= 0;
         button.disabled = unavailable;
         button.className = size === selectedSize ? 'active' : '';
         if (unavailable) button.setAttribute('aria-label', `Talla ${size} agotada`);
         button.addEventListener('click', () => {
             if (button.disabled) return;
             selectedSize = size;
+            selectedFulfillmentMode = quantityForMode(product, size, 'physical') > 0 ? 'physical' : 'preorder';
             sizeList.querySelectorAll('button').forEach(candidate => candidate.classList.toggle('active', candidate === button));
             sizeSelectionNote.textContent = `Talla seleccionada: ${size}`;
             sizeSelectionNote.classList.add('is-selected');
             selectedQuantity = 1;
+            renderFulfillmentOptions();
             updateQuantity();
             updateActionLinks();
         });
         sizeList.append(button);
     });
+    renderFulfillmentOptions();
 
     quantityMinus.addEventListener('click', () => { selectedQuantity -= 1; updateQuantity(); });
     quantityPlus.addEventListener('click', () => { selectedQuantity += 1; updateQuantity(); });
@@ -616,7 +652,7 @@ async function loadProduct() {
         if (!product) throw new Error('Producto no encontrado');
         return product;
     }
-    const baseFields = 'id,legacy_id,title,slug,category,price,stock,sizes,images,description,badge,status,fit_recommendation,sort_order,size_stock';
+    const baseFields = 'id,legacy_id,title,slug,category,price,stock,sizes,images,description,badge,status,fit_recommendation,sort_order,size_stock,preorder_stock';
     const queryProduct = async fields => {
         const request = client.from('products').select(fields).neq('status', 'archived').limit(1);
         return productSlug
@@ -625,7 +661,7 @@ async function loadProduct() {
     };
     let { data, error } = await queryProduct(baseFields);
     if (error && /size_stock|column|schema cache/i.test(error.message || '')) {
-        const compatibleFields = baseFields.replace(',size_stock', '');
+        const compatibleFields = baseFields.replace(',size_stock,preorder_stock', '');
         ({ data, error } = await queryProduct(compatibleFields));
     }
     if (error || !data) {

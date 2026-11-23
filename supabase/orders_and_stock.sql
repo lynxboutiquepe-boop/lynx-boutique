@@ -43,8 +43,12 @@ create table if not exists public.order_items (
   size text not null,
   quantity integer not null check (quantity > 0 and quantity <= 20),
   unit_price numeric(12,2) not null check (unit_price >= 0),
-  line_total numeric(12,2) not null check (line_total >= 0)
+  line_total numeric(12,2) not null check (line_total >= 0),
+  fulfillment_mode text not null default 'physical' check (fulfillment_mode in ('physical','preorder'))
 );
+alter table public.order_items add column if not exists fulfillment_mode text not null default 'physical';
+alter table public.order_items drop constraint if exists order_items_fulfillment_mode_check;
+alter table public.order_items add constraint order_items_fulfillment_mode_check check (fulfillment_mode in ('physical','preorder'));
 
 create index if not exists orders_status_date_idx on public.orders(status, created_at desc);
 create index if not exists order_items_order_idx on public.order_items(order_id);
@@ -139,6 +143,7 @@ declare
   v_product public.products%rowtype;
   v_qty integer;
   v_size text;
+  v_mode text;
   v_subtotal numeric(12,2) := 0;
   v_shipping numeric(12,2) := 0;
   v_discount_percent integer := 0;
@@ -156,10 +161,15 @@ begin
   loop
     v_qty := greatest(1, least(20, coalesce((v_item->>'quantity')::integer, 1)));
     v_size := left(trim(coalesce(v_item->>'size','ÚNICA')), 20);
+    v_mode := case when lower(trim(coalesce(v_item->>'fulfillment_mode','physical'))) = 'preorder' then 'preorder' else 'physical' end;
     select * into v_product from public.products where id = (v_item->>'product_id')::bigint for share;
-    if not found or v_product.status in ('sold_out','archived') then raise exception 'Una prenda ya no está disponible'; end if;
-    if v_product.status <> 'preorder' and v_product.stock < v_qty then raise exception 'Stock insuficiente para %', v_product.title; end if;
-    if v_product.status <> 'preorder' and v_product.size_stock ? v_size and coalesce((v_product.size_stock->>v_size)::integer,0) < v_qty then raise exception 'Stock insuficiente en talla % para %',v_size,v_product.title; end if;
+    if not found or v_product.status = 'archived' then raise exception 'Una prenda ya no está disponible'; end if;
+    if v_mode = 'physical' then
+      if v_product.status = 'sold_out' or v_product.stock < v_qty then raise exception 'Stock insuficiente para %', v_product.title; end if;
+      if v_product.size_stock ? v_size and coalesce((v_product.size_stock->>v_size)::integer,0) < v_qty then raise exception 'Stock insuficiente en talla % para %',v_size,v_product.title; end if;
+    else
+      if coalesce((v_product.preorder_stock->>v_size)::integer,0) < v_qty then raise exception 'Preventa insuficiente en talla % para %',v_size,v_product.title; end if;
+    end if;
     v_subtotal := v_subtotal + (v_product.price * v_qty);
   end loop;
 
@@ -192,9 +202,10 @@ begin
   loop
     v_qty := greatest(1, least(20, coalesce((v_item->>'quantity')::integer, 1)));
     v_size := left(trim(coalesce(v_item->>'size','ÚNICA')), 20);
+    v_mode := case when lower(trim(coalesce(v_item->>'fulfillment_mode','physical'))) = 'preorder' then 'preorder' else 'physical' end;
     select * into v_product from public.products where id = (v_item->>'product_id')::bigint;
-    insert into public.order_items(order_id,product_id,product_title,size,quantity,unit_price,line_total)
-    values(v_order_id,v_product.id,v_product.title,v_size,v_qty,v_product.price,v_product.price*v_qty);
+    insert into public.order_items(order_id,product_id,product_title,size,quantity,unit_price,line_total,fulfillment_mode)
+    values(v_order_id,v_product.id,v_product.title,v_size,v_qty,v_product.price,v_product.price*v_qty,v_mode);
   end loop;
 
   return query select v_order_id,v_order_code;

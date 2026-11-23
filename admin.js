@@ -363,7 +363,7 @@ const ORDER_STATUS_LABELS = {
 };
 
 function orderItemsText(order) {
-    return (order.order_items || []).map(item => `${item.quantity}× ${item.product_title} · ${item.size}`).join(' · ') || 'Sin productos';
+    return (order.order_items || []).map(item => `${item.quantity}× ${item.product_title} · ${item.size} · ${item.fulfillment_mode === 'preorder' ? 'PREVENTA' : 'FÍSICO'}`).join(' · ') || 'Sin productos';
 }
 
 function orderWhatsappUrl(order) {

@@ -2865,6 +2865,16 @@ html.is-android .stock-marquee {
     letter-spacing: 0.02em;
 }
 
+.product-card-availability {
+    display: block;
+    min-height: 16px;
+    margin: -8px 0 12px;
+    color: var(--gold-soft);
+    font-size: .68rem;
+    line-height: 1.35;
+    letter-spacing: .04em;
+}
+
 .product-card-footer {
     margin-top: auto;
 }

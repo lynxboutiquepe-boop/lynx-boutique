@@ -1463,7 +1463,8 @@ function mapDatabaseProduct(row) {
         careInstructions: row.care_instructions || '',
         weightGrams: row.weight_grams ?? null,
         measurements: row.measurements || {},
-        sizeStock: row.size_stock || {}
+        sizeStock: row.size_stock || {},
+        preorderStock: row.preorder_stock || {}
     };
 }
 
@@ -1515,7 +1516,8 @@ function persistCart() {
         localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart.map(item => ({
             productId: item.product.id,
             size: item.size,
-            qty: item.qty
+            qty: item.qty,
+            fulfillmentMode: item.fulfillmentMode || 'physical'
         }))));
     } catch (error) {
         console.warn('No se pudo guardar el carrito.', error);
@@ -1528,14 +1530,15 @@ function restoreCart() {
         if (!Array.isArray(saved)) return;
         cart = saved.map(item => {
             const product = PRODUCTS.find(candidate => String(candidate.id) === String(item.productId));
-            if (!product || product.status === 'sold_out') return null;
+            if (!product || (product.status === 'sold_out' && !Object.values(product.preorderStock || {}).some(value => Number(value) > 0))) return null;
             const sizes = Array.isArray(product.sizes) && product.sizes.length ? product.sizes : ['ÚNICA'];
-            const size = getAvailableProductSize(product, item.size);
+            const fulfillmentMode = item.fulfillmentMode === 'preorder' ? 'preorder' : 'physical';
+            const size = getAvailableProductSize(product, item.size, fulfillmentMode);
             if (!size) return null;
-            const stock = Number(product.stock);
-            const max = Number.isFinite(stock) && stock > 0 ? stock : Number.MAX_SAFE_INTEGER;
+            const max = availableQuantity(product, size, fulfillmentMode);
+            if (max <= 0) return null;
             const qty = Math.max(1, Math.min(Number(item.qty) || 1, max));
-            return { product, size, qty };
+            return { product, size, qty, fulfillmentMode };
         }).filter(Boolean);
     } catch (error) {
         cart = [];
@@ -1550,7 +1553,7 @@ async function loadDatabaseCatalog() {
     // La portada necesita solo campos que existen en todas las instalaciones.
     // Así evitamos dos consultas y nunca mostramos enlaces del catálogo viejo
     // mientras la base conectada termina de responder.
-    const baseFields = 'id,legacy_id,title,slug,category,price,stock,sizes,images,description,badge,status,fit_recommendation,sort_order,size_stock';
+    const baseFields = 'id,legacy_id,title,slug,category,price,stock,sizes,images,description,badge,status,fit_recommendation,sort_order,size_stock,preorder_stock';
     const queryCatalog = fields => client
         .from('products')
         .select(fields)
@@ -1559,7 +1562,7 @@ async function loadDatabaseCatalog() {
         .order('id', { ascending: true });
     let { data, error } = await queryCatalog(baseFields);
     if (error && /size_stock|column|schema cache/i.test(error.message || '')) {
-        ({ data, error } = await queryCatalog(baseFields.replace(',size_stock', '')));
+        ({ data, error } = await queryCatalog(baseFields.replace(',size_stock,preorder_stock', '')));
     }
 
     if (error) {
@@ -1651,12 +1654,20 @@ function productUrl(product) {
     return `/producto/${encodeURIComponent(String(identifier))}`;
 }
 
-function getAvailableProductSize(product, preferredSize = '') {
+function stockForSize(product, size, mode = 'physical') {
+    const key = String(size || 'ÚNICA');
+    const source = mode === 'preorder' ? (product?.preorderStock || product?.preorder_stock || {}) : (product?.sizeStock || product?.size_stock || {});
+    if (Object.prototype.hasOwnProperty.call(source, key)) return Math.max(0, Number(source[key]) || 0);
+    return mode === 'preorder' ? 0 : Math.max(0, Number(product?.stock) || 0);
+}
+
+function availableQuantity(product, size, mode = 'physical') {
+    return stockForSize(product, size, mode);
+}
+
+function getAvailableProductSize(product, preferredSize = '', mode = 'physical') {
     const sizes = Array.isArray(product?.sizes) && product.sizes.length ? product.sizes : ['ÚNICA'];
-    if (product?.status === 'preorder') return preferredSize && sizes.includes(preferredSize) ? preferredSize : sizes[0];
-    if (Number(product?.stock) <= 0) return '';
-    const sizeStock = product?.sizeStock || {};
-    const isAvailable = size => !Object.prototype.hasOwnProperty.call(sizeStock, size) || Number(sizeStock[size]) > 0;
+    const isAvailable = size => availableQuantity(product, size, mode) > 0;
     if (preferredSize && sizes.includes(preferredSize) && isAvailable(preferredSize)) return preferredSize;
     return sizes.find(isAvailable) || '';
 }
@@ -1768,7 +1779,8 @@ function renderProducts() {
         const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
         const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                               product.description.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStock = !catalogInStockOnly || (product.status !== 'sold_out' && (product.status === 'preorder' || Number(product.stock || 0) > 0));
+        const hasPreorder = Object.values(product.preorderStock || {}).some(value => Number(value) > 0);
+        const matchesStock = !catalogInStockOnly || ((product.status !== 'sold_out' || hasPreorder) && (Number(product.stock || 0) > 0 || hasPreorder));
         const matchesFavorite = !catalogFavoritesOnly || favoriteSlugs.has(String(product.slug));
         return matchesCategory && matchesSearch && matchesStock && matchesFavorite;
     });
@@ -1863,8 +1875,9 @@ function renderProducts() {
                 <span class="product-card-category">${CATALOG_CATEGORY_META[product.category]?.label || product.category}</span>
                 <a class="product-card-title product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}">${product.title}</a>
                 <span class="product-card-price">S/. ${product.price.toFixed(2)}</span>
+                <span class="product-card-availability">${availableQuantity(product, (product.sizes || ['ÚNICA'])[0], 'physical') > 0 ? 'Compra inmediata' : ''}${availableQuantity(product, (product.sizes || ['ÚNICA'])[0], 'physical') > 0 && Object.values(product.preorderStock || {}).some(value => Number(value) > 0) ? ' · ' : ''}${Object.values(product.preorderStock || {}).some(value => Number(value) > 0) ? 'Preventa disponible' : ''}</span>
                 <div class="product-card-footer">
-                    ${product.status === 'sold_out'
+                    ${product.status === 'sold_out' && !Object.values(product.preorderStock || {}).some(value => Number(value) > 0)
                         ? `<a class="btn btn-primary btn-block product-card-restock" href="${productUrl(product)}#restock">AVÍSAME</a>`
                         : `<button class="btn btn-primary btn-block product-card-add" type="button" data-product-id="${product.id}">AGREGAR AL CARRITO</button>`}
                     <a class="btn btn-secondary btn-block product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}">VER DETALLES</a>
@@ -2465,7 +2478,7 @@ function renderCart() {
             <img src="${item.product.image}" alt="${item.product.title}" class="cart-item-img" loading="lazy" decoding="async">
             <div class="cart-item-info">
                 <h4 class="cart-item-title">${item.product.title}</h4>
-                <div class="cart-item-meta">Talla: <strong>${item.size}</strong></div>
+                <div class="cart-item-meta">Talla: <strong>${item.size}</strong> · <strong>${(item.fulfillmentMode || 'physical') === 'preorder' ? 'PREVENTA · SEPARACIÓN' : 'STOCK FÍSICO'}</strong></div>
                 <div class="cart-item-price">S/. ${item.product.price.toFixed(2)}</div>
                 
                 <!-- Qty Editor inside cart -->
@@ -2950,12 +2963,13 @@ function setupEventListeners() {
         if (!button || button.disabled) return;
         const product = PRODUCTS.find(item => String(item.id) === button.dataset.productId);
         if (!product) return;
-        const size = getAvailableProductSize(product);
+        const mode = getAvailableProductSize(product, '', 'physical') ? 'physical' : 'preorder';
+        const size = getAvailableProductSize(product, '', mode);
         if (!size) {
             alert('Todas las tallas de esta prenda están agotadas por el momento.');
             return;
         }
-        if (!addToCart(product, size, 1)) return;
+        if (!addToCart(product, size, 1, mode)) return;
         closeAllDrawers();
         cartDrawer.classList.add('active');
     });
@@ -3151,7 +3165,8 @@ function setupEventListeners() {
         const size = activeSize.getAttribute('data-size');
         const qty = parseInt(modalQtyInput.value);
         
-        const wasAdded = addToCart(currentProduct, size, qty);
+        const mode = getAvailableProductSize(currentProduct, size, 'physical') ? 'physical' : 'preorder';
+        const wasAdded = addToCart(currentProduct, size, qty, mode);
         if (!wasAdded) return;
         closeProductDetails();
         
@@ -3332,12 +3347,13 @@ function openProductDetails(id, { syncUrl = true } = {}) {
     modalProductPrice.textContent = `S/. ${product.price.toFixed(2)}`;
     modalProductDesc.textContent = product.description;
     modalProductBadge.textContent = product.badge;
-    const selectedAvailableSize = getAvailableProductSize(product);
-    const isSoldOut = product.status === 'sold_out' || !selectedAvailableSize;
+    const modalMode = getAvailableProductSize(product, '', 'physical') ? 'physical' : 'preorder';
+    const selectedAvailableSize = getAvailableProductSize(product, '', modalMode);
+    const isSoldOut = !selectedAvailableSize;
     modalAddToCartBtn.disabled = isSoldOut;
     modalAddToCartBtn.innerHTML = isSoldOut
         ? '<i data-lucide="ban"></i> PRODUCTO AGOTADO'
-        : product.status === 'preorder'
+        : modalMode === 'preorder'
             ? '<i data-lucide="clock-3"></i> RESERVAR PREVENTA'
             : '<i data-lucide="shopping-bag"></i> AGREGAR AL CARRITO';
     modalFitRecommendation.hidden = product.category !== 'jeans-pants' || product.fitRecommendation === false;
@@ -3372,7 +3388,7 @@ function openProductDetails(id, { syncUrl = true } = {}) {
     modalQtyInput.max = product.stock || '';
     const availableSizes = product.sizes || ['S', 'M', 'L', 'XL'];
     modalSizeContainer.innerHTML = availableSizes.map((size, idx) => `
-        <button class="size-btn ${idx === 0 ? 'active' : ''}" data-size="${size}" ${product.status !== 'preorder' && product.sizeStock && Object.prototype.hasOwnProperty.call(product.sizeStock,size) && Number(product.sizeStock[size]) <= 0 ? 'disabled' : ''}>${size}</button>
+        <button class="size-btn ${size === selectedAvailableSize ? 'active' : ''}" data-size="${size}" ${availableQuantity(product, size, 'physical') <= 0 && availableQuantity(product, size, 'preorder') <= 0 ? 'disabled' : ''}>${size}</button>
     `).join('');
     const firstEnabledSize = modalSizeContainer.querySelector('.size-btn:not(:disabled)');
     modalSizeContainer.querySelectorAll('.size-btn').forEach(button => button.classList.toggle('active', button === firstEnabledSize));
@@ -3417,42 +3433,44 @@ function openProductFromUrl() {
     if (params.get('comprar') === '1' || params.get('agregar') === '1') {
         const availableSizes = product.sizes?.length ? product.sizes : ['ÚNICA'];
         const requestedSize = params.get('talla');
-        const size = getAvailableProductSize(product, availableSizes.includes(requestedSize) ? requestedSize : '');
+        const requestedMode = params.get('modo') === 'preorder' ? 'preorder' : 'physical';
+        const size = getAvailableProductSize(product, availableSizes.includes(requestedSize) ? requestedSize : '', requestedMode);
         if (!size) {
             alert('Todas las tallas de esta prenda están agotadas por el momento.');
             return;
         }
         const requestedQty = Math.max(1, Number(params.get('cantidad')) || 1);
-        const wasAdded = addToCart(product, size, requestedQty);
+        const wasAdded = addToCart(product, size, requestedQty, requestedMode);
         if (wasAdded || cart.length) {
             productModal.classList.remove('active');
             cartDrawer.classList.add('active');
         }
-        ['producto', 'comprar', 'agregar', 'talla', 'cantidad'].forEach(key => params.delete(key));
+        ['producto', 'comprar', 'agregar', 'talla', 'cantidad', 'modo'].forEach(key => params.delete(key));
         const cleanQuery = params.toString();
         history.replaceState({}, '', `${location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}${location.hash}`);
     }
 }
 
-function addToCart(product, size, qty) {
-    if (product.status === 'sold_out') {
+function addToCart(product, size, qty, fulfillmentMode = 'physical') {
+    const mode = fulfillmentMode === 'preorder' ? 'preorder' : 'physical';
+    if (product.status === 'sold_out' && mode !== 'preorder') {
         alert('Esta prenda está agotada por el momento.');
         return false;
     }
 
     // Buscar si el producto de esa talla ya está en el carrito
     const requestedQty = Math.max(1, Math.min(20, Number(qty) || 1));
-    const existingIndex = cart.findIndex(item => item.product.id === product.id && item.size === size);
+    const existingIndex = cart.findIndex(item => item.product.id === product.id && item.size === size && (item.fulfillmentMode || 'physical') === mode);
     const currentProductQty = cart
-        .filter(item => item.product.id === product.id)
+        .filter(item => item.product.id === product.id && (item.fulfillmentMode || 'physical') === mode)
         .reduce((total, item) => total + item.qty, 0);
-    const sizedStock = product.status !== 'preorder' && product.sizeStock && Object.prototype.hasOwnProperty.call(product.sizeStock, size) ? Number(product.sizeStock[size]) : null;
-    const sizeQtyInCart = cart.filter(item => item.product.id === product.id && item.size === size).reduce((total,item)=>total+item.qty,0);
-    const stockLimit = Number.isFinite(sizedStock) ? sizedStock : product.stock;
+    const sizedStock = availableQuantity(product, size, mode);
+    const sizeQtyInCart = cart.filter(item => item.product.id === product.id && item.size === size && (item.fulfillmentMode || 'physical') === mode).reduce((total,item)=>total+item.qty,0);
+    const stockLimit = sizedStock;
     const numericStockLimit = Number(stockLimit);
-    const availableToAdd = product.status === 'preorder' || !Number.isFinite(numericStockLimit)
-        ? requestedQty
-        : Math.max(0, numericStockLimit - (Number.isFinite(sizedStock) ? sizeQtyInCart : currentProductQty));
+    const availableToAdd = Number.isFinite(numericStockLimit)
+        ? Math.max(0, numericStockLimit - (mode === 'preorder' || product.sizeStock?.[size] !== undefined ? sizeQtyInCart : currentProductQty))
+        : requestedQty;
     const qtyToAdd = Math.min(requestedQty, availableToAdd);
 
     if (qtyToAdd <= 0) {
@@ -3463,7 +3481,7 @@ function addToCart(product, size, qty) {
     if (existingIndex > -1) {
         cart[existingIndex].qty += qtyToAdd;
     } else {
-        cart.push({ product, size, qty: qtyToAdd });
+        cart.push({ product, size, qty: qtyToAdd, fulfillmentMode: mode });
     }
 
     persistCart();
@@ -3475,9 +3493,8 @@ function addToCart(product, size, qty) {
 function updateCartQty(index, delta) {
     if (cart[index]) {
         const item = cart[index];
-        const sizedStock = item.product.status !== 'preorder' && item.product.sizeStock && Object.prototype.hasOwnProperty.call(item.product.sizeStock,item.size) ? Number(item.product.sizeStock[item.size]) : null;
-        const numericStock = Number(item.product.stock);
-        const maxStock = item.product.status === 'preorder' ? 20 : Number.isFinite(sizedStock) ? sizedStock : Number.isFinite(numericStock) ? numericStock : Number.MAX_SAFE_INTEGER;
+        const mode = item.fulfillmentMode || 'physical';
+        const maxStock = availableQuantity(item.product, item.size, mode) || Number.MAX_SAFE_INTEGER;
         cart[index].qty = Math.min(cart[index].qty + delta, maxStock);
         if (cart[index].qty <= 0) {
             removeFromCart(index);
@@ -3519,12 +3536,12 @@ async function validateCartStock() {
     const rows = [];
     try {
         if (databaseIds.length) {
-            const { data, error } = await client.from('products').select('id,legacy_id,title,price,stock,status,size_stock').in('id', databaseIds);
+            const { data, error } = await client.from('products').select('id,legacy_id,title,price,stock,status,size_stock,preorder_stock').in('id', databaseIds);
             if (error) throw error;
             rows.push(...(data || []));
         }
         if (legacyIds.length) {
-            const { data, error } = await client.from('products').select('id,legacy_id,title,price,stock,status,size_stock').in('legacy_id', legacyIds);
+            const { data, error } = await client.from('products').select('id,legacy_id,title,price,stock,status,size_stock,preorder_stock').in('legacy_id', legacyIds);
             if (error) throw error;
             rows.push(...(data || []));
         }
@@ -3542,8 +3559,12 @@ async function validateCartStock() {
         item.product.status = row.status;
         item.product.price = Number(row.price || item.product.price);
         item.product.sizeStock = row.size_stock || {};
-        const sizeAvailable = row.size_stock && Object.prototype.hasOwnProperty.call(row.size_stock,item.size) ? Number(row.size_stock[item.size]) : Number(row.stock || 0);
-        if (['sold_out', 'archived'].includes(row.status) || (row.status !== 'preorder' && (Number(row.stock || 0) < item.qty || sizeAvailable < item.qty))) unavailable.push(`${item.product.title} (${item.size})`);
+        item.product.preorderStock = row.preorder_stock || {};
+        const mode = item.fulfillmentMode || 'physical';
+        const sizeAvailable = mode === 'preorder'
+            ? Number((row.preorder_stock || {})[item.size] || 0)
+            : (row.size_stock && Object.prototype.hasOwnProperty.call(row.size_stock,item.size) ? Number(row.size_stock[item.size]) : Number(row.stock || 0));
+        if (['archived'].includes(row.status) || (mode === 'physical' && row.status === 'sold_out') || sizeAvailable < item.qty) unavailable.push(`${item.product.title} (${item.size})`);
     });
     if (unavailable.length) {
         persistCart();
@@ -3560,7 +3581,8 @@ async function createPendingWebOrder(details) {
     const items = cart.map(item => ({
         product_id: item.product.databaseId,
         size: item.size,
-        quantity: item.qty
+        quantity: item.qty,
+        fulfillment_mode: item.fulfillmentMode || 'physical'
     })).filter(item => Number.isFinite(Number(item.product_id)));
     if (items.length !== cart.length) return '';
     try {
@@ -3660,12 +3682,12 @@ async function submitOrder(confirmed = false) {
     // Crear lista de productos formateada
     let productsText = '';
     cart.forEach(item => {
-        productsText += `• ${item.qty}x ${item.product.title} (Talla: ${item.size}) - S/. ${(item.product.price * item.qty).toFixed(2)}\n`;
+        productsText += `• ${item.qty}x ${item.product.title} (Talla: ${item.size} · ${(item.fulfillmentMode || 'physical') === 'preorder' ? 'PREVENTA / SEPARACIÓN' : 'STOCK FÍSICO'}) - S/. ${(item.product.price * item.qty).toFixed(2)}\n`;
     });
 
     if (!confirmed) {
         checkoutReviewContent.innerHTML = `
-            <div class="checkout-review-items">${cart.map(item => `<div class="checkout-review-item"><img src="${escapeHtml(item.product.image)}" alt=""><div><strong>${escapeHtml(item.product.title)}</strong><span>${item.qty} und. · Talla ${escapeHtml(item.size)}</span></div><b>S/. ${(item.product.price * item.qty).toFixed(2)}</b></div>`).join('')}</div>
+            <div class="checkout-review-items">${cart.map(item => `<div class="checkout-review-item"><img src="${escapeHtml(item.product.image)}" alt=""><div><strong>${escapeHtml(item.product.title)}</strong><span>${item.qty} und. · Talla ${escapeHtml(item.size)} · ${(item.fulfillmentMode || 'physical') === 'preorder' ? 'PREVENTA / SEPARACIÓN' : 'STOCK FÍSICO'}</span></div><b>S/. ${(item.product.price * item.qty).toFixed(2)}</b></div>`).join('')}</div>
             <div class="checkout-review-row"><span>Cliente</span><strong>${escapeHtml(name)}</strong></div>
             <div class="checkout-review-row"><span>Contacto</span><strong>${escapeHtml(phone)}<br>${escapeHtml(email)}</strong></div>
             <div class="checkout-review-row"><span>Entrega</span><strong>${shippingMethod === 'shalom' ? 'Shalom · flete en agencia' : `Motorizado Lima${shippingCost === 0 ? ' · GRATIS' : ''}`}<br>${escapeHtml(city)} · ${escapeHtml(address)}</strong></div>
