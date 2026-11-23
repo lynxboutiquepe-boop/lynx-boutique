@@ -99,9 +99,9 @@ body {
 .size-selection-note { margin: 9px 0 0; color: var(--muted); font-size: .68rem; }
 .size-selection-note.is-selected { color: var(--violet-dark); }
 .fulfillment-options { display: grid; gap: 8px; margin-top: 15px; }
-.fulfillment-option { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; width: 100%; padding: 11px 12px; border: 1px solid #3a372f; border-radius: 9px; background: #111; color: var(--ink); text-align: left; cursor: pointer; }
+.fulfillment-option { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; width: 100%; min-height: 60px; padding: 12px 14px; border: 1px solid #3a372f; border-radius: 9px; background: #111; color: var(--ink); text-align: left; cursor: pointer; }
 .fulfillment-option.active { border-color: var(--violet); background: rgba(212,175,55,.1); }
-.fulfillment-option:disabled { opacity: .45; cursor: not-allowed; }
+.fulfillment-option:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
 .fulfillment-option input { accent-color: var(--violet); }
 .fulfillment-option strong { display: block; font: 800 .7rem/1.2 Outfit, sans-serif; letter-spacing: .04em; }
 .fulfillment-option small { display: block; margin-top: 3px; color: var(--muted); font-size: .68rem; }

@@ -93,6 +93,15 @@ function deliveryDateLabel(date) {
 function renderDeliveryEstimate() {
     const target = document.getElementById('delivery-estimate-copy');
     if (!target) return;
+    const heading = document.querySelector('#delivery-estimate strong');
+    const physical = currentProduct ? Object.values(currentProduct.size_stock || currentProduct.sizeStock || {}).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0) : 0;
+    const preorder = currentProduct ? Object.values(currentProduct.preorder_stock || currentProduct.preorderStock || {}).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0) : 0;
+    if (preorder > 0 && physical <= 0) {
+        if (heading) heading.textContent = 'ENTREGA DE PREVENTA';
+        target.textContent = 'Fecha estimada: se confirma por WhatsApp antes del pago · llega con el próximo pedido.';
+        return;
+    }
+    if (heading) heading.textContent = 'RECÍBELO PRONTO';
     const now = new Date();
     target.textContent = `Lima: ${deliveryDateLabel(addBusinessDays(now, 1))}–${deliveryDateLabel(addBusinessDays(now, 2))} · Provincias: 2–3 días hábiles por Shalom.`;
 }
@@ -143,7 +152,7 @@ function statusCopy(product) {
     const physical = Object.values(product.size_stock || product.sizeStock || {}).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0) || Number(product.stock || 0);
     const preorder = Object.values(product.preorder_stock || product.preorderStock || {}).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0);
     if (product.status === 'sold_out' && preorder <= 0) return { badge: 'AGOTADO', note: 'AGOTADO POR EL MOMENTO', sold: true };
-    if (preorder > 0 && physical <= 0) return { badge: 'PREVENTA', note: 'PREVENTA · RESERVA TU PRENDA' };
+    if (preorder > 0 && physical <= 0) return { badge: 'PREVENTA', note: 'PREVENTA · FECHA CONFIRMADA ANTES DEL PAGO' };
     if (preorder > 0 && physical > 0) return { badge: 'STOCK + PREVENTA', note: `Compra inmediata: ${physical} · Preventa: ${preorder}` };
     if (product.status === 'low_stock') return { badge: product.badge || 'ÚLTIMAS UNIDADES', note: 'ÚLTIMAS UNIDADES DISPONIBLES' };
     return { badge: product.badge || 'NUEVO DROP', note: product.stock ? `${product.stock} ${product.stock === 1 ? 'UNIDAD DISPONIBLE' : 'UNIDADES DISPONIBLES'}` : '' };
@@ -161,10 +170,10 @@ function renderFulfillmentOptions() {
     const preorder = quantityForMode(currentProduct, selectedSize, 'preorder');
     if (selectedFulfillmentMode === 'physical' && physical <= 0 && preorder > 0) selectedFulfillmentMode = 'preorder';
     if (selectedFulfillmentMode === 'preorder' && preorder <= 0 && physical > 0) selectedFulfillmentMode = 'physical';
-    fulfillmentOptions.innerHTML = [
-        { mode: 'physical', title: 'Comprar ahora', note: physical > 0 ? 'Entrega inmediata · stock físico' : 'No disponible en esta talla', qty: physical },
-        { mode: 'preorder', title: 'Separar en preventa', note: preorder > 0 ? 'Reserva tu talla · llega con el próximo pedido' : 'No disponible en esta talla', qty: preorder }
-    ].map(option => `<button type="button" class="fulfillment-option ${selectedFulfillmentMode === option.mode ? 'active' : ''}" data-mode="${option.mode}" ${option.qty <= 0 ? 'disabled' : ''}><input type="radio" tabindex="-1" ${selectedFulfillmentMode === option.mode ? 'checked' : ''} aria-label="${option.title}"><span><strong>${option.title}</strong><small>${option.note}</small></span><b>${option.qty > 0 ? `${option.qty} DISP.` : 'AGOTADO'}</b></button>`).join('');
+    const availableOptions = [];
+    if (physical > 0) availableOptions.push({ mode: 'physical', title: 'Comprar ahora', note: 'Entrega inmediata · stock físico', qty: physical });
+    if (preorder > 0) availableOptions.push({ mode: 'preorder', title: 'Separar en preventa', note: 'Reserva tu talla · fecha confirmada antes del pago', qty: preorder });
+    fulfillmentOptions.innerHTML = availableOptions.map(option => `<button type="button" class="fulfillment-option ${selectedFulfillmentMode === option.mode ? 'active' : ''}" data-mode="${option.mode}" aria-pressed="${selectedFulfillmentMode === option.mode}"><input type="radio" tabindex="-1" ${selectedFulfillmentMode === option.mode ? 'checked' : ''} aria-label="${option.title}"><span><strong>${option.title}</strong><small>${option.note}</small></span><b>${option.qty} DISP.</b></button>`).join('');
     fulfillmentOptions.querySelectorAll('.fulfillment-option').forEach(button => button.addEventListener('click', () => {
         if (button.disabled) return;
         selectedFulfillmentMode = button.dataset.mode === 'preorder' ? 'preorder' : 'physical';

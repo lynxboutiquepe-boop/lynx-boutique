@@ -3673,6 +3673,25 @@ html.is-android .stock-marquee {
     stroke-width: 1.5px;
 }
 
+.checkout-fulfillment-summary {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: .72rem;
+    line-height: 1.45;
+}
+
+.payment-now-row span:last-child {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.payment-balance-row span:last-child {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
 .whatsapp-security-notice {
     text-align: center;
     color: var(--text-muted);

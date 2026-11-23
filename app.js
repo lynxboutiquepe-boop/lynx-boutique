@@ -950,6 +950,9 @@ const checkoutEditBtn = document.getElementById('checkout-edit-btn');
 const checkoutSubtotal = document.getElementById('checkout-subtotal');
 const checkoutShipping = document.getElementById('checkout-shipping');
 const checkoutTotal = document.getElementById('checkout-total');
+const checkoutPaymentNow = document.getElementById('checkout-payment-now');
+const checkoutPaymentBalance = document.getElementById('checkout-payment-balance');
+const checkoutFulfillmentSummary = document.getElementById('checkout-fulfillment-summary');
 const cartSubtotal = document.getElementById('cart-subtotal');
 const cartDiscount = document.getElementById('cart-discount');
 const cartDiscountRow = document.getElementById('cart-discount-row');
@@ -1829,11 +1832,17 @@ function renderProducts() {
     }, {});
 
     // Actualizar texto de cantidad
+    const physicalUnitsFiltered = filtered.reduce((sum, product) => sum + productPhysicalUnits(product), 0);
+    const preorderUnitsFiltered = filtered.reduce((sum, product) => sum + productPreorderUnits(product), 0);
+    const availabilityText = [
+        physicalUnitsFiltered ? `${physicalUnitsFiltered} ${physicalUnitsFiltered === 1 ? 'unidad física' : 'unidades físicas'}` : '',
+        preorderUnitsFiltered ? `${preorderUnitsFiltered} en preventa` : ''
+    ].filter(Boolean).join(' · ');
     catalogCountText.textContent = isCompactHomeCatalog
-        ? `Selección de ${visibleProducts.length} prendas · ${totalFiltered} disponibles`
+        ? `Selección de ${visibleProducts.length} productos · ${availabilityText || 'sin unidades disponibles'}`
         : totalFiltered === 1
-            ? 'Mostrando 1 producto'
-            : `Mostrando ${visibleProducts.length} de ${totalFiltered} productos`;
+            ? `Mostrando 1 producto · ${availabilityText || 'sin unidades disponibles'}`
+            : `Mostrando ${visibleProducts.length} de ${totalFiltered} productos · ${availabilityText || 'sin unidades disponibles'}`;
 
     catalogLoadMore.hidden = isCompactHomeCatalog || totalFiltered <= catalogVisibleLimit;
     catalogLoadMore.textContent = 'VER MÁS PRENDAS';
@@ -2349,6 +2358,34 @@ function cartSubtotalValue() {
     return cart.reduce((sum, item) => sum + (item.product.price * item.qty), 0);
 }
 
+function cartUnitsByMode(mode) {
+    return cart.reduce((sum, item) => sum + ((item.fulfillmentMode || 'physical') === mode ? item.qty : 0), 0);
+}
+
+function updateCheckoutDeliveryFields(shippingMethod) {
+    const addressLabel = document.getElementById('checkout-address-label');
+    const addressInput = document.getElementById('checkout-address');
+    const addressHelp = document.getElementById('checkout-address-help');
+    const dniGroup = document.getElementById('checkout-dni-group');
+    const dniInput = document.getElementById('checkout-dni');
+    const isLima = shippingMethod === 'lima';
+    if (isLima) {
+        addressLabel.textContent = 'Dirección de entrega y referencia *';
+        addressInput.placeholder = 'Av., calle, número y referencia';
+        addressInput.setAttribute('autocomplete', 'street-address');
+        addressHelp.textContent = 'Incluye distrito, número y una referencia para el motorizado.';
+        dniGroup.classList.add('hidden');
+        dniInput.removeAttribute('required');
+    } else {
+        addressLabel.textContent = 'Agencia Shalom donde recogerás *';
+        addressInput.placeholder = 'Nombre y distrito de la agencia Shalom';
+        addressInput.setAttribute('autocomplete', 'off');
+        addressHelp.textContent = 'Ejemplo: Shalom Cusco Centro.';
+        dniGroup.classList.remove('hidden');
+        dniInput.setAttribute('required', '');
+    }
+}
+
 function discountAmountFor(subtotal) {
     return appliedDiscount.percent === 10 ? Math.round(subtotal * 10) / 100 : 0;
 }
@@ -2557,16 +2594,11 @@ function updateCheckoutTotals() {
     if (shippingMethod === 'lima') {
         shipping = limaShippingCost(subtotal);
         limaPaymentConditionBox.classList.remove('hidden');
-        document.getElementById('checkout-dni-group')?.classList.add('hidden');
-        document.getElementById('checkout-dni')?.removeAttribute('required');
-        document.getElementById('checkout-address-label').textContent = 'Dirección de entrega y referencia *';
     } else {
         shipping = 0.00;
         limaPaymentConditionBox.classList.add('hidden');
-        document.getElementById('checkout-dni-group')?.classList.remove('hidden');
-        document.getElementById('checkout-dni')?.setAttribute('required', '');
-        document.getElementById('checkout-address-label').textContent = 'Agencia Shalom donde recogerás *';
     }
+    updateCheckoutDeliveryFields(shippingMethod);
 
     document.querySelectorAll('.payment-option-card').forEach(card => {
         const radio = card.querySelector('input[type="radio"]');
@@ -2575,6 +2607,10 @@ function updateCheckoutTotals() {
 
     const discount = discountAmountFor(subtotal);
     const total = subtotal - discount + shipping;
+    const paymentNow = shippingMethod === 'lima' ? Math.min(50, total) : Math.max(0, total - shipping);
+    const paymentBalance = Math.max(0, total - paymentNow);
+    const physicalUnits = cartUnitsByMode('physical');
+    const preorderUnits = cartUnitsByMode('preorder');
 
     checkoutSubtotal.textContent = `S/. ${subtotal.toFixed(2)}`;
     if (checkoutDiscount) checkoutDiscount.textContent = `- S/. ${discount.toFixed(2)}`;
@@ -2583,13 +2619,22 @@ function updateCheckoutTotals() {
         ? 'FLETE POR PAGAR'
         : shipping === 0 ? 'GRATIS' : `S/. ${shipping.toFixed(2)}`;
     checkoutTotal.textContent = `S/. ${total.toFixed(2)}`;
+    if (checkoutPaymentNow) checkoutPaymentNow.textContent = `S/. ${paymentNow.toFixed(2)}`;
+    if (checkoutPaymentBalance) checkoutPaymentBalance.textContent = shippingMethod === 'shalom'
+        ? 'Flete Shalom en agencia'
+        : `S/. ${paymentBalance.toFixed(2)}`;
+    if (checkoutFulfillmentSummary) {
+        const parts = [];
+        if (physicalUnits) parts.push(`${physicalUnits} ${physicalUnits === 1 ? 'prenda' : 'prendas'} listas para entrega`);
+        if (preorderUnits) parts.push(`${preorderUnits} ${preorderUnits === 1 ? 'prenda' : 'prendas'} en preventa`);
+        checkoutFulfillmentSummary.textContent = parts.join(' · ') || 'Selecciona una prenda para continuar.';
+    }
 
     // Explicación de pago dinámica
     if (shippingMethod === 'shalom') {
-        paymentExplanationText.innerHTML = `<strong>Envío Shalom a Provincias:</strong> El envío se realiza por pagar. Recogerás tu pedido en la agencia Shalom de tu ciudad en 2 a 3 días hábiles y pagarás el flete del transporte ahí mismo. El valor de las prendas se deposita previamente.`;
+        paymentExplanationText.innerHTML = `<strong>Shalom a provincias:</strong> pagas ahora <strong>S/. ${paymentNow.toFixed(2)}</strong> por las prendas. El flete se paga directamente en la agencia al recoger. La fecha exacta de una preventa se confirma por WhatsApp antes del pago.`;
     } else if (shippingMethod === 'lima') {
-        const balance = Math.max(total - 50.00, 0);
-        paymentExplanationText.innerHTML = `<strong>${shipping === 0 ? 'Envío gratis desbloqueado. ' : ''}Separación obligatoria en Lima:</strong> Abonas <strong>S/. 50.00</strong> por Yape, Plin o transferencia para reservar el stock. El saldo (<strong>S/. ${balance.toFixed(2)}</strong>) también se cancela por Yape, Plin o transferencia antes o al momento de la entrega. <strong>No aceptamos efectivo.</strong>`;
+        paymentExplanationText.innerHTML = `<strong>${shipping === 0 ? 'Envío gratis desbloqueado. ' : ''}Separación en Lima:</strong> abonas <strong>S/. ${paymentNow.toFixed(2)}</strong> por Yape, Plin o transferencia. El saldo (<strong>S/. ${paymentBalance.toFixed(2)}</strong>) se paga digitalmente antes o al recibir. <strong>No aceptamos efectivo.</strong>`;
     }
     updateFreeShippingProgress(subtotal);
 }
@@ -3694,6 +3739,8 @@ async function submitOrder(confirmed = false) {
     const shippingCost = shippingMethod === 'lima' ? limaShippingCost(subtotal) : 0.00;
     const discountAmount = discountAmountFor(subtotal);
     const total = subtotal - discountAmount + shippingCost;
+    const paymentNow = shippingMethod === 'lima' ? Math.min(50, total) : Math.max(0, total - shippingCost);
+    const paymentBalance = Math.max(0, total - paymentNow);
 
     // Crear lista de productos formateada
     let productsText = '';
@@ -3709,7 +3756,8 @@ async function submitOrder(confirmed = false) {
             <div class="checkout-review-row"><span>Entrega</span><strong>${shippingMethod === 'shalom' ? 'Shalom · flete en agencia' : `Motorizado Lima${shippingCost === 0 ? ' · GRATIS' : ''}`}<br>${escapeHtml(city)} · ${escapeHtml(address)}</strong></div>
             <div class="checkout-review-row"><span>Pago preferido</span><strong>${escapeHtml(paymentLabels[paymentMethod])}</strong></div>
             ${discountCode ? `<div class="checkout-review-row"><span>Código 10% aplicado</span><strong>${escapeHtml(discountCode)} · - S/. ${discountAmount.toFixed(2)}</strong></div>` : ''}
-            ${shippingMethod === 'lima' ? `<div class="checkout-review-row"><span>Separación obligatoria</span><strong>S/. 50.00 · saldo digital S/. ${Math.max(total - 50, 0).toFixed(2)}</strong></div>` : ''}
+            <div class="checkout-review-row"><span>Pago inicial</span><strong>S/. ${paymentNow.toFixed(2)}</strong></div>
+            <div class="checkout-review-row"><span>Saldo pendiente</span><strong>${shippingMethod === 'shalom' ? 'Flete Shalom en agencia' : `S/. ${paymentBalance.toFixed(2)}`}</strong></div>
             <div class="checkout-review-row"><span>Total de prendas y delivery</span><strong>S/. ${total.toFixed(2)}${shippingMethod === 'shalom' ? ' + flete Shalom' : ''}</strong></div>`;
         setCheckoutReviewMode(true);
         lucide.createIcons();
@@ -3740,10 +3788,9 @@ async function submitOrder(confirmed = false) {
     // Formatear Detalles de Pago en el mensaje
     let paymentDetailText = '';
     if (shippingMethod === 'shalom') {
-        paymentDetailText = `📦 *ENVÍO A PROVINCIA (SHALOM):*\n- Flete de envío se cancela al recoger en agencia.\n- Depósito de prendas requerido para el despacho.\n- *Total Prendas: S/. ${(subtotal - discountAmount).toFixed(2)}*`;
+        paymentDetailText = `📦 *ENVÍO A PROVINCIA (SHALOM):*\n- Pago de prendas requerido antes del despacho: *S/. ${paymentNow.toFixed(2)}*\n- Flete se cancela al recoger en agencia.\n- La fecha exacta de cualquier preventa se confirma por WhatsApp antes del pago.`;
     } else { // Lima
-        const balance = Math.max(total - 50.00, 0);
-        paymentDetailText = `🛵 *DELIVERY MOTORIZADO LIMA:*\n${shippingCost === 0 ? '- *ENVÍO GRATIS* por compra desde S/. 349.90\n' : '- Delivery: *S/. 15.00*\n'}- Separación obligatoria: *S/. 50.00*\n- Saldo digital por Yape, Plin o transferencia: *S/. ${balance.toFixed(2)}*\n- No se acepta efectivo.\n- *Total del Pedido: S/. ${total.toFixed(2)}*`;
+        paymentDetailText = `🛵 *DELIVERY MOTORIZADO LIMA:*\n${shippingCost === 0 ? '- *ENVÍO GRATIS* por compra desde S/. 349.90\n' : '- Delivery: *S/. 15.00*\n'}- Pago inicial por Yape, Plin o transferencia: *S/. ${paymentNow.toFixed(2)}*\n- Saldo digital: *S/. ${paymentBalance.toFixed(2)}*\n- No se acepta efectivo.\n- *Total del Pedido: S/. ${total.toFixed(2)}*`;
     }
 
     // Mensaje final para WhatsApp

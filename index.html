@@ -60,7 +60,7 @@
     <!-- Lucide Icons (CDN) -->
     <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20261023-compact-cards-v1">
+    <link rel="stylesheet" href="styles.css?v=20261123-checkout-clarity-v1">
 </head>
 <body>
     <div class="page-scroll-progress" id="page-scroll-progress" aria-hidden="true"></div>
@@ -141,9 +141,9 @@
     <section class="hero-section" id="home-hero">
         <div class="hero-overlay"></div>
         <div class="hero-content">
-            <span class="hero-tag">STREETWEAR PARA HOMBRE · STOCK EN PERÚ</span>
+            <span class="hero-tag">STREETWEAR PARA HOMBRE · STOCK + PREVENTA</span>
             <h1 class="hero-title">PIEZAS QUE<br><span class="gradient-text">NO VES EN TODOS</span></h1>
-            <p class="hero-description">Hoodies oversized, jackets y jeans flare seleccionados de Fashion Nova. Pocas unidades, asesoría de talla y envíos seguros a todo el Perú.</p>
+            <p class="hero-description">Hoodies oversized, jackets y jeans flare seleccionados de Fashion Nova. Compra inmediata o separa en preventa, con asesoría de talla y envíos seguros a todo el Perú.</p>
             <a href="#catalog" class="btn btn-primary" id="hero-cta-btn">
                 <span class="hero-cta-desktop">VER PRENDAS DISPONIBLES</span>
                 <span class="hero-cta-mobile">VER PRENDAS</span>
@@ -649,9 +649,33 @@
                         <small class="field-error" id="checkout-city-error"></small>
                     </div>
 
+                    <div class="form-group checkout-shipping-group">
+                        <label>Método de envío *</label>
+                        <div class="shipping-options-grid">
+                            <label class="shipping-option-card active" id="shipping-shalom-label">
+                                <input type="radio" name="shipping-method" value="shalom" checked>
+                                <div class="option-details">
+                                    <span class="option-title">Shalom (provincias)</span>
+                                    <span class="option-price">Flete se paga en agencia</span>
+                                    <span class="option-time">2–3 días hábiles después del despacho.</span>
+                                </div>
+                            </label>
+
+                            <label class="shipping-option-card" id="shipping-lima-label">
+                                <input type="radio" name="shipping-method" value="lima">
+                                <div class="option-details">
+                                    <span class="option-title">Motorizado Express (Lima)</span>
+                                    <span class="option-price" id="lima-shipping-price">S/. 15.00 · gratis desde S/ 349.90</span>
+                                    <span class="option-time">Entrega directa a tu puerta en 24–48 horas.</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="form-group">
-                        <label for="checkout-address" id="checkout-address-label">Agencia Shalom o dirección de entrega *</label>
-                        <input type="text" id="checkout-address" required minlength="6" autocomplete="street-address" placeholder="Av., calle, número y referencia">
+                        <label for="checkout-address" id="checkout-address-label">Agencia Shalom donde recogerás *</label>
+                        <input type="text" id="checkout-address" required minlength="6" autocomplete="street-address" placeholder="Nombre y distrito de la agencia Shalom">
+                        <small class="field-help" id="checkout-address-help">Ejemplo: Shalom Cusco Centro.</small>
                         <small class="field-error" id="checkout-address-error"></small>
                     </div>
 
@@ -669,30 +693,6 @@
                             <button type="button" id="checkout-apply-discount-btn">APLICAR</button>
                         </div>
                         <small class="discount-code-message" id="checkout-discount-message" aria-live="polite">Ingresa el código que llegó a tu correo.</small>
-                    </div>
-
-                    <!-- Shipping Method Selection -->
-                    <div class="form-group">
-                        <label>Método de Envío *</label>
-                        <div class="shipping-options-grid">
-                            <label class="shipping-option-card active" id="shipping-shalom-label">
-                                <input type="radio" name="shipping-method" value="shalom" checked>
-                                <div class="option-details">
-                                    <span class="option-title">Shalom (Provincias)</span>
-                                    <span class="option-price">S/. 0.00 (Flete Contra Entrega)</span>
-                                    <span class="option-time">Llega de 2 a 3 días hábiles a la agencia de tu ciudad.</span>
-                                </div>
-                            </label>
-
-                            <label class="shipping-option-card" id="shipping-lima-label">
-                                <input type="radio" name="shipping-method" value="lima">
-                                <div class="option-details">
-                                    <span class="option-title">Motorizado Express (Lima)</span>
-                                    <span class="option-price" id="lima-shipping-price">+ S/. 15.00 · gratis desde S/ 349.90</span>
-                                    <span class="option-time">Entrega directa a tu puerta en 24-48 horas.</span>
-                                </div>
-                            </label>
-                        </div>
                     </div>
 
                     <!-- Payment Condition Reservation for Lima -->
@@ -738,6 +738,14 @@
                         <span>Costo de Envío:</span>
                         <span id="checkout-shipping">S/. 0.00</span>
                     </div>
+                    <div class="total-row payment-now-row">
+                        <span>Pago inicial:</span>
+                        <span id="checkout-payment-now">S/. 0.00</span>
+                    </div>
+                    <div class="total-row payment-balance-row">
+                        <span>Saldo pendiente:</span>
+                        <span id="checkout-payment-balance">S/. 0.00</span>
+                    </div>
                     <hr class="totals-divider">
 
                     <div class="total-row main-total">
@@ -752,6 +760,7 @@
                             <span id="payment-explanation-text">Envío a provincia vía Shalom. Pagas el costo del flete directamente en la agencia al recoger tu paquete.</span>
                         </div>
                     </div>
+                    <div class="checkout-fulfillment-summary" id="checkout-fulfillment-summary" aria-live="polite"></div>
                 </div>
 
                 <section class="checkout-review-panel" id="checkout-review-panel" hidden aria-live="polite">
@@ -820,7 +829,7 @@
     <script src="supabase-config.js?v=20260716-admin-v1" defer></script>
     <script src="commerce-tracking.js?v=20260824-conversion-v2" defer></script>
     <script src="product-image-overrides.js?v=20261023-mockups-v9" defer></script>
-    <script src="app.js?v=20261123-availability-labels-v2" defer></script>
+    <script src="app.js?v=20261123-checkout-clarity-v1" defer></script>
     <script src="tiktok-videos.js?v=20261005-muted-autoplay-v1" defer></script>
 </body>
 </html>
