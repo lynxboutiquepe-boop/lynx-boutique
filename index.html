@@ -60,9 +60,9 @@
     <!-- Lucide Icons (CDN) -->
     <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20261123-checkout-clarity-v1">
+    <link rel="stylesheet" href="styles.css?v=20261123-storefront-v1">
 </head>
-<body>
+<body class="home-storefront">
     <div class="page-scroll-progress" id="page-scroll-progress" aria-hidden="true"></div>
     <div class="page-pointer-glow" aria-hidden="true"></div>
 
@@ -141,15 +141,28 @@
     <section class="hero-section" id="home-hero">
         <div class="hero-overlay"></div>
         <div class="hero-content">
-            <span class="hero-tag">STREETWEAR PARA HOMBRE · STOCK + PREVENTA</span>
-            <h1 class="hero-title">PIEZAS QUE<br><span class="gradient-text">NO VES EN TODOS</span></h1>
-            <p class="hero-description">Hoodies oversized, jackets y jeans flare seleccionados de Fashion Nova. Compra inmediata o separa en preventa, con asesoría de talla y envíos seguros a todo el Perú.</p>
+            <span class="hero-tag">NUEVO DROP · STOCK + PREVENTA</span>
+            <h1 class="hero-title">ELIGE TU<br><span class="gradient-text">PRÓXIMA PRENDA</span></h1>
+            <p class="hero-description">Compra inmediata o separa en preventa. Tallas visibles, stock real y confirmación por WhatsApp antes de pagar.</p>
             <a href="#catalog" class="btn btn-primary" id="hero-cta-btn">
                 <span class="hero-cta-desktop">VER PRENDAS DISPONIBLES</span>
                 <span class="hero-cta-mobile">VER PRENDAS</span>
                 <i data-lucide="arrow-right"></i>
             </a>
             <span class="hero-proof"><i data-lucide="shield-check"></i> Confirmamos stock y talla antes de solicitar el pago</span>
+        </div>
+    </section>
+
+    <section class="storefront-collection-nav" aria-labelledby="storefront-collections-title">
+        <div class="storefront-section-heading">
+            <span>EXPLORE</span>
+            <h2 id="storefront-collections-title">Compra por categoría</h2>
+        </div>
+        <div class="storefront-collection-grid">
+            <a href="/categoria/hoodies.html"><span>01</span><strong>Hoodies & jackets</strong><small>Capas y abrigos</small><i data-lucide="arrow-up-right"></i></a>
+            <a href="/categoria/t-shirts.html"><span>02</span><strong>T-shirts & polos</strong><small>Texturas y básicos</small><i data-lucide="arrow-up-right"></i></a>
+            <a href="/categoria/jeans-y-pants.html"><span>03</span><strong>Jeans & pants</strong><small>Flare, stacked y cargos</small><i data-lucide="arrow-up-right"></i></a>
+            <a href="/categoria/conjuntos.html"><span>04</span><strong>Conjuntos</strong><small>Looks listos</small><i data-lucide="arrow-up-right"></i></a>
         </div>
     </section>
 
@@ -181,8 +194,8 @@
     <section class="trending-section" aria-labelledby="trending-title">
         <div class="trending-header">
             <div>
-                <span class="trending-eyebrow">NUEVO DROP</span>
-                <h2 id="trending-title">RECIÉN LLEGADOS</h2>
+                <span class="trending-eyebrow">SELECCIÓN LYNX</span>
+                <h2 id="trending-title">TRENDING NOW</h2>
             </div>
             <div class="trending-controls" aria-label="Controles del carrusel">
                 <button type="button" id="trending-prev" aria-label="Productos anteriores">

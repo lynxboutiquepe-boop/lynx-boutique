@@ -6363,3 +6363,239 @@ body {
         gap: 36px 24px;
     }
 }
+
+/* Storefront refresh: navegación y compra más directa, inspirada en tiendas de
+   streetwear editoriales, manteniendo la identidad, catálogo y lógica de LYNX. */
+body.home-storefront {
+    background: #f7f7f4;
+    color: #171717;
+}
+
+body.home-storefront .page-pointer-glow,
+body.home-storefront .free-shipping-spotlight,
+body.home-storefront #shipping-info-strip,
+body.home-storefront #outfit-builder {
+    display: none;
+}
+
+body.home-storefront .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(247, 247, 244, .96);
+    border-bottom: 1px solid #e7e5df;
+    backdrop-filter: blur(14px);
+}
+
+body.home-storefront .header-container {
+    max-width: 1320px;
+}
+
+body.home-storefront .desktop-nav .nav-link,
+body.home-storefront .account-btn,
+body.home-storefront .header-search-btn,
+body.home-storefront .cart-btn {
+    color: #171717;
+}
+
+body.home-storefront .stock-marquee {
+    background: #171717;
+    color: #fff;
+    border: 0;
+}
+
+body.home-storefront .hero-section {
+    min-height: 330px;
+    width: min(1320px, 100%);
+    margin: 0 auto;
+    border-radius: 0 0 24px 24px;
+    overflow: hidden;
+}
+
+body.home-storefront .hero-overlay {
+    background: linear-gradient(90deg, rgba(247, 247, 244, .96), rgba(247, 247, 244, .66), rgba(247, 247, 244, .04));
+}
+
+body.home-storefront .hero-content {
+    max-width: 560px;
+    padding: 58px clamp(24px, 5vw, 72px);
+    color: #171717;
+}
+
+body.home-storefront .hero-tag,
+body.home-storefront .trending-eyebrow {
+    color: #8b6d16;
+}
+
+body.home-storefront .hero-title {
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    color: #171717;
+}
+
+body.home-storefront .hero-description,
+body.home-storefront .hero-proof {
+    color: #514f49;
+}
+
+.storefront-collection-nav {
+    width: min(1320px, calc(100% - 40px));
+    margin: 36px auto 0;
+}
+
+.storefront-section-heading span {
+    color: #8b6d16;
+    font: 800 .68rem/1 var(--font-main);
+    letter-spacing: .16em;
+}
+
+.storefront-section-heading h2 {
+    margin: 8px 0 18px;
+    color: #171717;
+    font: 800 clamp(1.8rem, 4vw, 3rem)/1 var(--font-main);
+    letter-spacing: -.04em;
+}
+
+.storefront-collection-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.storefront-collection-grid a {
+    position: relative;
+    min-height: 130px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    color: #171717;
+    background: #fff;
+    border: 1px solid #e5e2db;
+    border-radius: 14px;
+    text-decoration: none;
+    transition: transform .18s ease, border-color .18s ease;
+}
+
+.storefront-collection-grid a:hover {
+    transform: translateY(-2px);
+    border-color: #b9952f;
+}
+
+.storefront-collection-grid span {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    color: #9a978f;
+    font: 800 .7rem/1 var(--font-main);
+}
+
+.storefront-collection-grid strong {
+    font: 800 1rem/1.1 var(--font-main);
+}
+
+.storefront-collection-grid small {
+    margin-top: 6px;
+    color: #6f6c65;
+    font-size: .78rem;
+}
+
+.storefront-collection-grid i {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    width: 16px;
+}
+
+body.home-storefront .trending-section,
+body.home-storefront .catalog-section {
+    width: min(1320px, calc(100% - 40px));
+    margin: 54px auto 0;
+    padding-inline: 0;
+}
+
+body.home-storefront .trending-header h2,
+body.home-storefront .catalog-section .section-title {
+    color: #171717;
+}
+
+body.home-storefront .catalog-section {
+    background: transparent;
+}
+
+body.home-storefront .catalog-header {
+    border-bottom: 1px solid #ddd9cf;
+    padding-bottom: 18px;
+}
+
+body.home-storefront .catalog-section .section-subtitle {
+    color: #6f6c65;
+}
+
+body.home-storefront .filter-controls,
+body.home-storefront .category-tags {
+    background: #fff;
+    border: 1px solid #e5e2db;
+    border-radius: 12px;
+}
+
+body.home-storefront .filter-controls {
+    padding: 10px;
+}
+
+body.home-storefront .category-tags {
+    padding: 8px;
+}
+
+body.home-storefront .tag-btn {
+    color: #514f49;
+}
+
+body.home-storefront .tag-btn.active {
+    background: #171717;
+    color: #fff;
+}
+
+body.home-storefront .products-grid {
+    gap: 18px;
+}
+
+body.home-storefront .product-card {
+    background: #fff;
+    border: 1px solid #e5e2db;
+    border-radius: 14px;
+    color: #171717;
+}
+
+body.home-storefront .product-card h3,
+body.home-storefront .product-card .product-title,
+body.home-storefront .product-card .product-price {
+    color: #171717;
+}
+
+@media (max-width: 800px) {
+    .storefront-collection-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    body.home-storefront .hero-section {
+        min-height: 300px;
+        border-radius: 0 0 18px 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .storefront-collection-nav,
+    body.home-storefront .trending-section,
+    body.home-storefront .catalog-section {
+        width: calc(100% - 24px);
+    }
+
+    .storefront-collection-grid {
+        gap: 8px;
+    }
+
+    .storefront-collection-grid a {
+        min-height: 112px;
+        padding: 14px;
+    }
+}
