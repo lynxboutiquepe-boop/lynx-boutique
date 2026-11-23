@@ -301,15 +301,31 @@ function renderStats() {
         (sum, product) => sum + (Number(product.price || 0) * Number(product.stock || 0)),
         0
     );
+    const preorderValue = preorderProducts.reduce(
+        (sum, product) => sum + (Number(product.price || 0) * preorderUnits(product)),
+        0
+    );
+    const totalInventoryUnits = inventoryUnits + preorderInventoryUnits;
+    const totalInventoryValue = inventoryValue + preorderValue;
     const inventoryCost = costedProducts.reduce(
         (sum, product) => sum + (Number(product.cost || 0) * Number(product.stock || 0)),
+        0
+    );
+    const costedPreorderProducts = preorderProducts.filter(product => Number(product.cost || 0) > 0);
+    const preorderInventoryCost = costedPreorderProducts.reduce(
+        (sum, product) => sum + (Number(product.cost || 0) * preorderUnits(product)),
         0
     );
     const costedRevenue = costedProducts.reduce(
         (sum, product) => sum + (Number(product.price || 0) * Number(product.stock || 0)),
         0
     );
-    const costedUnits = costedProducts.reduce((sum, product) => sum + Number(product.stock || 0), 0);
+    const preorderCostedRevenue = costedPreorderProducts.reduce(
+        (sum, product) => sum + (Number(product.price || 0) * preorderUnits(product)),
+        0
+    );
+    const costedUnits = costedProducts.reduce((sum, product) => sum + Number(product.stock || 0), 0)
+        + costedPreorderProducts.reduce((sum, product) => sum + preorderUnits(product), 0);
 
     $('#stat-products').textContent = visibleProducts.length;
     $('#stat-stock').textContent = inventoryUnits;
@@ -320,11 +336,11 @@ function renderStats() {
     $('#stat-expense').textContent = money(expense);
     $('#stat-balance').textContent = money(income - expense);
     $('#stat-account-balance').textContent = money(accountBalance);
-    $('#stat-inventory-value').textContent = money(inventoryValue);
-    $('#stat-inventory-units').textContent = `${inventoryUnits} ${inventoryUnits === 1 ? 'unidad' : 'unidades'}`;
-    $('#stat-inventory-cost').textContent = money(inventoryCost);
-    $('#stat-costed-revenue').textContent = money(costedRevenue);
-    $('#stat-inventory-profit').textContent = money(costedRevenue - inventoryCost);
+    $('#stat-inventory-value').textContent = money(totalInventoryValue);
+    $('#stat-inventory-units').textContent = `${inventoryUnits} físico · ${preorderInventoryUnits} preventa`;
+    $('#stat-inventory-cost').textContent = money(inventoryCost + preorderInventoryCost);
+    $('#stat-costed-revenue').textContent = money(costedRevenue + preorderCostedRevenue);
+    $('#stat-inventory-profit').textContent = money((costedRevenue + preorderCostedRevenue) - (inventoryCost + preorderInventoryCost));
     $('#stat-costed-units').textContent = `Ganancia calculada sobre ${costedUnits} ${costedUnits === 1 ? 'prenda' : 'prendas'} con costo registrado.`;
     $('#stat-customers').textContent = state.customers.length;
     $('#stat-subscribers').textContent = state.customers.filter(customer => customer.email_verified && customer.marketing_opt_in).length;
