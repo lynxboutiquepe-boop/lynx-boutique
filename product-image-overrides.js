@@ -1,4 +1,177 @@
 (function registerLynxProductImages() {
+    // Galerías oficiales de Fashion Nova para las fichas nuevas de preventa.
+    // Estas reemplazan cualquier mockup o foto incompleta de la fila de Supabase.
+    const fashionNovaOfficialGalleries = Object.freeze({
+        'stacked-slim-flare-we-wildin-in-bling-jean': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/10-10-25_S10_20_HD25B003_LightWash_ZSR_KJ_MC_12-33-26_16612_PXF.jpg?v=1760213698',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/10-10-25_S10_20_HD25B003_LightWash_ZSR_KJ_MC_12-33-26_16609_PXF.jpg?v=1760213698',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/10-10-25_S10_20_HD25B003_LightWash_ZSR_KJ_MC_12-33-26_16620_PXF.jpg?v=1760213698',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/10-10-25_S10_20_HD25B003_LightWash_ZSR_KJ_MC_12-33-26_16618_PXF.jpg?v=1760213698'
+        ],
+        'ruthless-embroidered-stacked-skinny-cargo-jean-medium-wash': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/01-03-24_S7_27_BG6_MediumWash_KF_DJ_12-43-24_29635_EH.jpg?v=1704838344',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/01-03-24_S7_27_BG6_MediumWash_KF_DJ_12-43-24_29632_EH.jpg?v=1704838344',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/01-03-24_S7_27_BG6_MediumWash_KF_DJ_12-43-24_29660_EH.jpg?v=1704838344',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/01-03-24_S7_27_BG6_MediumWash_KF_DJ_12-43-24_29666_EH.jpg?v=1704831612'
+        ],
+        'boxy-soho-weave-applique-textured-button-up-shirt-black': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/09-08-25_S7PM_4_FNMKV54003_Black_CR_DJ_17-49-14_115672_CM.jpg?v=1757557962',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/09-08-25_S7PM_4_FNMKV54003_Black_CR_DJ_17-49-14_115649_CM.jpg?v=1757557962',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/09-08-25_S7PM_4_FNMKV54003_Black_CR_DJ_17-49-14_115667_CM.jpg?v=1757557962',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/09-08-25_S7PM_4_FNMKV54003_Black_CR_DJ_17-49-14_115689_CM.jpg?v=1757557944'
+        ],
+        'stacked-slim-flare-fray-waves-jeans-black-wash': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/12-24-25_S7_27_25GWNZ360_BlackWash_KP_DJ_09-31-53_13965_PXF.jpg?v=1767111587',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/12-24-25_S7_27_25GWNZ360_BlackWash_KP_DJ_09-31-42_13961_PXF.jpg?v=1767111587',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/12-24-25_S7_27_25GWNZ360_BlackWash_KP_DJ_09-33-33_13974_PXF.jpg?v=1767111587',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/12-24-25_S7_27_25GWNZ360_BlackWash_KP_DJ_09-32-41_13970_PXF.jpg?v=1767111587'
+        ],
+        'stacked-skinny-flare-walk-me-through-jeweled-distressed-jean-medium-blue-wash': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/11-03-25_S9_19_URSS26P1003_MediumBlueWash_DA_PC_10-20-51_0450_PXF.jpg?v=1762297281',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/11-03-25_S9_19_URSS26P1003_MediumBlueWash_DA_PC_10-20-20_0441_PXF.jpg?v=1762297281',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/11-03-25_S9_19_URSS26P1003_MediumBlueWash_DA_PC_10-22-38_0458_PXF.jpg?v=1762297281',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/11-03-25_S9_19_URSS26P1003_MediumBlueWash_DA_PC_10-23-09_0465_PXF.jpg?v=1762297281'
+        ],
+        'canyon-wave-johnny-polo-light-blue': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/05-28-26_S8_42_UN4225_LightBlue_ZSR_DA_MC_13-36-36_39105_MWA.jpg?v=1780346082',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/05-28-26_S8_42_UN4225_LightBlue_ZSR_DA_MC_13-36-12_39095_MWA.jpg?v=1780346082',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/05-28-26_S8_42_UN4225_LightBlue_ZSR_DA_MC_13-36-59_39113_MWA.jpg?v=1780346082',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/05-28-26_S8_42_UN4225_LightBlue_ZSR_DA_MC_13-38-06_39119_MWA.jpg?v=1780346082'
+        ],
+        'desert-hues-crochet-button-up-shirt-brown': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-27-26_S9_87_FNMKV61051_Brown_AF_EO_15-07-48_1110_PXF.jpg?v=1775065009',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-27-26_S9_87_FNMKV61051_Brown_AF_EO_15-07-40_1106_PXF.jpg?v=1775065009',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-27-26_S9_87_FNMKV61051_Brown_AF_EO_15-07-52_1112_PXF.jpg?v=1775065009',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-27-26_S9_87_FNMKV61051_Brown_AF_EO_15-08-07_1117_PXF.jpg?v=1775065009'
+        ],
+        'desert-hues-crochet-button-up-shirt-cream': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-13-26_S7_37_FNMKV61051_Cream_ZSR_DA_MA_11-43-13_28404_SKS_SKS_CM.jpg?v=1773697865',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-13-26_S7_37_FNMKV61051_Cream_ZSR_DA_MA_11-42-24_28389_SKS_SKS.jpg?v=1773697865',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-13-26_S7_37_FNMKV61051_Cream_ZSR_DA_MA_11-43-24_28412_SKS_SKS.jpg?v=1773697865',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-13-26_S7_37_FNMKV61051_Cream_ZSR_DA_MA_11-43-46_28416_SKS_SKS.jpg?v=1773697865'
+        ],
+        'relaxed-sunstage-crochet-cuban-collar-button-up-shirt-light-blue': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/04-10-26_S3_59_UN4231_LightBlue_LR_DJ_14-14-02_56140_PXF.jpg?v=1776188900',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/04-10-26_S3_59_UN4231_LightBlue_LR_DJ_14-14-02_56126_PXF.jpg?v=1776188900',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/04-10-26_S3_59_UN4231_LightBlue_LR_DJ_14-14-02_56144_PXF.jpg?v=1776188900',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/04-01-26_S6_6_UN4231_LightBlue_AB_DJ_17-20-58_PLUS_1573_PXF.jpg?v=1776188900'
+        ],
+        'nolan-textured-shirt-green': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-05-26_S2_1_ZDF01V410315_Green_ZSR_AB_MA_09-07-26_11963_BH_SKS.jpg?v=1770677511',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-05-26_S2_1_ZDF01V410315_Green_ZSR_AB_MA_09-06-17_11942_BH_SKS.jpg?v=1770677511',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/12-02-25_S7_44_FNMTS61003_Brown_AE_MC_14-09-43_PLUS_26740_SKS.jpg?v=1770677511',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-05-26_S2_1_ZDF01V410315_Green_ZSR_AB_MA_09-07-51_11969_BH_SKS.jpg?v=1770677511'
+        ],
+        'relaxed-aegean-pleat-cuban-collar-button-up-cream': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-24-26_S8_17_FNMKV61056_Cream_ZSR_DA_MA_11-00-50_1928_BH_SKS.jpg?v=1772133541',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-24-26_S8_17_FNMKV61056_Cream_ZSR_DA_MA_10-59-18_1917_BH_SKS.jpg?v=1772133541',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-24-26_S8_17_FNMKV61056_Cream_ZSR_DA_MA_11-00-59_1934_BH_SKS.jpg?v=1772133535',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-24-26_S8_17_FNMKV61056_Cream_ZSR_DA_MA_11-01-53_1943_BH_SKS_SG.jpg?v=1772133535'
+        ],
+        'harbor-point-knit-johnny-collar-polo-cream': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/01-07-26_S7_3_FNMTK61020_Cream_DA_DJ_09-47-54_25114_BG_SKS_922d7fa1-98ee-4e06-ad7c-32609fa7023f.jpg?v=1767985410',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/01-07-26_S7_3_FNMTK61020_Cream_DA_DJ_09-47-45_25109_BG_SKS_43d30ebe-a3fc-49b8-89d7-bc56cba8baf0.jpg?v=1767985410',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/01-07-26_S7_3_FNMTK61020_Cream_DA_DJ_09-48-13_25122_BG_SKS_BH.jpg?v=1767993225',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-05-26_S6_PM_8_FNMTK61020_Cream_ZSR_AB_MC_18-12-26_PLUS_11472_PXF.jpg?v=1773081104'
+        ],
+        'solstice-knit-johnny-collar-polo-burgundy-combo': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/11-25-25_S9_7_FNMTK54012_Burgundycombo_ZSR_LR_DJ_08-09-25_2470_CM.jpg?v=1764177480',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/11-25-25_S9_7_FNMTK54012_Burgundycombo_ZSR_LR_DJ_08-09-25_2466_CM.jpg?v=1764177480',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/11-25-25_S9_7_FNMTK54012_Burgundycombo_ZSR_LR_DJ_08-09-25_2472_CM.jpg?v=1764177480',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/11-24-25_S8_3_FNMTK54012_Burgundycombo_ZSR_KJ_MC_07-47-07_PLUS_7582_PXF.jpg?v=1764177480'
+        ],
+        'straight-flare-aegean-pant-cream': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-24-26_S8_18_FNMDT61044_Cream_DA_MA_11-03-31_62663_BH_SKS.jpg?v=1772837968',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-24-26_S8_18_FNMDT61044_Cream_DA_MA_11-03-31_62644_BH_SKS.jpg?v=1772837968',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-24-26_S8_18_FNMDT61044_Cream_DA_MA_11-03-31_62673_BH_SKS.jpg?v=1772133574',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-24-26_S8_18_FNMDT61044_Cream_DA_MA_11-03-31_62671_BH_SKS.jpg?v=1772133574'
+        ],
+        'canon-contrast-collar-zip-up-shirt-taupe': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-19-26_S7PM_14_SS26J402F_Taupe_ZSR_AB_DJ_18-22-08_75260_SG_SKS.jpg?v=1771885987',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-19-26_S7PM_14_SS26J402F_Taupe_ZSR_AB_DJ_18-21-43_75254_SG_SKS.jpg?v=1771885987',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-19-26_S7PM_14_SS26J402F_Taupe_ZSR_AB_DJ_18-22-20_75270_SG_SKS.jpg?v=1771885980',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-19-26_S7PM_14_SS26J402F_Taupe_ZSR_AB_DJ_18-22-46_75276_SG_SKS_SG.jpg?v=1771885979'
+        ],
+        'cornell-wide-leg-stacked-jean-bleached-blue-wash': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/06-19-24_S7_1_ZAPP977_White_ID_DJ_09-40-30_108912_PXF.jpg?v=1719245370',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/06-19-24_S7_1_ZAPP977_White_ID_DJ_09-39-46_108899_PXF_eb4e4469-9e93-41b2-9385-293b6c4117e3.jpg?v=1719245370',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/06-19-24_S7_1_ZAPP977_White_ID_DJ_09-41-06_108913_PXF.jpg?v=1719244702',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/06-19-24_S7_1_ZAPP977_White_ID_DJ_09-41-34_108917_PXF.jpg?v=1719244702'
+        ],
+        'cornell-wide-leg-stacked-jean-white': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/06-30-23Studio7_CB_DJ_10-36-20_30_ZDF01D310023_White_7720_MP.jpg?crop=center&height=1825&v=1689986050&width=1200',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/07-07-23Studio7_CB_DJ_12-59PM_2_ZDF01D310023_White_24699_PLUS_MP.jpg?crop=center&height=1800&v=1753743000&width=1200',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/06-30-23Studio7_CB_DJ_10-36-20_30_ZDF01D310023_White_7720_MP.jpg?v=1689986050&width=800&height=1200&crop=center',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/07-07-23Studio7_CB_DJ_12-59PM_2_ZDF01D310023_White_24699_PLUS_MP.jpg?v=1753743000&width=800&height=1200&crop=center'
+        ],
+        'cuff-me-stacked-skinny-flared-jean-grey': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/ZDF01D330003_Grey_42_Grey_PLUS_V1.jpg?v=1784053180&width=800&height=1200&crop=center',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/ZDF01D330003_Grey_42_Grey_PLUS_V2.jpg?v=1784053168&width=800&height=1200&crop=center',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/ZDF01D330003_Grey_42_Grey_PLUS_V3.jpg?v=1784053167&width=800&height=1200&crop=center',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/ZDF01D330003_Grey_42_Grey_PLUS_V4.jpg?v=1784053170&width=800&height=1200&crop=center'
+        ],
+        'deylen-relaxed-cargo-short-camouflage': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/04-09-24_S7_70_ZDF01H410095_Camouflage_P_CZ_DJ_13-51-02_42023_CM.jpg?v=1712861252',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/04-09-24_S7_70_ZDF01H410095_Camouflage_P_CZ_DJ_13-51-02_42024_CM.jpg?v=1712861252',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/04-09-24_S7_70_ZDF01H410095_Camouflage_P_CZ_DJ_13-51-02_42025_CM.jpg?v=1712861252',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/04-09-24_S7_70_ZDF01H410095_Camouflage_P_CZ_DJ_13-51-02_42027_CM.jpg?v=1712861252'
+        ],
+        'drilled-slim-stacked-jean-black-wash': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/07-18-24_S7_40_ZDF01D420006_BlackWash_CZ_DJ_11-47-43_52897_SL.jpg?v=1721928392',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/07-18-24_S7_40_ZDF01D420006_BlackWash_CZ_DJ_11-47-43_52896_SL.jpg?v=1721928392',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/07-18-24_S7_40_ZDF01D420006_BlackWash_CZ_DJ_11-47-43_52898_SL.jpg?v=1721928392',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/07-18-24_S7_40_ZDF01D420006_BlackWash_CZ_DJ_11-47-43_52899_SL.jpg?v=1721928392'
+        ],
+        'i-be-jeweled-wide-leg-stacked-jean-light-blue': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-19-24_S7_71_GFL4_LightBlue_P_CZ_DJ_14-35-09_31382_EH.jpg?v=1708621697',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-19-24_S7_71_GFL4_LightBlue_P_CZ_DJ_14-33-40_31372_EH.jpg?v=1708621697',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-19-24_S7_71_GFL4_LightBlue_P_CZ_DJ_14-34-06_31379_EH.jpg?v=1708621697',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/02-19-24_S7_71_GFL4_LightBlue_P_CZ_DJ_14-35-12_31383_EH.jpg?v=1708621697'
+        ],
+        'kaine-stacked-slim-jean-black-wash': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/01-08-25_S7_74_ZDF01D440006_BlackWash_KJ_DJ_12-01-33_64605_PXF.jpg?v=1737151241',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/01-08-25_S7_74_ZDF01D440006_BlackWash_KJ_DJ_12-01-33_64604_PXF.jpg?v=1737151241',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/01-08-25_S7_74_ZDF01D440006_BlackWash_KJ_DJ_12-01-33_64602_PXF.jpg?v=1737151241',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/01-08-25_S7_74_ZDF01D440006_BlackWash_KJ_DJ_12-01-33_64609_PXF.jpg?v=1737151241'
+        ],
+        'laredo-paisley-shirt-black-white': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/05-06-24_s7_44_ZDF01V410200_BlackWhite_ID_DJ_13-31-38_87065_BH.jpg?v=1715704120',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/05-06-24_s7_44_ZDF01V410200_BlackWhite_ID_DJ_13-31-18_87059_BH.jpg?v=1715704120',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/05-06-24_s7_44_ZDF01V410200_BlackWhite_ID_DJ_13-31-42_87066_BH.jpg?v=1715704120',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/05-06-24_s7_44_ZDF01V410200_BlackWhite_ID_DJ_13-31-49_87068_BH.jpg?v=1715704120'
+        ],
+        'matrix-power-crochet-johnny-collar-polo-blue': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-27-26_S1_32_FNM041619T_Blue_LR_PC_15-07-49_25914_PXF.jpg?v=1775241040',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-27-26_S1_32_FNM041619T_Blue_LR_PC_15-07-49_25913_PXF.jpg?v=1775241040',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-27-26_S1_32_FNM041619T_Blue_LR_PC_15-07-49_25915_PXF.jpg?v=1775241032',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-27-26_S1_32_FNM041619T_Blue_LR_PC_15-07-49_25916_PXF.jpg?v=1775241032'
+        ],
+        'patriot-baggy-denim-short-light-wash': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-08-25_S7_52_ZDF01Y510006_LightWash_KJ_DJ_10-08-59_91450_CM.jpg?v=1741647133',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-08-25_S7_52_ZDF01Y510006_LightWash_KJ_DJ_10-09-46_91461_CM.jpg?v=1741647133',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-08-25_S7_52_ZDF01Y510006_LightWash_KJ_DJ_10-09-29_91456_CM.jpg?v=1741647133',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-08-25_S7_52_ZDF01Y510006_LightWash_KJ_DJ_10-09-31_91457_CM.jpg?v=1741647131'
+        ],
+        'relaxed-geometric-jewel-jacquard-short-grey': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/04-20-26_S6_43_D3016K239_Grey_LR_DJ_14-11-13_27319-Miller_PXF.jpg?v=1777494996',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/04-20-26_S6_43_D3016K239_Grey_LR_DJ_14-11-13_27320-Miller_PXF.jpg?v=1777494996',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/04-20-26_S6_43_D3016K239_Grey_LR_DJ_14-11-13_27321-Miller_PXF.jpg?v=1777494996',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/04-29-26_S8_48_D3016K239_Grey_KJ_MC_13-00-10_PLUS_90823_PXF_PLUS.jpg?v=1777932627'
+        ],
+        'rhinestone-bandana-wide-leg-stacked-jean-light-blue-wash': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-12-26_S8_15_ZAPP50560_LightBlueWash_KF_MC_10-40-24_78681_SKS.jpg?v=1773675249',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-12-26_S8_15_ZAPP50560_LightBlueWash_KF_MC_10-40-24_78666_SKS.jpg?v=1773675249',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-12-26_S8_15_ZAPP50560_LightBlueWash_KF_MC_10-41-14_21631_SKS.jpg?v=1773675249',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/03-12-26_S8_15_ZAPP50560_LightBlueWash_KF_MC_10-40-24_78682_SKS.jpg?v=1773675249'
+        ],
+        'ripple-stripe-johnny-polo-charcoal': [
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/04-09-26_S8_40_UN4227_Charcoal_JG_CW_11-15-45_12135_PXF.jpg?v=1776103062',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/04-09-26_S8_40_UN4227_Charcoal_JG_CW_11-15-27_12125_CM_CM.jpg?v=1776103062',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/04-09-26_S8_40_UN4227_Charcoal_JG_CW_11-15-47_12136_PXF.jpg?v=1776103062',
+            'https://cdn.shopify.com/s/files/1/0293/9277/files/04-09-26_S8_40_UN4227_Charcoal_JG_CW_11-16-20_12144_PXF.jpg?v=1776103062'
+        ]
+    });
+
     // Mockups PNG nuevos: se fuerzan como primera imagen también cuando el
     // catálogo se carga desde Supabase (no solo desde catalog-seed.json).
     const newPngMockups = Object.freeze({
@@ -128,6 +301,9 @@
     }
 
     function withMockup(slug, images = []) {
+        const normalizedSlug = String(slug || '').trim().toLowerCase();
+        const officialGallery = fashionNovaOfficialGalleries[normalizedSlug];
+        if (officialGallery?.length) return [...officialGallery];
         const originals = Array.isArray(images) ? images.filter(Boolean) : [];
         const mockup = mockupFor(slug);
         if (!mockup) return originals;
