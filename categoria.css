@@ -261,6 +261,16 @@ a {
     letter-spacing: .04em;
     text-transform: uppercase;
 }
+.category-product-availability {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px 7px;
+    color: #b9d6b0;
+    text-transform: none;
+}
+.category-product-availability .availability-preorder { color: #d6c58b; }
+.category-product-availability > span:empty { display: none; }
 
 .category-empty {
     grid-column: 1 / -1;

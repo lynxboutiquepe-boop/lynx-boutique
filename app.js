@@ -1430,17 +1430,33 @@ function setupReviewEvents() {
 }
 
 // 4. LÓGICA DE INICIALIZACIÓN
+function productPhysicalUnits(product) {
+    const sizeStock = product?.size_stock || product?.sizeStock || {};
+    const bySize = Object.values(sizeStock).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0);
+    return Math.max(bySize, Number(product?.stock || 0));
+}
+
+function productPreorderUnits(product) {
+    return Object.values(product?.preorder_stock || product?.preorderStock || {}).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0);
+}
+
+function productAvailabilityBadge(product) {
+    const physical = productPhysicalUnits(product);
+    const preorder = productPreorderUnits(product);
+    if (physical > 0 && preorder > 0) return 'STOCK + PREVENTA';
+    if (preorder > 0 || product?.status === 'preorder') return 'PREVENTA';
+    if (product?.status === 'sold_out' || physical <= 0) return 'AGOTADO';
+    if (product?.status === 'low_stock') return physical === 1 ? 'ÚLTIMA UNIDAD' : `ÚLTIMAS ${physical} UNIDADES`;
+    return product?.badge || 'DISPONIBLE';
+}
+
 function mapDatabaseProduct(row) {
     const sourceImages = LOCAL_PRODUCT_IMAGE_OVERRIDES[row.slug]
         || (Array.isArray(row.images) ? row.images : []);
     const images = (window.LynxProductImages?.withMockup(row.slug, sourceImages) || sourceImages)
         .filter(Boolean)
         .map(optimizedStoreImage);
-    const statusBadge = {
-        preorder: 'PREVENTA',
-        sold_out: 'AGOTADO',
-        low_stock: 'ÚLTIMAS UNIDADES'
-    }[row.status];
+    const statusBadge = productAvailabilityBadge(row);
 
     return {
         id: row.legacy_id ?? (1000000 + Number(row.id)),
@@ -1875,7 +1891,7 @@ function renderProducts() {
                 <span class="product-card-category">${CATALOG_CATEGORY_META[product.category]?.label || product.category}</span>
                 <a class="product-card-title product-detail-link" href="${productUrl(product)}" data-product-id="${product.id}">${product.title}</a>
                 <span class="product-card-price">S/. ${product.price.toFixed(2)}</span>
-                <span class="product-card-availability">${availableQuantity(product, (product.sizes || ['ÚNICA'])[0], 'physical') > 0 ? 'Compra inmediata' : ''}${availableQuantity(product, (product.sizes || ['ÚNICA'])[0], 'physical') > 0 && Object.values(product.preorderStock || {}).some(value => Number(value) > 0) ? ' · ' : ''}${Object.values(product.preorderStock || {}).some(value => Number(value) > 0) ? 'Preventa disponible' : ''}</span>
+                <span class="product-card-availability">${productPhysicalUnits(product) > 0 ? `Disponible ahora: ${productPhysicalUnits(product)}` : ''}${productPhysicalUnits(product) > 0 && productPreorderUnits(product) > 0 ? ' · ' : ''}${productPreorderUnits(product) > 0 ? `Preventa: ${productPreorderUnits(product)}` : ''}</span>
                 <div class="product-card-footer">
                     ${product.status === 'sold_out' && !Object.values(product.preorderStock || {}).some(value => Number(value) > 0)
                         ? `<a class="btn btn-primary btn-block product-card-restock" href="${productUrl(product)}#restock">AVÍSAME</a>`

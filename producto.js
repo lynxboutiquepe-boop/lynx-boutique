@@ -528,15 +528,21 @@ function renderProduct(product) {
     sizes.forEach((size, index) => {
         const button = document.createElement('button');
         button.type = 'button';
-        button.innerHTML = `<span>${escapeHtml(size)}</span><small>${quantityForMode(product, size, 'physical') > 0 ? `F ${quantityForMode(product, size, 'physical')}` : ''}${quantityForMode(product, size, 'physical') > 0 && quantityForMode(product, size, 'preorder') > 0 ? ' · ' : ''}${quantityForMode(product, size, 'preorder') > 0 ? `P ${quantityForMode(product, size, 'preorder')}` : ''}</small>`;
-        const unavailable = quantityForMode(product, size, 'physical') <= 0 && quantityForMode(product, size, 'preorder') <= 0;
+        const physicalQty = quantityForMode(product, size, 'physical');
+        const preorderQty = quantityForMode(product, size, 'preorder');
+        const availability = [
+            physicalQty > 0 ? `Ahora: ${physicalQty}` : '',
+            preorderQty > 0 ? `Preventa: ${preorderQty}` : ''
+        ].filter(Boolean).join(' · ');
+        button.innerHTML = `<span>${escapeHtml(size)}</span><small>${escapeHtml(availability || 'Agotada')}</small>`;
+        const unavailable = physicalQty <= 0 && preorderQty <= 0;
         button.disabled = unavailable;
         button.className = size === selectedSize ? 'active' : '';
         if (unavailable) button.setAttribute('aria-label', `Talla ${size} agotada`);
         button.addEventListener('click', () => {
             if (button.disabled) return;
             selectedSize = size;
-            selectedFulfillmentMode = quantityForMode(product, size, 'physical') > 0 ? 'physical' : 'preorder';
+            selectedFulfillmentMode = physicalQty > 0 ? 'physical' : 'preorder';
             sizeList.querySelectorAll('button').forEach(candidate => candidate.classList.toggle('active', candidate === button));
             sizeSelectionNote.textContent = `Talla seleccionada: ${size}`;
             sizeSelectionNote.classList.add('is-selected');

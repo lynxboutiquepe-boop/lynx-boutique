@@ -68,7 +68,7 @@
         const query = document.getElementById('category-search')?.value.trim().toLowerCase() || '';
         const sort = document.getElementById('category-sort')?.value || 'featured';
         const inStock = document.getElementById('category-in-stock')?.checked || false;
-        const products = categoryProducts.filter(product => (!query || `${product.title} ${product.description || ''}`.toLowerCase().includes(query)) && (!inStock || (product.status !== 'sold_out' && (product.status === 'preorder' || Number(product.stock || 0) > 0 || pendingUnits(product) > 0))));
+        const products = categoryProducts.filter(product => (!query || `${product.title} ${product.description || ''}`.toLowerCase().includes(query)) && (!inStock || ((product.status !== 'sold_out' || pendingUnits(product) > 0) && (Number(product.stock || 0) > 0 || pendingUnits(product) > 0))));
         if (sort === 'price-asc') products.sort((a, b) => Number(a.price) - Number(b.price));
         if (sort === 'price-desc') products.sort((a, b) => Number(b.price) - Number(a.price));
         renderCategory(products, category);
@@ -82,9 +82,11 @@
 
     function productBadge(product, category) {
         const stock = Number(product.stock || 0);
-        if (product.status === 'sold_out' || (product.status !== 'preorder' && stock <= 0)) return 'AGOTADO';
+        const preorder = pendingUnits(product);
+        if ((product.status === 'sold_out' || (product.status !== 'preorder' && stock <= 0)) && preorder <= 0) return 'AGOTADO';
         if (category === 'outlet' && productDiscountInfo(product)) return 'OUTLET';
-        if (product.status === 'preorder' || pendingUnits(product) > 0) return 'PREVENTA';
+        if (stock > 0 && preorder > 0) return 'STOCK + PREVENTA';
+        if (product.status === 'preorder' || preorder > 0) return 'PREVENTA';
         if (productDiscountInfo(product)) return 'OUTLET';
         if (product.status === 'low_stock') return stock === 1 ? 'ÚLTIMA UNIDAD' : `ÚLTIMAS ${stock} UNIDADES`;
         if (product.badge) return product.badge;
@@ -115,7 +117,8 @@
 
     function productCard(product, category) {
         const stock = Number(product.stock || 0);
-        const soldOut = product.status === 'sold_out' || (product.status !== 'preorder' && stock <= 0);
+        const preorder = pendingUnits(product);
+        const soldOut = (product.status === 'sold_out' || (product.status !== 'preorder' && stock <= 0)) && preorder <= 0;
         const sourceImages = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
         const images = window.LynxProductImages?.withMockup(product.slug, sourceImages) || sourceImages;
         const image = normalizeImageUrl(images[0]);
@@ -134,7 +137,7 @@
                 <p>${escapeHtml(originalCategory)}</p>
                 <h2>${escapeHtml(product.title)}</h2>
                 <div class="category-product-pricing">${discount ? `<del>Antes S/. ${discount.previous.toFixed(2)}</del>` : ''}<strong>Ahora S/. ${Number(product.price || 0).toFixed(2)}</strong></div>
-                ${pendingUnits(product) > 0 ? `<small class="category-preorder-stock">${Number(product.stock || 0)} en stock · ${pendingUnits(product)} en preventa</small>` : ''}
+                ${(stock > 0 || preorder > 0) ? `<small class="category-preorder-stock category-product-availability"><span class="availability-physical">${stock > 0 ? `${stock} ${stock === 1 ? 'unidad disponible' : 'unidades disponibles'}` : ''}</span>${stock > 0 && preorder > 0 ? '<span aria-hidden="true">·</span>' : ''}<span class="availability-preorder">${preorder > 0 ? `${preorder} en preventa` : ''}</span></small>` : ''}
             </a>`;
     }
 
@@ -160,7 +163,7 @@
 
             if (category === 'preorder') return query.neq('status', 'archived');
             if (category === 'outlet') return query.neq('status', 'archived');
-            return query.eq('category', category).neq('status', 'archived').neq('status', 'preorder');
+            return query.eq('category', category).neq('status', 'archived');
         };
         let { data, error } = await loadProducts(true);
         if (error && /compare_at_price|column|schema cache/i.test(error.message || '')) ({ data, error } = await loadProducts(false));
