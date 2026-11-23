@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/producto.css?v=20261123-checkout-clarity-v1">
+    <link rel="stylesheet" href="/producto.css?v=20261123-purchase-focus-v1">
 </head>
 <body>
     <header class="product-header">
@@ -59,6 +59,33 @@
                     <span class="product-free-shipping"><i data-lucide="gift"></i> Envío gratis en Lima desde S/ 349.90</span>
                 </div>
                 <div class="delivery-estimate" id="delivery-estimate"><i data-lucide="calendar-check"></i><div><strong>RECÍBELO PRONTO</strong><span id="delivery-estimate-copy">Calculando fechas de entrega…</span></div></div>
+
+                <section class="quick-buy-panel" aria-labelledby="quick-buy-title">
+                    <span class="quick-buy-kicker" id="quick-buy-title">COMPRA RÁPIDA</span>
+                    <div class="product-options" id="product-options">
+                        <div>
+                            <div class="option-heading"><span class="option-label">SELECCIONA TU TALLA</span><button class="size-guide-trigger" id="size-guide-trigger" type="button">GUÍA DE TALLAS</button></div>
+                            <div class="size-list" id="size-list"></div>
+                            <p class="size-selection-note" id="size-selection-note">Selecciona una talla para continuar.</p>
+                            <div class="fulfillment-options" id="fulfillment-options" aria-label="Forma de entrega"></div>
+                        </div>
+                        <div class="quantity-option">
+                            <span class="option-label">CANTIDAD</span>
+                            <div class="quantity-control">
+                                <button type="button" id="quantity-minus" aria-label="Reducir cantidad">−</button>
+                                <output id="quantity-value">1</output>
+                                <button type="button" id="quantity-plus" aria-label="Aumentar cantidad">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="purchase-actions">
+                        <a class="primary-button" id="add-cart-button" href="/">AGREGAR AL CARRITO</a>
+                        <a class="secondary-button" id="buy-button" href="/">COMPRAR · COMPLETAR ENTREGA</a>
+                    </div>
+                    <p class="purchase-note"><i data-lucide="shield-check"></i> Sin cuenta ni cobros automáticos. Confirmamos stock, talla y total por WhatsApp.</p>
+                </section>
+
                 <p class="product-description" id="product-description"></p>
                 <div class="product-benefit-copy"><strong>POR QUÉ TE VA A GUSTAR</strong><p id="product-benefit"></p></div>
 
@@ -75,27 +102,6 @@
                     <span>El calce cambia según el modelo. Compara cintura y cadera con la guía; si quedas entre dos tallas, elige la mayor para mayor comodidad.</span>
                 </aside>
 
-                <div class="product-options" id="product-options">
-                    <div>
-                        <div class="option-heading"><span class="option-label">SELECCIONA TU TALLA</span><button class="size-guide-trigger" id="size-guide-trigger" type="button">GUÍA DE TALLAS</button></div>
-                        <div class="size-list" id="size-list"></div>
-                        <p class="size-selection-note" id="size-selection-note">Selecciona una talla para continuar.</p>
-                        <div class="fulfillment-options" id="fulfillment-options" aria-label="Forma de entrega"></div>
-                    </div>
-                    <div class="quantity-option">
-                        <span class="option-label">CANTIDAD</span>
-                        <div class="quantity-control">
-                            <button type="button" id="quantity-minus" aria-label="Reducir cantidad">−</button>
-                            <output id="quantity-value">1</output>
-                            <button type="button" id="quantity-plus" aria-label="Aumentar cantidad">+</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="purchase-actions">
-                    <a class="primary-button" id="add-cart-button" href="/">AGREGAR AL CARRITO</a>
-                    <a class="secondary-button" id="buy-button" href="/">COMPRAR · COMPLETAR ENTREGA</a>
-                </div>
                 <section class="restock-request" id="restock-request" hidden>
                     <span class="eyebrow">TE AVISAMOS PRIMERO</span>
                     <h2>Avísame cuando vuelva</h2>
@@ -108,7 +114,6 @@
                     </form>
                     <a class="restock-whatsapp" id="restock-whatsapp" href="#" target="_blank" rel="noopener noreferrer"><i data-lucide="message-circle"></i> PEDIR AVISO POR WHATSAPP</a>
                 </section>
-                <p class="purchase-note"><i data-lucide="shield-check"></i> No necesitas crear una cuenta. Confirmamos stock, talla y total por WhatsApp antes de cualquier pago.</p>
                 <div class="product-trust-accordion">
                     <details open><summary>Envíos y tiempos</summary><p><strong>Lima:</strong> motorizado, normalmente en 24–48 horas. <strong>Provincias:</strong> Shalom, normalmente en 2–3 días hábiles; el flete se paga en agencia.</p></details>
                     <details><summary>Reserva y medios de pago</summary><p>En Lima puedes separar con S/ 50. Aceptamos Yape y transferencias BCP o BBVA; compartimos las cuentas oficiales durante la confirmación.</p></details>
@@ -153,6 +158,6 @@
     <script src="/commerce-tracking.js?v=20260824-conversion-v2" defer></script>
     <script src="/product-image-overrides.js?v=20260822-mockups-v1" defer></script>
     <script src="/size-guide-data.js?v=20260822-v1" defer></script>
-    <script src="/producto.js?v=20261123-checkout-clarity-v1" defer></script>
+    <script src="/producto.js?v=20261123-purchase-focus-v1" defer></script>
 </body>
 </html>

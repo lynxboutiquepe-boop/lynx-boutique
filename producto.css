@@ -123,6 +123,11 @@ body {
 .delivery-estimate div { display: grid; gap: 4px; }
 .delivery-estimate strong { color: var(--violet-dark); font: 800 .65rem/1 Outfit, sans-serif; letter-spacing: .14em; }
 .delivery-estimate span { color: var(--ink); font-size: .83rem; line-height: 1.45; }
+.quick-buy-panel { margin: 20px 0 26px; padding: 18px; border: 1px solid rgba(212,175,55,.34); border-radius: 16px; background: #10100e; }
+.quick-buy-kicker { display: block; color: var(--violet-dark); font: 800 .66rem/1 Outfit, sans-serif; letter-spacing: .13em; }
+.quick-buy-panel .product-options { margin: 12px 0 16px; padding-top: 0; border-top: 0; }
+.quick-buy-panel .purchase-actions { margin-top: 2px; }
+.quick-buy-panel .purchase-note { margin-bottom: 0; }
 .restock-request { margin-top: 18px; padding: 22px; border: 1px solid rgba(212,175,55,.34); background: #14130f; }
 .restock-request h2 { margin: 6px 0 8px; font: 800 clamp(1.35rem,2.4vw,1.9rem)/1 Outfit, sans-serif; }
 .restock-request > p { margin: 0 0 16px; color: var(--muted); font-size: .86rem; line-height: 1.55; }
