@@ -28,7 +28,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/producto.css?v=20260824-responsive-v16">
+    <link rel="stylesheet" href="/producto.css?v=20261123-purchase-focus-v1">
 </head>
 <body>
     <header class="product-header">
@@ -76,29 +76,27 @@
                 <p class="stock-note " id="stock-note">ÚLTIMAS UNIDADES DISPONIBLES</p>
                 <div class="product-proof-row" aria-label="Beneficios de compra"><span><i data-lucide="badge-check"></i> Prenda original</span><span><i data-lucide="truck"></i> Envíos a todo el Perú</span><span class="product-free-shipping"><i data-lucide="gift"></i> Envío gratis en Lima desde S/ 349.90</span></div>
                 <div class="delivery-estimate" id="delivery-estimate"><i data-lucide="calendar-check"></i><div><strong>RECÍBELO PRONTO</strong><span id="delivery-estimate-copy">Calculando fechas de entrega…</span></div></div>
+                <section class="quick-buy-panel" aria-labelledby="quick-buy-title">
+                    <span class="quick-buy-kicker" id="quick-buy-title">COMPRA RÁPIDA</span>
+                    <div class="product-options" id="product-options">
+                        <div><div class="option-heading"><span class="option-label">SELECCIONA TU TALLA</span><button class="size-guide-trigger" id="size-guide-trigger" type="button">GUÍA DE TALLAS</button></div><div class="size-list" id="size-list"><button type="button" class="active">38</button></div><p class="size-selection-note" id="size-selection-note">Selecciona una talla para continuar.</p><div class="fulfillment-options" id="fulfillment-options" aria-label="Forma de entrega"></div></div>
+                        <div class="quantity-option"><span class="option-label">CANTIDAD</span><div class="quantity-control"><button type="button" id="quantity-minus" aria-label="Reducir cantidad">−</button><output id="quantity-value">1</output><button type="button" id="quantity-plus" aria-label="Aumentar cantidad">+</button></div></div>
+                    </div>
+                    <div class="purchase-actions"><a class="primary-button" id="add-cart-button" href="/?producto=38&amp;agregar=1&amp;talla=38&amp;cantidad=1" >AGREGAR AL CARRITO</a><a class="secondary-button" id="buy-button" href="/?producto=38&amp;comprar=1&amp;talla=38&amp;cantidad=1" >COMPRAR · COMPLETAR ENTREGA</a></div>
+                    <p class="purchase-note"><i data-lucide="shield-check"></i> Sin cuenta ni cobros automáticos. Confirmamos stock, talla y total por WhatsApp.</p>
+                </section>
                 <p class="product-description" id="product-description">Jean de lavado claro con corte skinny apilado, pierna acampanada y detalles deshilachados About Fray. Stock: 2 unidades en talla 38.</p>
                 <div class="product-benefit-copy"><strong>POR QUÉ TE VA A GUSTAR</strong><p id="product-benefit">Su silueta alarga visualmente las piernas y marca el outfit sin esfuerzo. Úsalo con un hoodie o jacket LYNX para construir un look completo.</p></div>
                 <div class="product-specs" id="product-specs" aria-label="Características de la prenda"><div><span>FIT</span><strong id="product-fit">Skinny</strong></div><div><span>MATERIAL</span><strong id="product-material">Denim</strong></div><div><span>COLOR</span><strong id="product-color">Deslavado Claro</strong></div><div><span>CUIDADO</span><strong id="product-care">Lavado frío · al revés</strong></div><div id="product-weight-row" hidden><span>PESO</span><strong id="product-weight"></strong></div></div>
                 <aside class="fit-note" id="fit-note" >
                     <strong>Recomendación de calce</strong><span>El calce cambia según el modelo. Compara cintura y cadera con la guía; si quedas entre dos tallas, elige la mayor para mayor comodidad.</span>
                 </aside>
-                <div class="product-options" id="product-options">
-                    <div><div class="option-heading"><span class="option-label">SELECCIONA TU TALLA</span><button class="size-guide-trigger" id="size-guide-trigger" type="button">GUÍA DE TALLAS</button></div><div class="size-list" id="size-list"><button type="button" class="active">38</button></div><p class="size-selection-note" id="size-selection-note">Selecciona una talla para continuar.</p></div>
-                    <div class="quantity-option"><span class="option-label">CANTIDAD</span><div class="quantity-control">
-                        <button type="button" id="quantity-minus" aria-label="Reducir cantidad">−</button><output id="quantity-value">1</output><button type="button" id="quantity-plus" aria-label="Aumentar cantidad">+</button>
-                    </div></div>
-                </div>
-                <div class="purchase-actions">
-                    <a class="primary-button" id="add-cart-button" href="/?producto=38&amp;agregar=1&amp;talla=38&amp;cantidad=1" >AGREGAR AL CARRITO</a>
-                    <a class="secondary-button" id="buy-button" href="/?producto=38&amp;comprar=1&amp;talla=38&amp;cantidad=1" >COMPRAR · COMPLETAR ENTREGA</a>
-                </div>
                 <section class="restock-request" id="restock-request" hidden>
                     <span class="eyebrow">TE AVISAMOS PRIMERO</span><h2>Avísame cuando vuelva</h2>
                     <p>Elige una talla y deja tu correo. También puedes pedir el aviso directamente por WhatsApp.</p>
                     <form id="restock-form"><label><span>Talla</span><select id="restock-size" required><option value="38">38</option></select></label><label><span>Correo</span><input id="restock-email" type="email" autocomplete="email" required placeholder="tu@correo.com"></label><button class="primary-button" type="submit">AVÍSAME POR CORREO</button><p id="restock-message" aria-live="polite"></p></form>
                     <a class="restock-whatsapp" id="restock-whatsapp" href="https://wa.me/51962210278?text=Hola%20LYNX%2C%20av%C3%ADsenme%20cuando%20vuelva%20About%20Fray%20Stacked%20Skinny%20Flare%20Jeans%20-%20Deslavado%20Claro." target="_blank" rel="noopener noreferrer"><i data-lucide="message-circle"></i> PEDIR AVISO POR WHATSAPP</a>
                 </section>
-                <p class="purchase-note"><i data-lucide="shield-check"></i> No necesitas crear una cuenta. Confirmamos stock, talla y total por WhatsApp antes de cualquier pago.</p>
                 <div class="product-trust-accordion"><details open><summary>Envíos y tiempos</summary><p><strong>Lima:</strong> motorizado, normalmente en 24–48 horas. <strong>Provincias:</strong> Shalom, normalmente en 2–3 días hábiles; el flete se paga en agencia.</p></details><details><summary>Reserva y medios de pago</summary><p>En Lima puedes separar con S/ 50. Aceptamos Yape y transferencias BCP o BBVA; compartimos las cuentas oficiales durante la confirmación.</p></details><details><summary>Cambios y condición de la prenda</summary><p>Confirma las condiciones y el plazo de cambio con nuestro equipo antes de pagar. La prenda debe conservar etiquetas y no presentar uso, lavado, manchas ni daños.</p></details></div>
             </div>
         </article>
@@ -112,6 +110,6 @@
     <script src="/commerce-tracking.js?v=20260824-conversion-v2" defer></script>
     <script src="/product-image-overrides.js?v=20260822-mockups-v1" defer></script>
     <script src="/size-guide-data.js?v=20260822-v1" defer></script>
-    <script src="/producto.js?v=20260824-smart-look-v12" defer></script>
+    <script src="/producto.js?v=20261123-purchase-focus-v1" defer></script>
 </body>
 </html>
