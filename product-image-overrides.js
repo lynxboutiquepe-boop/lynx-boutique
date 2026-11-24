@@ -172,23 +172,6 @@
         ]
     });
 
-    const fashionNovaOfficialCutouts = Object.freeze({
-        'kaleido-bloom-crochet-button-up-shirt': 'assets/fashion-nova-upper-cutouts/kaleido-bloom-crochet-button-up-shirt.png',
-        'boxy-soho-weave-applique-textured-button-up-shirt-black': 'assets/fashion-nova-upper-cutouts/boxy-soho-weave-applique-textured-button-up-shirt-black.png',
-        'canyon-wave-johnny-polo-light-blue': 'assets/fashion-nova-upper-cutouts/canyon-wave-johnny-polo-light-blue.png',
-        'desert-hues-crochet-button-up-shirt-brown': 'assets/fashion-nova-upper-cutouts/desert-hues-crochet-button-up-shirt-brown.png',
-        'desert-hues-crochet-button-up-shirt-cream': 'assets/fashion-nova-upper-cutouts/desert-hues-crochet-button-up-shirt-cream.png',
-        'relaxed-sunstage-crochet-cuban-collar-button-up-shirt-light-blue': 'assets/fashion-nova-upper-cutouts/relaxed-sunstage-crochet-cuban-collar-button-up-shirt-light-blue.png',
-        'nolan-textured-shirt-green': 'assets/fashion-nova-upper-cutouts/nolan-textured-shirt-green.png',
-        'relaxed-aegean-pleat-cuban-collar-button-up-cream': 'assets/fashion-nova-upper-cutouts/relaxed-aegean-pleat-cuban-collar-button-up-cream.png',
-        'harbor-point-knit-johnny-collar-polo-cream': 'assets/fashion-nova-upper-cutouts/harbor-point-knit-johnny-collar-polo-cream.png',
-        'solstice-knit-johnny-collar-polo-burgundy-combo': 'assets/fashion-nova-upper-cutouts/solstice-knit-johnny-collar-polo-burgundy-combo.png',
-        'canon-contrast-collar-zip-up-shirt-taupe': 'assets/fashion-nova-upper-cutouts/canon-contrast-collar-zip-up-shirt-taupe.png',
-        'laredo-paisley-shirt-black-white': 'assets/fashion-nova-upper-cutouts/laredo-paisley-shirt-black-white.png',
-        'matrix-power-crochet-johnny-collar-polo-blue': 'assets/fashion-nova-upper-cutouts/matrix-power-crochet-johnny-collar-polo-blue.png',
-        'ripple-stripe-johnny-polo-charcoal': 'assets/fashion-nova-upper-cutouts/ripple-stripe-johnny-polo-charcoal.png'
-    });
-
     // Mockups PNG nuevos: se fuerzan como primera imagen también cuando el
     // catálogo se carga desde Supabase (no solo desde catalog-seed.json).
     const newPngMockups = Object.freeze({
@@ -320,11 +303,7 @@
     function withMockup(slug, images = []) {
         const normalizedSlug = String(slug || '').trim().toLowerCase();
         const officialGallery = fashionNovaOfficialGalleries[normalizedSlug];
-        const officialCutout = fashionNovaOfficialCutouts[normalizedSlug];
-        if (officialGallery?.length) {
-            return officialCutout ? [officialCutout, ...officialGallery] : [...officialGallery];
-        }
-        if (officialCutout) return [officialCutout, ...((Array.isArray(images) ? images : []).filter(Boolean))];
+        if (officialGallery?.length) return [...officialGallery];
         const originals = Array.isArray(images) ? images.filter(Boolean) : [];
         const mockup = mockupFor(slug);
         if (!mockup) return originals;
